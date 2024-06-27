@@ -45,11 +45,11 @@ def align_images(
 
 
 if __name__ == '__main__':
-    resource_path = Path.cwd() / '..' / 'forms' / 'test'
+    resource_path = Path.cwd() / '..' / 'forms'
 
     # Load the test and reference images
-    test_img = cv2.imread(str(resource_path / 'form_w4_test.jpg'))
-    reference_img = cv2.imread(str(resource_path / 'form_w4_ref.jpg'))
+    test_img = cv2.imread(str(resource_path / 'test' / 'collection_form_test2.png'))
+    reference_img = cv2.imread(str(resource_path / 'reference' / 'collection_form_template.png'))
 
     # Align them
     aligned_img = align_images(test_img, reference_img, show_matches=False)

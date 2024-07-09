@@ -1,11 +1,9 @@
 import pytesseract
-import argparse
-import imutils
 import cv2
 from pathlib import Path
 from typing import NamedTuple
 
-from code.src.align_images import align_images
+from src.align_images import align_images
 
 
 class BoxBounds(NamedTuple):

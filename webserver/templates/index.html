@@ -4,38 +4,23 @@
 <head>
     <meta charset="UTF-8">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-    <link rel="stylesheet" href="static/css/main.css">
-    <script src="static/js/file_upload.js" defer></script>
+    <link rel="stylesheet" href="static/css/index.css">
 
     <title>KU BDI Collection Processor</title>
 </head>
+
 <body>
-    <div style="display:flex; flex-direction: row; align-items: center; border:1px solid black;">
+    <div style="display: flex; flex-direction: row; align-items: center; border: 1px solid black;">
         <img src="static/images/ku_bdi_logo.jpg" style="width: 100px; height: 100px; margin: 10px;">
         <h1>KU BDI Collection Form Processing</h1>
     </div>
 
-     <div style="width: 100%; overflow: hidden;">
-         <div style="width: 30%; float: left;">
-             <h2>Step 1: File Selection</h2>
-             <div style="margin-bottom: 10px;">
-                 <button>Begin Processing</button>
-                 <button onclick="handleFilesSelected()">Clear Selections</button>
-                 <label>Files Selected: </label>
-                 <label id="file-selection-count-label">0</label>
-             </div>
-             <div id="file-selection-div">
-                 <input type="file" id="file-selector" multiple accept="image/*" style="display:none"/>
-                 <div id="file-selection-list">
-                     <h5>Drag and drop files or click to browse</h5>
-                 </div>
-             </div>
-         </div>
-         <div style="width: 50%; float: left;">
-
-         </div>
-     </div>
+    <div style="margin-top: 45px;">
+        <div style="margin: 0 auto; width: fit-content;">
+            <a href="/file-selector?id={{ instance_id }}" class="control-button">Start Job</a>
+            <a href="/job-statuses" class="control-button">View Job Statuses</a>
+            <p>Instance ID: {{ instance_id }}</p>
+        </div>
+    </div>
 </body>
-
 </html>

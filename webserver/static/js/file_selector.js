@@ -1,4 +1,4 @@
-const fileSelector = document.getElementById("file-selector");
+const fileSelector = document.getElementById("file-selector-input");
 const fileList = document.getElementById("file-selection-list");
 const fileCountLabel = document.getElementById("file-selection-count-label");
 
@@ -34,5 +34,29 @@ function handleFilesSelected() {
         }
 
         fileCountLabel.innerHTML = this.files.length;
+    }
+}
+
+function upload(file) {
+    fetch(
+        '/file-upload',
+        {
+            method: 'POST',
+            body: file
+        }
+    );
+};
+
+function uploadFiles() {
+    // Don't do anything if we have no files
+    if (!fileSelector.files.length) {
+        console.log("No files selected, not uploading")
+        return;
+    }
+
+    for (let i = 0; i < fileSelector.files.length; i++) {
+        const file = fileSelector.files[i];
+        console.log("Uploading file: ", file.name);
+        upload(file);
     }
 }

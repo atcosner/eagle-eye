@@ -1,25 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet" href="static/css/index.css">
+{% block title %}KU BDI Collection Processor{% endblock %}
 
-    <title>KU BDI Collection Processor</title>
-</head>
+{% block head %}
+    <link rel="stylesheet" href="/static/css/index.css">
+{% endblock %}
 
-<body>
-    <div style="display: flex; flex-direction: row; align-items: center; border: 1px solid black;">
-        <img src="static/images/ku_bdi_logo.jpg" style="width: 100px; height: 100px; margin: 10px;">
-        <h1>KU BDI Collection Form Processing</h1>
-    </div>
-
+{% block content %}
     <div style="margin-top: 45px;">
         <div style="margin: 0 auto; width: fit-content;">
             <a href="/create-job" class="control-button">Create Job</a>
             <a href="/job-statuses" class="control-button">View Job Statuses</a>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

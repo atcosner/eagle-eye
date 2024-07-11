@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+{% block title %}KU BDI Collection Processor - Create Job{% endblock %}
 
-    <link rel="stylesheet" href="static/css/create_job.css">
-    <script src="static/js/create_job.js" defer></script>
+{% block head %}
+    <link rel="stylesheet" href="/static/css/create_job.css">
+    <script src="/static/js/create_job.js" defer></script>
+{% endblock %}
 
-    <title>KU BDI Collection Processor</title>
-</head>
-<body>
-    <div style="display:flex; flex-direction: row; align-items: center; border: 1px solid black;">
-        <img src="static/images/ku_bdi_logo.jpg" style="width: 100px; height: 100px; margin: 10px;">
-        <h1>KU BDI Collection Form Processing</h1>
-    </div>
-
+{% block content %}
      <div style="width: 30%;">
          <h2>Create Job - Please select your files</h2>
          <div style="margin-bottom: 10px;">
@@ -26,7 +18,7 @@
          </div>
          <div id="file-selection-div">
              <form id="job-config" action="/submit-job" method="post" enctype="multipart/form-data">
-                 <input type="file" id="file-selector-input" multiple name="job-files" accept="image/*" style="display:none"/>
+                 <input type="file" id="file-selector-input" multiple required name="job-files" accept="image/*" style="display:none"/>
                  <input type="hidden" id="job-id" name="job-id" value="{{ job_id }}">
              </form>
 
@@ -35,6 +27,4 @@
              </div>
          </div>
      </div>
-</body>
-
-</html>
+{% endblock %}

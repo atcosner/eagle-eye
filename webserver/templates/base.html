@@ -1,0 +1,16 @@
+<!doctype html>
+<title>{% block title %}{% endblock %}</title>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+<head>
+    {% block head %}{% endblock %}
+</head>
+
+<section class="content">
+    <div style="display: flex; flex-direction: row; align-items: center; border: 1px solid black;">
+        <img src="/static/images/ku_bdi_logo.jpg" style="width: 100px; height: 100px; margin: 10px;">
+        <h1>KU BDI Collection Form Processing</h1>
+    </div>
+
+    {% block content %}{% endblock %}
+</section>

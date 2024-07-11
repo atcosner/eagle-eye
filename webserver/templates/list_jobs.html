@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}KU BDI Collection Processor - Job List{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <div style="margin: 0 auto; width: fit-content;">
+        <h2>All Jobs</h2>
+        <table>
+            <tr>
+                <th>Job ID</th>
+                <th>Current State</th>
+                <th>Last Change Timestamp</th>
+            </tr>
+            {% for job in jobs %}
+                <tr>
+                    <td><a href="/job-status/{{ job.uuid }}">{{ job.uuid }}</a></td>
+                    <td>{{ job.last_state.name }}</td>
+                    <td>{{ job.last_timestamp }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

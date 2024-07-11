@@ -6,9 +6,25 @@
 {% endblock %}
 
 {% block content %}
-    <div style="margin-top: 45px;">
-        <div style="margin: 0 auto; width: fit-content;">
-            <h2>Job Status: {{ job_id }}</h2>
-        </div>
+    <div style="margin: 0 auto; width: fit-content;">
+        <h2>Job Status: {{ job_id }}</h2>
+        <h4>State: {{ job_state.state.name }}</h4>
+
+        <br>
+        <br>
+
+        <h6>State Change Log</h6>
+        <table>
+            <tr>
+                <th>State</th>
+                <th>Timestamp</th>
+            </tr>
+            {% for change in state_log %}
+                <tr>
+                    <td>{{ change.state.name }}</td>
+                    <td>{{ change.timestamp }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     </div>
 {% endblock %}

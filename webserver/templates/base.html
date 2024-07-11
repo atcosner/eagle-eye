@@ -8,9 +8,13 @@
 
 <section class="content">
     <div style="display: flex; flex-direction: row; align-items: center; border: 1px solid black;">
-        <img src="/static/images/ku_bdi_logo.jpg" style="width: 100px; height: 100px; margin: 10px;">
+        <a href="/">
+            <img src="/static/images/ku_bdi_logo.jpg" style="width: 100px; height: 100px; margin: 10px;">
+        </a>
         <h1>KU BDI Collection Form Processing</h1>
     </div>
 
-    {% block content %}{% endblock %}
+    <div style="margin-top: 45px;">
+        {% block content %}{% endblock %}
+    </div>
 </section>

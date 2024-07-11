@@ -36,8 +36,21 @@ def submit_job():
 
 
 @app.route('/job-status/<uuid:job_id>')
-def job_status(job_id: str):
-    return render_template('job_status.html', job_id=job_id)
+def job_status(job_id: uuid.UUID):
+    if job := manager.get_job(job_id):
+        return render_template(
+            'job_status.html',
+            job_id=job_id,
+            job_state=job.get_current_state(),
+            state_log=job.get_state_changes(),
+        )
+    else:
+        return render_template('unknown_job.html', job_id=job_id)
+
+
+@app.route('/list-jobs')
+def list_jobs():
+    return render_template('list_jobs.html', jobs=manager.get_html_job_list())
 
 
 if __name__ == '__main__':

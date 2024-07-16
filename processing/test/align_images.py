@@ -8,7 +8,7 @@ def align_images(
         test: np.array,
         reference: np.array,
         max_keypoint_regions: int = 500,
-        match_keep_percent: float = 0.2,
+        match_keep_percent: float = 0.05,
         show_matches: bool = False,
 ) -> np.array:
     # Ensure both images are in grayscale
@@ -45,14 +45,14 @@ def align_images(
 
 
 if __name__ == '__main__':
-    resource_path = Path.cwd() / '..' / 'forms'
+    resource_path = Path.cwd() / '..' / '..' / 'forms'
 
     # Load the dev and production images
-    test_img = cv2.imread(str(resource_path / 'dev' / 'collection_form_test2.png'))
-    reference_img = cv2.imread(str(resource_path / 'production' / 'collection_form_template.png'))
+    test_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_1_top.png'))
+    reference_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_template_top.png'))
 
     # Align them
-    aligned_img = align_images(test_img, reference_img, show_matches=False)
+    aligned_img = align_images(test_img, reference_img, show_matches=True)
 
     aligned_img = imutils.resize(aligned_img, width=700)
     reference_img = imutils.resize(reference_img, width=700)

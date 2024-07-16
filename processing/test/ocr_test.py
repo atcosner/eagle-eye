@@ -1,5 +1,6 @@
 import pytesseract
 import cv2
+import imutils
 from pathlib import Path
 from typing import NamedTuple
 
@@ -21,11 +22,11 @@ class OcrField(NamedTuple):
 
 
 OCR_FIELDS = [
-    OcrField(name='KT #', region=BoxBounds(x=275, y=121, width=174, height=32), segment='7'),
-    OcrField(name='Locality', region=BoxBounds(x=334, y=167, width=950, height=30), segment='12'),
-    OcrField(name='Species', region=BoxBounds(x=333, y=252, width=965, height=30), segment='12'),
-    OcrField(name='Habitat', region=BoxBounds(x=332, y=294, width=960, height=35), segment='12'),
-    OcrField(name='Collection Date', region=BoxBounds(x=333, y=339, width=405, height=29), segment='12'),
+    OcrField(name='KT #', region=BoxBounds(x=248, y=140, width=125, height=37), segment='7'),
+    OcrField(name='Locality', region=BoxBounds(x=281, y=191, width=804, height=31), segment='12'),
+    OcrField(name='Species', region=BoxBounds(x=287, y=267, width=686, height=31), segment='12'),
+    OcrField(name='Habitat', region=BoxBounds(x=248, y=303, width=1026, height=35), segment='12'),
+    OcrField(name='Collection Date', region=BoxBounds(x=301, y=339, width=433, height=33), segment='12'),
 ]
 
 
@@ -36,11 +37,11 @@ def cleanup_text(text):
 
 
 if __name__ == '__main__':
-    resource_path = Path.cwd() / '..' / 'forms'
+    resource_path = Path.cwd() / '..' / '..' / 'forms'
 
     # Load the dev and production images
-    test_img = cv2.imread(str(resource_path / 'dev' / 'collection_form_test2.png'))
-    reference_img = cv2.imread(str(resource_path / 'production' / 'collection_form_template.png'))
+    test_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_1_top.png'))
+    reference_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_template_top.png'))
 
     # Align them
     aligned_img = align_images(test_img, reference_img, show_matches=False)
@@ -117,6 +118,6 @@ if __name__ == '__main__':
 
     # show the input and output images, resizing it such that they fit
     # on our screen
-    # cv2.imshow("Input", imutils.resize(test_img, width=700))
-    # cv2.imshow("Output", imutils.resize(aligned_img, width=700))
+    cv2.imshow("Input", imutils.resize(test_img, width=700))
+    cv2.imshow("Output", imutils.resize(aligned_img, width=700))
     cv2.waitKey(0)

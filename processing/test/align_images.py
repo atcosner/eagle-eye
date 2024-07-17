@@ -7,8 +7,8 @@ from pathlib import Path
 def align_images(
         test: np.array,
         reference: np.array,
-        max_keypoint_regions: int = 500,
-        match_keep_percent: float = 0.05,
+        max_keypoint_regions: int = 1000,
+        match_keep_percent: float = 0.2,
         show_matches: bool = False,
 ) -> np.array:
     # Ensure both images are in grayscale

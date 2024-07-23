@@ -70,6 +70,24 @@ class Job:
             last_timestamp=current_state.timestamp,
         )
 
+    def pending_work(self) -> bool:
+        return self.get_current_state().state not in [JobState.ERROR, JobState.COMPLETED]
+
+    def continue_processing(self) -> None:
+        if not self.pending_work():
+            return
+
+        current_state = self.get_current_state().state
+        match current_state:
+            case JobState.FILES_SUBMITTED:
+                pass
+            case JobState.PRE_PROCESSING:
+                pass
+            case JobState.PROCESSING:
+                pass
+            case _:
+                logger.warning(f'Unknown state: {current_state}')
+
     def save_files(self, files: list[FileStorage]) -> None:
         for file in files:
             # Handle empty FileStorage objects
@@ -87,3 +105,6 @@ class Job:
                 return
 
         self._change_state(JobState.FILES_SUBMITTED)
+
+    def _pre_process(self) -> None:
+        #

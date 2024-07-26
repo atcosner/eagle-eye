@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
+from .pre_processing import AlignmentResult, grayscale_image, align_images
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,10 +36,14 @@ class HtmlJobInfo:
 
 
 class Job:
-    def __init__(self, parent_directory: Path, job_id: uuid.UUID):
+    def __init__(self, parent_directory: Path, job_id: uuid.UUID, reference_image_path: Path):
         self.job_id: uuid.UUID = job_id
         self.states: list[StateChange] = [StateChange(JobState.CREATED, datetime.now())]
         self.exception: Exception | None = None
+
+        self.reference_path: Path = reference_image_path
+        self.submitted_images: list[Path] = []
+        self.alignment_results: list[AlignmentResult] = []
 
         # Create a working directory for ourselves
         self.working_dir: Path = parent_directory / str(job_id)
@@ -80,7 +86,7 @@ class Job:
         current_state = self.get_current_state().state
         match current_state:
             case JobState.FILES_SUBMITTED:
-                pass
+                self._pre_process()
             case JobState.PRE_PROCESSING:
                 pass
             case JobState.PROCESSING:
@@ -89,22 +95,48 @@ class Job:
                 logger.warning(f'Unknown state: {current_state}')
 
     def save_files(self, files: list[FileStorage]) -> None:
+        idx = 0
         for file in files:
             # Handle empty FileStorage objects
             if not file.filename:
                 logger.warning('Received file without name')
                 continue
 
-            file_path = self.working_dir / file.filename
+            # Create the directory for this file
+            file_dir_path = self.working_dir / str(idx)
+            try:
+                file_dir_path.mkdir()
+            except Exception as e:
+                self._record_exception(e)
+                continue
+
+            # Save the original file
+            # TODO: This should be called something like "original.[EXTENSION]"
+            #  (We need a mapping of the original to the new name if we do this. Metadata file? DB row?)
+            file_path = file_dir_path / f'original_{file.filename}'
             logger.info(f'Saving: {file.filename} ({file_path})')
 
             try:
                 file.save(file_path)
+                self.submitted_images.append(file_path)
             except Exception as e:
                 self._record_exception(e)
-                return
+            finally:
+                idx += 1
 
         self._change_state(JobState.FILES_SUBMITTED)
 
     def _pre_process(self) -> None:
-        #
+        for original_path in self.submitted_images:
+            logger.info(f'Processing: {original_path}')
+
+            # Convert the original image to grayscale
+            gray_path = grayscale_image(original_path)
+            logger.info(f'Converted image to grayscale: {gray_path}')
+
+            # Detect key points in the image
+            alignment_result = align_images(gray_path, self.reference_path)
+
+            self.alignment_results.append(alignment_result)
+            logger.info(f'Matched features image: {alignment_result.matched_features_image_path}')
+            logger.info(f'Aligned image: {alignment_result.aligned_image_path}')

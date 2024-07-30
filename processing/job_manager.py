@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class JobManager:
-    def __init__(self):
+    def __init__(self, reference_image: Path):
         self.job_map: dict[uuid.UUID, Job] = {}
+        self.reference_image: Path = reference_image
 
         self.working_dir: Path = Path(mkdtemp())
         logger.info(f'JobManager working directory: {self.working_dir}')
@@ -23,5 +24,9 @@ class JobManager:
 
     def create_job(self, job_id: str) -> Job:
         job_uuid = uuid.UUID(job_id)
-        self.job_map[job_uuid] = Job(parent_directory=self.working_dir, job_id=job_uuid)
+        self.job_map[job_uuid] = Job(
+            parent_directory=self.working_dir,
+            job_id=job_uuid,
+            reference_image_path=self.reference_image,
+        )
         return self.job_map[job_uuid]

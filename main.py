@@ -1,8 +1,12 @@
 import uuid
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort
+from pathlib import Path
 
 from processing.job_manager import JobManager
 from processing.util import set_up_root_logger
+
+FORMS_PATH = Path(__file__).parent / 'forms' / 'production'
+REFERENCE_IMAGE = FORMS_PATH / 'ku_collection_form_template_top.png'
 
 app = Flask(
     __name__,
@@ -16,6 +20,14 @@ manager: JobManager | None = None
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/reference-image')
+def reference_image():
+    return send_from_directory(
+        FORMS_PATH,
+        REFERENCE_IMAGE.name
+    )
 
 
 @app.route('/create-job')
@@ -35,6 +47,22 @@ def submit_job():
     return redirect(url_for('job_status', job_id=job.job_id))
 
 
+@app.route('/list-jobs')
+def list_jobs():
+    return render_template('list_jobs.html', jobs=manager.get_html_job_list())
+
+
+@app.route('/job-file/<uuid:job_id>/<int:image_id>/<file_name>')
+def job_file(job_id: uuid.UUID, image_id: int, file_name: str):
+    if job := manager.get_job(job_id):
+        return send_from_directory(
+            job.working_dir / str(image_id),
+            file_name
+        )
+    else:
+        abort(404)
+
+
 @app.route('/job-status/<uuid:job_id>')
 def job_status(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
@@ -48,14 +76,26 @@ def job_status(job_id: uuid.UUID):
         return render_template('unknown_job.html', job_id=job_id)
 
 
-@app.route('/list-jobs')
-def list_jobs():
-    return render_template('list_jobs.html', jobs=manager.get_html_job_list())
+@app.route('/job-status/<uuid:job_id>/pre-process')
+def job_status_pre_process(job_id: uuid.UUID):
+    if job := manager.get_job(job_id):
+        return render_template('job_pre_process.html', job_id=job_id)
+    else:
+        return render_template('unknown_job.html', job_id=job_id)
+
+
+@app.route('/continue-job/<uuid:job_id>', methods=['POST'])
+def continue_job(job_id: uuid.UUID):
+    if job := manager.get_job(job_id):
+        job.continue_processing()
+        return redirect(url_for('job_status', job_id=job.job_id))
+    else:
+        return render_template('unknown_job.html', job_id=job_id)
 
 
 if __name__ == '__main__':
     set_up_root_logger(verbose=True)
-    manager = JobManager()
+    manager = JobManager(reference_image=REFERENCE_IMAGE)
 
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True

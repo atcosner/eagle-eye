@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}KU BDI Collection Processor - Job Pre Process Results{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/css/job_pre_process.css">
+{% endblock %}
+
+{% block content %}
+    <h2>Job: {{ job_id }}</h2>
+
+    <div style="display: flex; margin-bottom: 5px;">
+        <button><-</button>
+        <button>-></button>
+        <h3 id="image_id" style="margin: 0; padding-left: 10px;">Image: 0</h3>
+    </div>
+
+    <div id="results-viewport">
+        <div>
+            <h4>Test and Reference Image</h4>
+            <img src="/job-file/{{ job_id }}/0/grayscale_image.png" class="image-box">
+            <img src="/reference-image" class="image-box">
+        </div>
+
+        <br>
+
+        <div>
+            <h4>Matched Image</h4>
+            <img src="/job-file/{{ job_id }}/0/matched_image.png" class="image-box">
+        </div>
+
+        <br>
+
+        <div>
+            <h4>Aligned Image</h4>
+            <img src="/job-file/{{ job_id }}/0/aligned_image.png" class="image-box">
+        </div>
+
+        <br>
+
+        <div>
+            <h4>Overlaid Image</h4>
+            <img src="/job-file/{{ job_id }}/0/overlaid_image.png" class="image-box">
+        </div>
+    </div>
+{% endblock %}

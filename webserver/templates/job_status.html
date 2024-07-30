@@ -10,6 +10,10 @@
         <h2>Job Status: {{ job_id }}</h2>
         <h4>State: {{ job_state.state.name }}</h4>
 
+        <form id="continue-job" action="/continue-job/{{ job_id }}" method="post">
+            <input type="submit" value="Continue"/>
+        </form>
+
         <br>
         <br>
 
@@ -21,7 +25,13 @@
             </tr>
             {% for change in state_log %}
                 <tr>
-                    <td>{{ change.state.name }}</td>
+                    <td>
+                        {% if change.state.name == "PRE_PROCESSED" %}
+                            <a href="/job-status/{{ job_id }}/pre-process">{{ change.state.name }}</a>
+                        {% else %}
+                            {{ change.state.name }}
+                        {% endif %}
+                    </td>
                     <td>{{ change.timestamp }}</td>
                 </tr>
             {% endfor %}

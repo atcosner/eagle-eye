@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 class JobState(Enum):
     CREATED = auto()
     FILES_SUBMITTED = auto()
-    PRE_PROCESSING = auto()
-    PROCESSING = auto()
+    PRE_PROCESSED = auto()
 
     # Terminal states
     COMPLETED = auto()
@@ -87,12 +86,13 @@ class Job:
         match current_state:
             case JobState.FILES_SUBMITTED:
                 self._pre_process()
-            case JobState.PRE_PROCESSING:
-                pass
-            case JobState.PROCESSING:
+            case JobState.PRE_PROCESSED:
                 pass
             case _:
                 logger.warning(f'Unknown state: {current_state}')
+
+    def num_images(self) -> int:
+        return len(self.submitted_images)
 
     def save_files(self, files: list[FileStorage]) -> None:
         idx = 0
@@ -139,4 +139,7 @@ class Job:
 
             self.alignment_results.append(alignment_result)
             logger.info(f'Matched features image: {alignment_result.matched_features_image_path}')
+            logger.info(f'Overlaid image: {alignment_result.overlaid_image_path}')
             logger.info(f'Aligned image: {alignment_result.aligned_image_path}')
+
+        self._change_state(JobState.PRE_PROCESSED)

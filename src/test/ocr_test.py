@@ -4,7 +4,7 @@ import imutils
 from pathlib import Path
 from typing import NamedTuple
 
-from processing.test.align_images import align_images
+from src.test.align_images import align_images
 
 
 class BoxBounds(NamedTuple):

@@ -2,8 +2,8 @@ import uuid
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort
 from pathlib import Path
 
-from processing.job_manager import JobManager
-from processing.util import set_up_root_logger
+from src.job_manager import JobManager
+from src.util import set_up_root_logger
 
 FORMS_PATH = Path(__file__).parent / 'forms' / 'production'
 REFERENCE_IMAGE = FORMS_PATH / 'ku_collection_form_template_top.png'

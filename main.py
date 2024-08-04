@@ -84,6 +84,14 @@ def job_status_pre_process(job_id: uuid.UUID):
         return render_template('unknown_job.html', job_id=job_id)
 
 
+@app.route('/job-status/<uuid:job_id>/results')
+def job_status_results(job_id: uuid.UUID):
+    if job := manager.get_job(job_id):
+        return render_template('job_results.html', job_id=job_id, results=job.ocr_results[0])
+    else:
+        return render_template('unknown_job.html', job_id=job_id)
+
+
 @app.route('/continue-job/<uuid:job_id>', methods=['POST'])
 def continue_job(job_id: uuid.UUID):
     if job := manager.get_job(job_id):

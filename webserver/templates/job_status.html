@@ -28,6 +28,8 @@
                     <td>
                         {% if change.state.name == "PRE_PROCESSED" %}
                             <a href="/job-status/{{ job_id }}/pre-process">{{ change.state.name }}</a>
+                        {% elif change.state.name == "COMPLETED" %}
+                            <a href="/job-status/{{ job_id }}/results">{{ change.state.name }}</a>
                         {% else %}
                             {{ change.state.name }}
                         {% endif %}

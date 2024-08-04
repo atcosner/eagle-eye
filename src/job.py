@@ -158,7 +158,14 @@ class Job:
     def _process_ocr(self) -> None:
         for result in self.alignment_results:
             logger.info(f'Attempting OCR on: {result.aligned_image_path}')
+
+            # Create a directory to store the OCR roi pictures
             working_dir = result.aligned_image_path.parent
+            # try:
+            #     working_dir.mkdir()
+            # except Exception as e:
+            #     self._record_exception(e)
+            #     continue
 
             try:
                 results = process_ocr_regions(

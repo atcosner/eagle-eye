@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class OcrResult(NamedTuple):
+    field: OcrField
     roi_image_path: Path
     extracted_text: str
 
@@ -38,6 +39,7 @@ def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrR
     # Post-processing on the returned string
 
     return OcrResult(
+        field=field,
         roi_image_path=roi_image_path,
         extracted_text=ocr_string.strip(),
     )

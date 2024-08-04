@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}KU BDI Collection Processor - Job Results{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <h2>Job: {{ job_id }}</h2>
+
+    <div style="display: flex; margin-bottom: 5px;">
+        <button><-</button>
+        <button>-></button>
+        <h3 id="image_id" style="margin: 0; padding-left: 10px;">Image: 0</h3>
+    </div>
+
+    <div id="results-viewport">
+        <table>
+            <tr>
+                <th>Data Field</th>
+                <th>ROI Image</th>
+                <th>OCR Result</th>
+            </tr>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.field.name }}</td>
+                    <td><img src="/job-file/{{ job_id }}/0/{{ result.roi_image_path.name }}"/></td>
+                    <td>{{ result.extracted_text }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

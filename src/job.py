@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.ornithology_form import FORM1_OCR_FIELDS
+from .definitions.ornithology_form import TOP_OCR_FIELDS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import OcrResult, process_ocr_regions
 
@@ -171,7 +171,7 @@ class Job:
                 results = process_ocr_regions(
                     working_dir=working_dir,
                     aligned_image_path=result.aligned_image_path,
-                    fields=FORM1_OCR_FIELDS,
+                    fields=TOP_OCR_FIELDS,
                 )
                 self.ocr_results.append(results)
             except Exception as e:

@@ -35,9 +35,10 @@
                                 <input
                                         type="text"
                                         name="{{ result.field.name }}"
-                                        placeholder="{{ result.extracted_text }}"
                                         {% if result.user_corrected_text is not none %}
                                             value="{{ result.user_corrected_text }}"
+                                        {% else %}
+                                            value="{{ result.extracted_text }}"
                                         {% endif %}
                                 >
                             </td>

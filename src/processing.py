@@ -1,18 +1,20 @@
 import cv2
 import logging
 import pytesseract
+from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple
 
 from src.definitions.util import OcrField
 
 logger = logging.getLogger(__name__)
 
 
-class OcrResult(NamedTuple):
+@dataclass
+class OcrResult:
     field: OcrField
     roi_image_path: Path
     extracted_text: str
+    user_corrected_text: str | None = None
 
 
 def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrResult:

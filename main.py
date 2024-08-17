@@ -78,7 +78,7 @@ def job_status(job_id: uuid.UUID):
 
 @app.route('/job-status/<uuid:job_id>/pre-process')
 def job_status_pre_process(job_id: uuid.UUID):
-    if job := manager.get_job(job_id):
+    if _ := manager.get_job(job_id):
         return render_template('job_pre_process.html', job_id=job_id)
     else:
         return render_template('unknown_job.html', job_id=job_id)
@@ -99,6 +99,16 @@ def continue_job(job_id: uuid.UUID):
         return redirect(url_for('job_status', job_id=job.job_id))
     else:
         return render_template('unknown_job.html', job_id=job_id)
+
+
+@app.route('/job-status/<uuid:job_id>/update', methods=['POST'])
+def update_job_results(job_id: uuid.UUID):
+    job = manager.get_job(job_id)
+    if job is None:
+        return render_template('unknown_job.html', job_id=job_id)
+
+    job.update_results(0, request.form)
+    return redirect(url_for('job_status_results', job_id=job_id))
 
 
 if __name__ == '__main__':

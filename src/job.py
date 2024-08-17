@@ -133,6 +133,25 @@ class Job:
 
         self._change_state(JobState.FILES_SUBMITTED)
 
+    def update_results(self, result_id: int, web_form_dict: dict[str, str]) -> None:
+        results = self.ocr_results[result_id]
+
+        for key, value in web_form_dict.items():
+            # Check each OCR result for a name match
+            matched = False
+            for result in results:
+                if result.field.name == key:
+                    # Add user corrections only if the text differs
+                    if result.extracted_text != value:
+                        result.user_corrected_text = value
+
+                    matched = True
+                    break
+
+            # Report on match failures
+            if not matched:
+                logger.warning(f'Did not find a match for form element: {key}')
+
     def _pre_process(self) -> None:
         for original_path in self.submitted_images:
             logger.info(f'Pre-processing: {original_path}')

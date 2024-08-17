@@ -15,19 +15,37 @@
     </div>
 
     <div id="results-viewport">
-        <table>
-            <tr>
-                <th>Data Field</th>
-                <th>ROI Image</th>
-                <th>OCR Result</th>
-            </tr>
-            {% for result in results %}
+        <form
+                id="job-results-corrections"
+                action="/job-status/{{ job_id }}/update"
+                method="post"
+                enctype="multipart/form-data"
+        >
+            <table>
                 <tr>
-                    <td>{{ result.field.name }}</td>
-                    <td><img src="/job-file/{{ job_id }}/0/{{ result.roi_image_path.name }}"/></td>
-                    <td>{{ result.extracted_text }}</td>
+                    <th>Data Field</th>
+                    <th>ROI Image</th>
+                    <th>Extracted Text</th>
                 </tr>
-            {% endfor %}
-        </table>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result.field.name }}</td>
+                            <td><img src="/job-file/{{ job_id }}/0/{{ result.roi_image_path.name }}"/></td>
+                            <td>
+                                <input
+                                        type="text"
+                                        name="{{ result.field.name }}"
+                                        placeholder="{{ result.extracted_text }}"
+                                        {% if result.user_corrected_text is not none %}
+                                            value="{{ result.user_corrected_text }}"
+                                        {% endif %}
+                                >
+                            </td>
+                        </tr>
+                    {% endfor %}
+            </table>
+
+            <input type="submit" value="Submit"/>
+        </form>
     </div>
 {% endblock %}

@@ -78,8 +78,14 @@ def job_status(job_id: uuid.UUID):
 
 @app.route('/job-status/<uuid:job_id>/pre-process')
 def job_status_pre_process(job_id: uuid.UUID):
-    if _ := manager.get_job(job_id):
-        return render_template('job_pre_process.html', job_id=job_id)
+    if job := manager.get_job(job_id):
+        pre_process_results = list(enumerate(job.alignment_results))
+        return render_template(
+            'job_pre_process.html',
+            job_id=job_id,
+            results_count=len(pre_process_results),
+            results=pre_process_results,
+        )
     else:
         return render_template('unknown_job.html', job_id=job_id)
 

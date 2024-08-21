@@ -5,6 +5,7 @@ from typing import NamedTuple
 
 
 class AlignmentResult(NamedTuple):
+    test_image_path: Path
     matched_features_image_path: Path
     overlaid_image_path: Path
     aligned_image_path: Path
@@ -70,6 +71,7 @@ def align_images(
     cv2.imwrite(str(overlaid_image_path), overlaid_image)
 
     return AlignmentResult(
+        test_image_path=test_image_path,
         matched_features_image_path=matched_image_path,
         overlaid_image_path=overlaid_image_path,
         aligned_image_path=aligned_image_path,

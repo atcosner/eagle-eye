@@ -4,43 +4,87 @@
 
 {% block head %}
     <link rel="stylesheet" href="/static/css/job_pre_process.css">
+    <script>
+        var CURRENT_INDEX = 0;
+        var RESULTS_COUNT = {{ results_count }};
+
+        function updateViewport(forward) {
+            // Determine the new iterator
+            var temp_index = CURRENT_INDEX;
+            if (forward) {
+                temp_index += 1;
+            } else {
+                temp_index -= 1;
+            }
+
+            // Handle overflow/underflow
+            if (temp_index >= RESULTS_COUNT) {
+                temp_index = 0;
+            } else if (temp_index < 0) {
+                temp_index = RESULTS_COUNT - 1;
+            }
+
+            // Hide the current index and show the new index
+            var current_div = document.getElementById("results-viewport-" + CURRENT_INDEX);
+            current_div.style.display = "none";
+
+            var new_div = document.getElementById("results-viewport-" + temp_index);
+            new_div.style.display = "block";
+
+            // Update the image label
+            var image_label = document.getElementById("image_id");
+            var display_index = temp_index + 1;
+            image_label.innerHTML = display_index + " (" + display_index + "/" + RESULTS_COUNT + ")";
+            CURRENT_INDEX = temp_index;
+        }
+    </script>
 {% endblock %}
 
 {% block content %}
     <h2>Job: {{ job_id }}</h2>
 
     <div style="display: flex; margin-bottom: 5px;">
-        <button><-</button>
-        <button>-></button>
-        <h3 id="image_id" style="margin: 0; padding-left: 10px;">Image: 0</h3>
+        <button onclick="updateViewport(false)">Previous</button>
+        <button onclick="updateViewport(true)">Next</button>
+        <h3 style="margin: 0; padding-left: 10px;">Image: </h3>
+        <h3 id="image_id" style="margin: 0; padding-left:5px;">1 (1/{{ results_count }})</h3>
     </div>
 
-    <div id="results-viewport">
-        <div>
-            <h4>Test and Reference Image</h4>
-            <img src="/job-file/{{ job_id }}/0/grayscale_image.png" class="image-box">
-            <img src="/reference-image" class="image-box">
+    {% for index, result in results %}
+        <div
+                id="results-viewport-{{ index }}"
+                {% if index == 0 %}
+                    style="display: block;"
+                {% else %}
+                    style="display: none;"
+                {% endif %}
+        >
+            <div>
+                <h4>Test and Reference Image</h4>
+                <img src="/job-file/{{ job_id }}/{{ index }}/{{ result.test_image_path.name }}" class="image-box">
+                <img src="/reference-image" class="image-box">
+            </div>
+
+            <br>
+
+            <div>
+                <h4>Matched Image</h4>
+                <img src="/job-file/{{ job_id }}/{{ index }}/{{ result.matched_features_image_path.name }}" class="image-box">
+            </div>
+
+            <br>
+
+            <div>
+                <h4>Aligned Image</h4>
+                <img src="/job-file/{{ job_id }}/{{ index }}/{{ result.aligned_image_path.name }}" class="image-box">
+            </div>
+
+            <br>
+
+            <div>
+                <h4>Overlaid Image</h4>
+                <img src="/job-file/{{ job_id }}/{{ index }}/{{ result.overlaid_image_path.name }}" class="image-box">
+            </div>
         </div>
-
-        <br>
-
-        <div>
-            <h4>Matched Image</h4>
-            <img src="/job-file/{{ job_id }}/0/matched_image.png" class="image-box">
-        </div>
-
-        <br>
-
-        <div>
-            <h4>Aligned Image</h4>
-            <img src="/job-file/{{ job_id }}/0/aligned_image.png" class="image-box">
-        </div>
-
-        <br>
-
-        <div>
-            <h4>Overlaid Image</h4>
-            <img src="/job-file/{{ job_id }}/0/overlaid_image.png" class="image-box">
-        </div>
-    </div>
+    {% endfor %}
 {% endblock %}

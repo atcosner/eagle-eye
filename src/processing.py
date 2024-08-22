@@ -6,6 +6,8 @@ from pathlib import Path
 
 from src.definitions.util import OcrField
 
+OCR_DARK_PIXEL_THRESHOLD = 0.99
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,20 +25,29 @@ def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrR
         field.region.y:field.region.y + field.region.height,
         field.region.x:field.region.x + field.region.width
     ]
+    total_pixels = field.region.height * field.region.width
 
     # Apply pre-processing to the ROI
-    roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
-    roi = cv2.GaussianBlur(roi, (3, 3), 0)
-    roi = cv2.copyMakeBorder(roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
+    updated_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
+    updated_roi = cv2.GaussianBlur(updated_roi, (3, 3), 0)
+    updated_roi = cv2.copyMakeBorder(updated_roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
 
     # Save the image off for further analysis
     sanitized_field_name = field.name.lower().replace(' ', '_')
     roi_image_path = working_dir / f'{sanitized_field_name}.png'
     assert not roi_image_path.exists(), f'Path ({roi_image_path}) already exists!'
-    cv2.imwrite(str(roi_image_path), roi)
+    cv2.imwrite(str(roi_image_path), updated_roi)
+
+    # Threshold the image to determine if there is text in it
+    _, threshold = cv2.threshold(roi, 127, 255, cv2.THRESH_BINARY)
+    dark_pixels = cv2.countNonZero(threshold)
+    logger.info(f'Dark: {dark_pixels}, Total: {total_pixels}, Pct: {dark_pixels / total_pixels}')
+    if (dark_pixels / total_pixels) > OCR_DARK_PIXEL_THRESHOLD:
+        logger.info('Detected black image, skipping OCR')
+        return OcrResult(field=field, roi_image_path=roi_image_path, extracted_text='')
 
     # Attempt OCR on the image
-    ocr_string = pytesseract.image_to_string(roi, lang='eng', config=f'--psm {field.segment}')
+    ocr_string = pytesseract.image_to_string(updated_roi, lang='eng', config=f'--psm {field.segment}')
 
     # Post-processing on the returned string
 
@@ -49,7 +60,7 @@ def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrR
 
 def process_ocr_regions(working_dir: Path, aligned_image_path: Path, fields: list[OcrField]) -> list[OcrResult]:
     # Load the aligned image
-    aligned_image = cv2.imread(str(aligned_image_path))
+    aligned_image = cv2.imread(str(aligned_image_path), flags=cv2.IMREAD_GRAYSCALE)
 
     # Process each OCR field
     results = []

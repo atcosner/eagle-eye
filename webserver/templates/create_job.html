@@ -10,12 +10,13 @@
 {% block content %}
      <div style="width: 30%;">
          <h2>Create Job - Please select your files</h2>
+
          <div style="margin-bottom: 10px;">
-             <input type="submit" form="job-config" value="Submit"/>
              <button onclick="handleFilesSelected()">Clear Selections</button>
              <label>Files Selected: </label>
              <label id="file-selection-count-label">0</label>
          </div>
+
          <div id="file-selection-div">
              <form id="job-config" action="/submit-job" method="post" enctype="multipart/form-data">
                  <input type="file" id="file-selector-input" multiple required name="job-files" accept="image/*" style="display:none"/>
@@ -24,6 +25,12 @@
 
              <div id="file-selection-list">
                  <h5>Drag and drop files or click to browse</h5>
+             </div>
+
+             <div style="margin-top: 10px;">
+                 <label for="job-name">Job Name:</label>
+                 <input type="text" form="job-config" name="job-name" id="job-name" value="{{ job_id }}" style="width: 300px"/>
+                 <input type="submit" form="job-config" value="Submit"/>
              </div>
          </div>
      </div>

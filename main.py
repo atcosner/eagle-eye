@@ -41,7 +41,7 @@ def submit_job():
         print('Missing job parameters')
         return redirect(url_for('submit_job'))
 
-    job = manager.create_job(request.form['job-id'])
+    job = manager.create_job(request.form['job-id'], request.form['job-name'])
     job.save_files(request.files.getlist('job-files'))
 
     return redirect(url_for('job_status', job_id=job.job_id))
@@ -69,6 +69,7 @@ def job_status(job_id: uuid.UUID):
         return render_template(
             'job_status.html',
             job_id=job_id,
+            job_name=job.job_name,
             job_state=job.get_current_state(),
             state_log=job.get_state_changes(),
         )
@@ -83,6 +84,7 @@ def job_status_pre_process(job_id: uuid.UUID):
         return render_template(
             'job_pre_process.html',
             job_id=job_id,
+            job_name=job.job_name,
             results_count=len(pre_process_results),
             results=pre_process_results,
         )
@@ -93,7 +95,14 @@ def job_status_pre_process(job_id: uuid.UUID):
 @app.route('/job-status/<uuid:job_id>/results')
 def job_status_results(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
-        return render_template('job_results.html', job_id=job_id, results=job.ocr_results[0])
+        processing_results = list(enumerate(job.ocr_results))
+        return render_template(
+            'job_results.html',
+            job_id=job_id,
+            job_name=job.job_name,
+            results_count=len(processing_results),
+            results=processing_results,
+        )
     else:
         return render_template('unknown_job.html', job_id=job_id)
 
@@ -107,14 +116,14 @@ def continue_job(job_id: uuid.UUID):
         return render_template('unknown_job.html', job_id=job_id)
 
 
-@app.route('/job-status/<uuid:job_id>/update', methods=['POST'])
-def update_job_results(job_id: uuid.UUID):
+@app.route('/job-status/<uuid:job_id>/<int:image_id>/update', methods=['POST'])
+def update_job_results(job_id: uuid.UUID, image_id: int):
     job = manager.get_job(job_id)
     if job is None:
         return render_template('unknown_job.html', job_id=job_id)
 
-    job.update_results(0, request.form)
-    return redirect(url_for('job_status_results', job_id=job_id))
+    job.update_results(image_id, request.form)
+    return redirect(url_for('job_status_results', job_id=job_id, focus_id=image_id))
 
 
 if __name__ == '__main__':

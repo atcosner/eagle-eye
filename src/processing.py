@@ -6,7 +6,8 @@ from pathlib import Path
 
 from src.definitions.util import OcrField
 
-OCR_DARK_PIXEL_THRESHOLD = 0.99
+# Ignore images that are over X% white
+OCR_WHITE_PIXEL_THRESHOLD = 0.99
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +41,10 @@ def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrR
 
     # Threshold the image to determine if there is text in it
     _, threshold = cv2.threshold(roi, 127, 255, cv2.THRESH_BINARY)
-    dark_pixels = cv2.countNonZero(threshold)
-    logger.info(f'Dark: {dark_pixels}, Total: {total_pixels}, Pct: {dark_pixels / total_pixels}')
-    if (dark_pixels / total_pixels) > OCR_DARK_PIXEL_THRESHOLD:
-        logger.info('Detected black image, skipping OCR')
+    white_pixels = cv2.countNonZero(threshold)
+    logger.info(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
+    if (white_pixels / total_pixels) > OCR_WHITE_PIXEL_THRESHOLD:
+        logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
         return OcrResult(field=field, roi_image_path=roi_image_path, extracted_text='')
 
     # Attempt OCR on the image

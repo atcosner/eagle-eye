@@ -7,7 +7,7 @@
 
 {% block content %}
     <div style="margin: 0 auto; width: fit-content;">
-        <h2>Job Status: {{ job_id }}</h2>
+        <h2>Job: {{ job_name }}</h2>
         <h4>State: {{ job_state.state.name }}</h4>
 
         <form id="continue-job" action="/continue-job/{{ job_id }}" method="post">

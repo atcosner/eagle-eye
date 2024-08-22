@@ -31,13 +31,21 @@ class StateChange(NamedTuple):
 
 @dataclass
 class HtmlJobInfo:
+    name: str
     uuid: str
     last_state: JobState
     last_timestamp: datetime
 
 
 class Job:
-    def __init__(self, parent_directory: Path, job_id: uuid.UUID, reference_image_path: Path):
+    def __init__(
+            self,
+            parent_directory: Path,
+            job_id: uuid.UUID,
+            reference_image_path: Path,
+            job_name: str,
+    ) -> None:
+        self.job_name: str = job_name
         self.job_id: uuid.UUID = job_id
         self.states: list[StateChange] = [StateChange(JobState.CREATED, datetime.now())]
         self.exception: Exception | None = None
@@ -77,6 +85,7 @@ class Job:
         current_state = self.get_current_state()
 
         return HtmlJobInfo(
+            name=self.job_name,
             uuid=str(self.job_id),
             last_state=current_state.state,
             last_timestamp=current_state.timestamp,

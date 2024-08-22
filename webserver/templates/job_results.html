@@ -3,55 +3,111 @@
 {% block title %}KU BDI Collection Processor - Job Results{% endblock %}
 
 {% block head %}
+    <link rel="stylesheet" href="/static/css/job_results.css">
+    <script>
+        var CURRENT_INDEX = 0;
+        var RESULTS_COUNT = {{ results_count }};
+
+        function updateViewport(forward, force_id) {
+            // Determine the new iterator
+            var temp_index = CURRENT_INDEX;
+            if (force_id === null) {
+                if (forward) {
+                    temp_index += 1;
+                } else {
+                    temp_index -= 1;
+                }
+
+                // Handle overflow/underflow
+                if (temp_index >= RESULTS_COUNT) {
+                    temp_index = 0;
+                } else if (temp_index < 0) {
+                    temp_index = RESULTS_COUNT - 1;
+                }
+            } else {
+                temp_index = force_id;
+            }
+
+            // Hide the current index and show the new index
+            var current_div = document.getElementById("results-viewport-" + CURRENT_INDEX);
+            current_div.style.display = "none";
+
+            var new_div = document.getElementById("results-viewport-" + temp_index);
+            new_div.style.display = "block";
+
+            // Update the image label
+            var image_label = document.getElementById("image_id");
+            var display_index = temp_index + 1;
+            image_label.innerHTML = display_index + " (" + display_index + "/" + RESULTS_COUNT + ")";
+            CURRENT_INDEX = temp_index;
+        }
+
+        window.onload = () => {
+            let params = new URLSearchParams(document.location.search);
+            let focus_id = params.get("focus_id");
+            console.log("Focusing to " + focus_id);
+
+            if (focus_id === null) {
+                focus_id = 0;
+            } else {
+                focus_id = parseInt(focus_id);
+            }
+            updateViewport(true, focus_id);
+        };
+    </script>
 {% endblock %}
 
 {% block content %}
-    <h2>Job: {{ job_id }}</h2>
+    <h2>Job: {{ job_name }}</h2>
 
     <div style="display: flex; margin-bottom: 5px;">
-        <button><-</button>
-        <button>-></button>
-        <h3 id="image_id" style="margin: 0; padding-left: 10px;">Image: 0</h3>
+        <button onclick="updateViewport(false, null)">Previous</button>
+        <button onclick="updateViewport(true, null)">Next</button>
+        <h3 style="margin: 0; padding-left: 10px;">Image: </h3>
+        <h3 id="image_id" style="margin: 0; padding-left:5px;">1 (1/{{ results_count }})</h3>
     </div>
 
-    <div id="results-viewport">
-        <form
-                id="job-results-corrections"
-                action="/job-status/{{ job_id }}/update"
-                method="post"
-                enctype="multipart/form-data"
-        >
-            <table>
-                <tr>
-                    <th>Data Field</th>
-                    <th>ROI Image</th>
-                    <th>Extracted Text</th>
-                </tr>
-                    {% for result in results %}
-                        <tr>
-                            <td>{{ result.field.name }}</td>
-                            <td>
-                                <img
-                                        src="/job-file/{{ job_id }}/0/{{ result.roi_image_path.name }}"
-                                        style="border: 2px solid black;"
-                                />
-                            </td>
-                            <td>
-                                <input
-                                        type="text"
-                                        name="{{ result.field.name }}"
-                                        {% if result.user_corrected_text is not none %}
-                                            value="{{ result.user_corrected_text }}"
-                                        {% else %}
-                                            value="{{ result.extracted_text }}"
-                                        {% endif %}
-                                >
-                            </td>
-                        </tr>
-                    {% endfor %}
-            </table>
+    {% for image_index, fields in results %}
+        <div id="results-viewport-{{ image_index }}"  style="display: none;">
+            <form
+                    id="job-results-corrections"
+                    action="/job-status/{{ job_id }}/{{ image_index }}/update"
+                    method="post"
+                    enctype="multipart/form-data"
+            >
+                <table>
+                    <tr>
+                        <th>Data Field</th>
+                        <th>Extracted Text</th>
+                        <th>ROI Image</th>
+                    </tr>
+                        {% for field in fields %}
+                            <tr>
+                                <td>{{ field.field.name }}</td>
+                                <td>
+                                    <input
+                                            type="text"
+                                            name="{{ field.field.name }}"
+                                            class="corrections-box"
+                                            {% if field.user_corrected_text is not none %}
+                                                value="{{ field.user_corrected_text }}"
+                                            {% else %}
+                                                value="{{ field.extracted_text }}"
+                                            {% endif %}
+                                    />
+                                </td>
+                                <td>
+                                    <img
+                                            src="/job-file/{{ job_id }}/{{ image_index }}/{{ field.roi_image_path.name }}"
+                                            style="border: 2px solid black;"
+                                    />
+                                </td>
+                            </tr>
+                        {% endfor %}
+                </table>
 
-            <input type="submit" value="Submit"/>
-        </form>
-    </div>
+                <input type="submit" value="Submit"/>
+            </form>
+        </div>
+    {% endfor %}
 {% endblock %}

@@ -22,11 +22,12 @@ class JobManager:
     def get_html_job_list(self) -> list[HtmlJobInfo]:
         return [job.to_html_info() for job in self.job_map.values()]
 
-    def create_job(self, job_id: str) -> Job:
+    def create_job(self, job_id: str, job_name: str) -> Job:
         job_uuid = uuid.UUID(job_id)
         self.job_map[job_uuid] = Job(
             parent_directory=self.working_dir,
             job_id=job_uuid,
             reference_image_path=self.reference_image,
+            job_name=job_name,
         )
         return self.job_map[job_uuid]

@@ -15,10 +15,31 @@ def align_images(
     test_grayscale = cv2.cvtColor(test, cv2.COLOR_BGR2GRAY)
     reference_grayscale = cv2.cvtColor(reference, cv2.COLOR_BGR2GRAY)
 
+    _, test_grayscale = cv2.threshold(test_grayscale, 127, 255, 0)
+    _, reference_grayscale = cv2.threshold(reference_grayscale, 127, 255, 0)
+
+    mask2 = np.zeros(reference_grayscale.shape[:2], dtype=np.uint8)
+    cv2.rectangle(mask2, (0, 0), (1324, 117), 255, thickness=-1)
+    cv2.rectangle(mask2, (0, 1824), (1324, 1942), 255, thickness=-1)
+
+    # # Middle
+    # cv2.rectangle(mask2, (0, 922), (1324, 1061), 255, thickness=-1)
+
+    # # Left and Right
+    # cv2.rectangle(mask2, (0, 0), (177, 1941), 255, thickness=-1)
+    # cv2.rectangle(mask2, (1236, 0), (1324, 1942), 255, thickness=-1)
+
     # Detect keypoints and compute features
     orb = cv2.ORB_create(max_keypoint_regions)
-    (test_keypoints, test_features) = orb.detectAndCompute(test_grayscale, None)
-    (ref_keypoints, ref_features) = orb.detectAndCompute(reference_grayscale, None)
+    (test_keypoints, test_features) = orb.detectAndCompute(test_grayscale, mask2)
+    (ref_keypoints, ref_features) = orb.detectAndCompute(reference_grayscale, mask2)
+
+    test1 = cv2.drawKeypoints(test_grayscale, test_keypoints, 0, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv2.imshow('Test', imutils.resize(test1, width=500))
+    cv2.waitKey(0)
+    test1 = cv2.drawKeypoints(reference_grayscale, ref_keypoints, 0, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    cv2.imshow('Reference', imutils.resize(test1, width=500))
+    cv2.waitKey(0)
 
     # Match the features and sort by distance
     matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
@@ -48,8 +69,8 @@ if __name__ == '__main__':
     resource_path = Path.cwd() / '..' / '..' / 'forms'
 
     # Load the dev and production images
-    test_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_1_top.png'))
-    reference_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_template_top.png'))
+    test_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_2_v3.png'))
+    reference_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_template.png'))
 
     # Align them
     aligned_img = align_images(test_img, reference_img, show_matches=True)

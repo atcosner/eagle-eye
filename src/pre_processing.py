@@ -120,38 +120,6 @@ def align_images(
     test_image_rotate, test_marks = detect_alignment_marks(test_image)
     _, reference_marks = detect_alignment_marks(reference_image)
 
-    # # Detect keypoints and compute features
-    # orb = cv2.ORB_create(max_features)
-    # test_keypoints, test_features = orb.detectAndCompute(test_image, None)
-    # ref_keypoints, ref_features = orb.detectAndCompute(reference_image, None)
-    #
-    # # Match the features and sort by distance
-    # matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-    # matches = sorted(matcher.match(test_features, ref_features, None), key=lambda x: x.distance)
-    #
-    # # Truncate matches and save an image of the matches
-    # matches = matches[:int(len(matches) * match_keep_percent)]
-    # matched_image = cv2.drawMatches(test_image, test_keypoints, reference_image, ref_keypoints, matches, None)
-    # cv2.imwrite(str(matched_image_path), matched_image)
-    #
-    # # Populate numpy arrays for the matched points
-    # test_matchpoints = np.zeros((len(matches), 2), dtype='float')
-    # ref_matchpoints = np.zeros((len(matches), 2), dtype='float')
-    # for (i, m) in enumerate(matches):
-    #     test_matchpoints[i] = test_keypoints[m.queryIdx].pt
-    #     ref_matchpoints[i] = ref_keypoints[m.trainIdx].pt
-    #
-    # # Compute the homography matrix and align the images using it
-    # (H, _) = cv2.findHomography(test_matchpoints, ref_matchpoints, method=cv2.RANSAC)
-    # (h, w) = reference_image.shape[:2]
-    # aligned_image = cv2.warpPerspective(test_image, H, (w, h))
-    # cv2.imwrite(str(aligned_image_path), aligned_image)
-    #
-    # # Save an overlaid image to assist in debugging
-    # overlaid_image = aligned_image.copy()
-    # cv2.addWeighted(reference_image, 0.5, aligned_image, 0.5, 0, overlaid_image)
-    # cv2.imwrite(str(overlaid_image_path), overlaid_image)
-
     # Convert the alignment marks to matchpoints
     test_matchpoints = alignment_marks_to_points(test_marks)
     ref_matchpoints = alignment_marks_to_points(reference_marks)

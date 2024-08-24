@@ -189,11 +189,6 @@ class Job:
 
             # Create a directory to store the OCR roi pictures
             working_dir = result.aligned_image_path.parent
-            # try:
-            #     working_dir.mkdir()
-            # except Exception as e:
-            #     self._record_exception(e)
-            #     continue
 
             try:
                 results = process_ocr_regions(

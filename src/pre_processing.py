@@ -1,7 +1,13 @@
 import cv2
+import logging
 import numpy as np
 from pathlib import Path
 from typing import NamedTuple
+
+# Allow for an image to be +/- 6 degrees rotated
+ROTATION_ATTEMPTS = [0] + list(range(1, 6, 1)) + list(range(-1, -6, -1))
+
+logger = logging.getLogger(__name__)
 
 
 class AlignmentResult(NamedTuple):
@@ -9,6 +15,13 @@ class AlignmentResult(NamedTuple):
     matched_features_image_path: Path
     overlaid_image_path: Path
     aligned_image_path: Path
+
+
+class AlignmentMark(NamedTuple):
+    x: int
+    y: int
+    height: int
+    width: int
 
 
 def grayscale_image(image_path: Path) -> Path:
@@ -20,6 +33,71 @@ def grayscale_image(image_path: Path) -> Path:
     output_path = image_path.parent / f'grayscale_image{image_path.suffix}'
     cv2.imwrite(str(output_path), image_grayscale)
     return output_path
+
+
+def rotate_image(image: np.array, degrees: int) -> np.array:
+    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, degrees, 1.0)
+    return cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+
+
+def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMark]]:
+    found_marks = []
+    used_rotation = 0
+    for attempt_degrees in ROTATION_ATTEMPTS:
+        logger.info(f'Trying {attempt_degrees} degree rotation')
+        working_image = image.copy()
+
+        # Grayscale and rotate if required
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        if attempt_degrees != 0:
+            gray = rotate_image(gray, attempt_degrees)
+
+        # Threshold to eliminate noise
+        _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # Find all possible contours in the image
+        marks = []
+        contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        for c in contours:
+            x, y, width, height = cv2.boundingRect(c)
+            side_ratio = height / width
+
+            contour_roi = threshold[y:y + height, x:x + width]
+            white_pixels = cv2.countNonZero(contour_roi)
+            color_ratio = white_pixels / (height * width)
+
+            # Check that the mark is mostly square and contains almost all black pixels
+            if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
+                marks.append(AlignmentMark(x, y, height, width))
+
+        # Look to see if we found 8 qualifying marks
+        if len(marks) == 8:
+            found_marks = marks
+            used_rotation = attempt_degrees
+            break
+        else:
+            logger.info(f'Found {len(marks)} marks')
+            continue
+
+    # Order the marks in left-to-right and top-to-bottom order
+    marks_x_sort = sorted(found_marks, key=lambda m: m.x)
+    sorted_marks = sorted(marks_x_sort[:4], key=lambda m: m.y) + sorted(marks_x_sort[4:], key=lambda m: m.y)
+
+    # Rotate the image and return the alignment marks
+    rotated_image = rotate_image(image, used_rotation)
+    return rotated_image, sorted_marks
+
+
+def alignment_marks_to_points(marks: list[AlignmentMark]) -> np.array:
+    points = []
+    for mark in marks:
+        points.append((mark.x, mark.y))
+        points.append((mark.x + mark.width, mark.y))
+        points.append((mark.x, mark.y + mark.height))
+        points.append((mark.x + mark.width, mark.y + mark.height))
+
+    return np.array(points, dtype='float')
 
 
 def align_images(
@@ -38,31 +116,61 @@ def align_images(
     test_image = cv2.imread(str(test_image_path))
     reference_image = cv2.imread(str(reference_image_path))
 
-    # Detect keypoints and compute features
-    orb = cv2.ORB_create(max_features)
-    test_keypoints, test_features = orb.detectAndCompute(test_image, None)
-    ref_keypoints, ref_features = orb.detectAndCompute(reference_image, None)
+    # Detect alignment marks in both images
+    test_image_rotate, test_marks = detect_alignment_marks(test_image)
+    _, reference_marks = detect_alignment_marks(reference_image)
 
-    # Match the features and sort by distance
-    matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
-    matches = sorted(matcher.match(test_features, ref_features, None), key=lambda x: x.distance)
+    # # Detect keypoints and compute features
+    # orb = cv2.ORB_create(max_features)
+    # test_keypoints, test_features = orb.detectAndCompute(test_image, None)
+    # ref_keypoints, ref_features = orb.detectAndCompute(reference_image, None)
+    #
+    # # Match the features and sort by distance
+    # matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
+    # matches = sorted(matcher.match(test_features, ref_features, None), key=lambda x: x.distance)
+    #
+    # # Truncate matches and save an image of the matches
+    # matches = matches[:int(len(matches) * match_keep_percent)]
+    # matched_image = cv2.drawMatches(test_image, test_keypoints, reference_image, ref_keypoints, matches, None)
+    # cv2.imwrite(str(matched_image_path), matched_image)
+    #
+    # # Populate numpy arrays for the matched points
+    # test_matchpoints = np.zeros((len(matches), 2), dtype='float')
+    # ref_matchpoints = np.zeros((len(matches), 2), dtype='float')
+    # for (i, m) in enumerate(matches):
+    #     test_matchpoints[i] = test_keypoints[m.queryIdx].pt
+    #     ref_matchpoints[i] = ref_keypoints[m.trainIdx].pt
+    #
+    # # Compute the homography matrix and align the images using it
+    # (H, _) = cv2.findHomography(test_matchpoints, ref_matchpoints, method=cv2.RANSAC)
+    # (h, w) = reference_image.shape[:2]
+    # aligned_image = cv2.warpPerspective(test_image, H, (w, h))
+    # cv2.imwrite(str(aligned_image_path), aligned_image)
+    #
+    # # Save an overlaid image to assist in debugging
+    # overlaid_image = aligned_image.copy()
+    # cv2.addWeighted(reference_image, 0.5, aligned_image, 0.5, 0, overlaid_image)
+    # cv2.imwrite(str(overlaid_image_path), overlaid_image)
 
-    # Truncate matches and save an image of the matches
-    matches = matches[:int(len(matches) * match_keep_percent)]
-    matched_image = cv2.drawMatches(test_image, test_keypoints, reference_image, ref_keypoints, matches, None)
+    # Convert the alignment marks to matchpoints
+    test_matchpoints = alignment_marks_to_points(test_marks)
+    ref_matchpoints = alignment_marks_to_points(reference_marks)
+
+    # Save an image of the matches
+    matched_image = cv2.drawMatches(
+        test_image_rotate,
+        [cv2.KeyPoint(x, y, 2) for x, y in test_matchpoints],
+        reference_image,
+        [cv2.KeyPoint(x, y, 2) for x, y in ref_matchpoints],
+        [cv2.DMatch(x, x, 1) for x in range(len(ref_matchpoints))],
+        None,
+    )
     cv2.imwrite(str(matched_image_path), matched_image)
-
-    # Populate numpy arrays for the matched points
-    test_matchpoints = np.zeros((len(matches), 2), dtype='float')
-    ref_matchpoints = np.zeros((len(matches), 2), dtype='float')
-    for (i, m) in enumerate(matches):
-        test_matchpoints[i] = test_keypoints[m.queryIdx].pt
-        ref_matchpoints[i] = ref_keypoints[m.trainIdx].pt
 
     # Compute the homography matrix and align the images using it
     (H, _) = cv2.findHomography(test_matchpoints, ref_matchpoints, method=cv2.RANSAC)
     (h, w) = reference_image.shape[:2]
-    aligned_image = cv2.warpPerspective(test_image, H, (w, h))
+    aligned_image = cv2.warpPerspective(test_image_rotate, H, (w, h))
     cv2.imwrite(str(aligned_image_path), aligned_image)
 
     # Save an overlaid image to assist in debugging

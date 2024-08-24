@@ -6,7 +6,7 @@ from src.job_manager import JobManager
 from src.util import set_up_root_logger
 
 FORMS_PATH = Path(__file__).parent / 'forms' / 'production'
-REFERENCE_IMAGE = FORMS_PATH / 'ku_collection_form_template_top.png'
+REFERENCE_IMAGE = FORMS_PATH / 'ku_collection_form_template.png'
 
 app = Flask(
     __name__,

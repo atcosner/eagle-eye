@@ -22,6 +22,9 @@ class JobManager:
     def get_html_job_list(self) -> list[HtmlJobInfo]:
         return [job.to_html_info() for job in self.job_map.values()]
 
+    def get_exportable_jobs(self) -> list[Job]:
+        return [job for job in self.job_map.values() if job.success()]
+
     def create_job(self, job_id: str, job_name: str) -> Job:
         job_uuid = uuid.UUID(job_id)
         self.job_map[job_uuid] = Job(

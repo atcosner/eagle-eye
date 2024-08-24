@@ -30,7 +30,7 @@ def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrR
 
     # Apply pre-processing to the ROI
     updated_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
-    updated_roi = cv2.GaussianBlur(updated_roi, (3, 3), 0)
+    # updated_roi = cv2.GaussianBlur(updated_roi, (3, 3), 0)
     updated_roi = cv2.copyMakeBorder(updated_roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
 
     # Save the image off for further analysis

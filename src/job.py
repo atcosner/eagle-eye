@@ -94,6 +94,14 @@ class Job:
     def pending_work(self) -> bool:
         return self.get_current_state().state not in [JobState.ERROR, JobState.COMPLETED]
 
+    def success(self) -> bool | None:
+        if self.pending_work():
+            return None
+        elif self.get_current_state().state is JobState.COMPLETED:
+            return True
+        else:
+            return False
+
     def continue_processing(self) -> None:
         if not self.pending_work():
             return
@@ -109,6 +117,9 @@ class Job:
 
     def num_images(self) -> int:
         return len(self.submitted_images)
+
+    def num_results(self) -> int:
+        return len(self.ocr_results)
 
     def save_files(self, files: list[FileStorage]) -> None:
         idx = 0

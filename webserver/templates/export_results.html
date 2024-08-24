@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}KU BDI Collection Processor - Export Results{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <div style="margin: 0 auto; width: fit-content;">
+        <h2>Exportable Jobs</h2>
+        <table>
+            <tr>
+                <th></th>
+                <th>Job Name</th>
+                <th>Results Count</th>
+            </tr>
+            {% for job in jobs %}
+                <tr>
+                    <td><input type="checkbox" name="{{ job.uuid }}"/></td>
+                    <td><a href="/job-status/{{ job.uuid }}">{{ job.job_name }}</a></td>
+                    <td>{{ job.num_results() }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" form="job-config" value="Submit"/>
+    </div>
+{% endblock %}

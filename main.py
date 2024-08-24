@@ -52,6 +52,11 @@ def list_jobs():
     return render_template('list_jobs.html', jobs=manager.get_html_job_list())
 
 
+@app.route('/export-results')
+def export_results():
+    return render_template('export_results.html', jobs=manager.get_exportable_jobs())
+
+
 @app.route('/job-file/<uuid:job_id>/<int:image_id>/<file_name>')
 def job_file(job_id: uuid.UUID, image_id: int, file_name: str):
     if job := manager.get_job(job_id):

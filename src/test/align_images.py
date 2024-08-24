@@ -4,9 +4,33 @@ import numpy as np
 from pathlib import Path
 
 
+def create_alignment_mask(image) -> np.array:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    mask = np.zeros(gray.shape[:2], dtype=np.uint8)
+
+    contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours:
+        x, y, width, height = cv2.boundingRect(c)
+        side_ratio = height / width
+
+        contour_roi = threshold[y:y + height, x:x + width]
+        white_pixels = cv2.countNonZero(contour_roi)
+        color_ratio = white_pixels / (height * width)
+
+        if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
+            cv2.rectangle(image, (x, y), (x + width, y + height), (36, 255, 12), 3)
+            cv2.rectangle(mask, (x, y), (x + width, y + height), 255, thickness=-1)
+
+    return mask
+
+
 def align_images(
         test: np.array,
+        test_mask: np.array,
         reference: np.array,
+        reference_mask: np.array,
         max_keypoint_regions: int = 1000,
         match_keep_percent: float = 0.2,
         show_matches: bool = False,
@@ -18,21 +42,10 @@ def align_images(
     _, test_grayscale = cv2.threshold(test_grayscale, 127, 255, 0)
     _, reference_grayscale = cv2.threshold(reference_grayscale, 127, 255, 0)
 
-    mask2 = np.zeros(reference_grayscale.shape[:2], dtype=np.uint8)
-    cv2.rectangle(mask2, (0, 0), (1324, 117), 255, thickness=-1)
-    cv2.rectangle(mask2, (0, 1824), (1324, 1942), 255, thickness=-1)
-
-    # # Middle
-    # cv2.rectangle(mask2, (0, 922), (1324, 1061), 255, thickness=-1)
-
-    # # Left and Right
-    # cv2.rectangle(mask2, (0, 0), (177, 1941), 255, thickness=-1)
-    # cv2.rectangle(mask2, (1236, 0), (1324, 1942), 255, thickness=-1)
-
     # Detect keypoints and compute features
     orb = cv2.ORB_create(max_keypoint_regions)
-    (test_keypoints, test_features) = orb.detectAndCompute(test_grayscale, mask2)
-    (ref_keypoints, ref_features) = orb.detectAndCompute(reference_grayscale, mask2)
+    (test_keypoints, test_features) = orb.detectAndCompute(test_grayscale, test_mask)
+    (ref_keypoints, ref_features) = orb.detectAndCompute(reference_grayscale, reference_mask)
 
     test1 = cv2.drawKeypoints(test_grayscale, test_keypoints, 0, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
     cv2.imshow('Test', imutils.resize(test1, width=500))
@@ -69,11 +82,14 @@ if __name__ == '__main__':
     resource_path = Path.cwd() / '..' / '..' / 'forms'
 
     # Load the dev and production images
-    test_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_2_v3.png'))
+    test_img = cv2.imread(str(resource_path / 'production' / 'form1__filled.png'))
     reference_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_template.png'))
 
+    test_mask = create_alignment_mask(test_img)
+    reference_mask = create_alignment_mask(reference_img)
+
     # Align them
-    aligned_img = align_images(test_img, reference_img, show_matches=True)
+    aligned_img = align_images(test_img, test_mask, reference_img, reference_mask, show_matches=True)
 
     aligned_img = imutils.resize(aligned_img, width=700)
     reference_img = imutils.resize(reference_img, width=700)

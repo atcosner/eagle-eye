@@ -1,5 +1,7 @@
 import logging
+import pandas as pd
 import uuid
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum, auto
@@ -171,6 +173,15 @@ class Job:
             # Report on match failures
             if not matched:
                 logger.warning(f'Did not find a match for form element: {key}')
+
+    def export_results(self) -> pd.DataFrame:
+        fields_dict = defaultdict(list)
+        for image_result in self.ocr_results:
+            for ocr_result in image_result:
+                text = ocr_result.user_corrected_text if ocr_result.user_corrected_text else ocr_result.extracted_text
+                fields_dict[ocr_result.field.name].append(text)
+
+        return pd.DataFrame(fields_dict)
 
     def _pre_process(self) -> None:
         for original_path in self.submitted_images:

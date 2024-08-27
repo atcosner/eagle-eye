@@ -1,5 +1,6 @@
 import logging
 import os
+import pandas as pd
 import uuid
 from pathlib import Path
 
@@ -35,3 +36,17 @@ class JobManager:
             job_name=job_name,
         )
         return self.job_map[job_uuid]
+
+    def export_jobs(self, job_ids: list[uuid.UUID]) -> Path:
+        dataframes = []
+        for job_id in job_ids:
+            if job := self.get_job(job_id):
+                dataframes.append(job.export_results())
+            else:
+                logger.warning(f'Did not find job with id: {job_id}')
+
+        excel_path = self.working_dir / 'export.xlsx'
+        merged_df = pd.concat(dataframes).reset_index()
+        merged_df.to_excel(excel_path)
+
+        return excel_path

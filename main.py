@@ -1,6 +1,6 @@
 import logging
 import uuid
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, send_file
 from pathlib import Path
 
 from src.job_manager import JobManager
@@ -142,13 +142,9 @@ def update_job_results(job_id: uuid.UUID, image_id: int):
 @app.route('/export-jobs', methods=['POST'])
 def export_jobs():
     # Filter to requested exports
-    exports = [key for key, value in request.form.items() if value == 'on']
-
-    for job_id_str in exports:
-        job = manager.get_job(uuid.UUID(job_id_str))
-        if job is None:
-            logger.warning(f'Did not find job with id: {job_id_str}')
-            continue
+    jobs_to_export = [uuid.UUID(key) for key, value in request.form.items() if value == 'on']
+    excel_path = manager.export_jobs(jobs_to_export)
+    return send_file(excel_path)
 
 
 if __name__ == '__main__':

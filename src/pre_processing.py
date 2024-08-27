@@ -46,7 +46,6 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
     used_rotation = 0
     for attempt_degrees in ROTATION_ATTEMPTS:
         logger.info(f'Trying {attempt_degrees} degree rotation')
-        working_image = image.copy()
 
         # Grayscale and rotate if required
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -71,14 +70,16 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
             if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
                 marks.append(AlignmentMark(x, y, height, width))
 
+        logger.info(f'Found {len(marks)} marks')
+
         # Look to see if we found 8 qualifying marks
         if len(marks) == 8:
             found_marks = marks
             used_rotation = attempt_degrees
             break
-        else:
-            logger.info(f'Found {len(marks)} marks')
-            continue
+
+    if not found_marks:
+        raise RuntimeError('Failed to detect alignment marks')
 
     # Order the marks in left-to-right and top-to-bottom order
     marks_x_sort = sorted(found_marks, key=lambda m: m.x)
@@ -103,8 +104,6 @@ def alignment_marks_to_points(marks: list[AlignmentMark]) -> np.array:
 def align_images(
         test_image_path: Path,
         reference_image_path: Path,
-        max_features: int = 1000,
-        match_keep_percent: float = 0.2,
 ) -> AlignmentResult:
     assert test_image_path.exists(), f'Test image did not exist: {test_image_path}'
     assert reference_image_path.exists(), f'Ref image did not exist: {reference_image_path}'

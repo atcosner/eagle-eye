@@ -1,3 +1,4 @@
+import logging
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort
 from pathlib import Path
@@ -14,6 +15,7 @@ app = Flask(
     template_folder='webserver/templates/',
 )
 
+logger = logging.getLogger(__name__)
 manager: JobManager | None = None
 
 
@@ -38,7 +40,7 @@ def create_job():
 @app.route('/submit-job', methods=['POST'])
 def submit_job():
     if 'job-files' not in request.files or 'job-id' not in request.form:
-        print('Missing job parameters')
+        logger.error('Missing job parameters')
         return redirect(url_for('submit_job'))
 
     job = manager.create_job(request.form['job-id'], request.form['job-name'])
@@ -57,11 +59,17 @@ def export_results():
     return render_template('export_results.html', jobs=manager.get_exportable_jobs())
 
 
-@app.route('/job-file/<uuid:job_id>/<int:image_id>/<file_name>')
-def job_file(job_id: uuid.UUID, image_id: int, file_name: str):
+@app.route('/job-file/<uuid:job_id>/<int:image_id>/<part_name>')
+@app.route('/job-file/<uuid:job_id>/<int:image_id>/<part_name>/<file_name>')
+def job_file(job_id: uuid.UUID, image_id: int, part_name: str, file_name: str | None = None):
+    # Handle some files not having a part
+    if '.' in part_name:
+        file_name = part_name
+        part_name = ''
+
     if job := manager.get_job(job_id):
         return send_from_directory(
-            job.working_dir / str(image_id),
+            job.working_dir / str(image_id) / part_name,
             file_name
         )
     else:
@@ -129,6 +137,18 @@ def update_job_results(job_id: uuid.UUID, image_id: int):
 
     job.update_results(image_id, request.form)
     return redirect(url_for('job_status_results', job_id=job_id, focus_id=image_id))
+
+
+@app.route('/export-jobs', methods=['POST'])
+def export_jobs():
+    # Filter to requested exports
+    exports = [key for key, value in request.form.items() if value == 'on']
+
+    for job_id_str in exports:
+        job = manager.get_job(uuid.UUID(job_id_str))
+        if job is None:
+            logger.warning(f'Did not find job with id: {job_id_str}')
+            continue
 
 
 if __name__ == '__main__':

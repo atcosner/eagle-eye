@@ -3,25 +3,29 @@
 {% block title %}KU BDI Collection Processor - Export Results{% endblock %}
 
 {% block head %}
+    <link rel="stylesheet" href="/static/css/export_results.css">
 {% endblock %}
 
 {% block content %}
     <div style="margin: 0 auto; width: fit-content;">
         <h2>Exportable Jobs</h2>
-        <table>
-            <tr>
-                <th></th>
-                <th>Job Name</th>
-                <th>Results Count</th>
-            </tr>
-            {% for job in jobs %}
+        <form id="export-config" action="/export-jobs" method="post" enctype="multipart/form-data">
+            <table>
                 <tr>
-                    <td><input type="checkbox" name="{{ job.uuid }}"/></td>
-                    <td><a href="/job-status/{{ job.uuid }}">{{ job.job_name }}</a></td>
-                    <td>{{ job.num_results() }}</td>
+                    <th></th>
+                    <th>Job Name</th>
+                    <th>Results Count</th>
                 </tr>
-            {% endfor %}
-        </table>
-        <input type="submit" form="job-config" value="Submit"/>
+                {% for job in jobs %}
+                    <tr>
+                        <td><input type="checkbox" name="{{ job.job_id }}"/></td>
+                        <td><a href="/job-status/{{ job.job_id }}">{{ job.job_name }}</a></td>
+                        <td>{{ job.num_results() }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <input type="submit" form="export-config" value="Submit" style="margin-top: 10px;"/>
+        </form>
     </div>
 {% endblock %}

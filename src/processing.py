@@ -40,6 +40,7 @@ def process_ocr_field(working_dir: Path, aligned_image, field: OcrField) -> OcrR
     cv2.imwrite(str(roi_image_path), updated_roi)
 
     # Threshold the image to determine if there is text in it
+    # TODO: Use the inner part of the image to remove top and bottom lines that appear after alignment
     _, threshold = cv2.threshold(roi, 127, 255, cv2.THRESH_BINARY)
     white_pixels = cv2.countNonZero(threshold)
     logger.info(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')

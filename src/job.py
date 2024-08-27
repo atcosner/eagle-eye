@@ -181,7 +181,7 @@ class Job:
                 gray_path = grayscale_image(original_path)
                 logger.info(f'Converted image to grayscale: {gray_path}')
 
-                # Detect key points in the image
+                # Align this image to the reference
                 alignment_result = align_images(gray_path, self.reference_path)
 
                 self.alignment_results.append(alignment_result)
@@ -198,18 +198,21 @@ class Job:
         for result in self.alignment_results:
             logger.info(f'Attempting OCR on: {result.aligned_image_path}')
 
-            # Create a directory to store the OCR roi pictures
-            working_dir = result.aligned_image_path.parent
+            for name, fields in {'top': TOP_OCR_FIELDS}.items():
+                # Create a directory to store the OCR roi pictures
+                working_dir = result.aligned_image_path.parent / name
+                working_dir.mkdir()
+                logger.info(f'Processing "{name}": {working_dir}')
 
-            try:
-                results = process_ocr_regions(
-                    working_dir=working_dir,
-                    aligned_image_path=result.aligned_image_path,
-                    fields=TOP_OCR_FIELDS,
-                )
-                self.ocr_results.append(results)
-            except Exception as e:
-                self._record_exception(e)
-                break
+                try:
+                    results = process_ocr_regions(
+                        working_dir=working_dir,
+                        aligned_image_path=result.aligned_image_path,
+                        fields=fields,
+                    )
+                    self.ocr_results.append(results)
+                except Exception as e:
+                    self._record_exception(e)
+                    break
 
         self._change_state(JobState.COMPLETED)

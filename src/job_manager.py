@@ -1,7 +1,7 @@
 import logging
+import os
 import uuid
 from pathlib import Path
-from tempfile import mkdtemp
 
 from .job import Job, HtmlJobInfo
 
@@ -13,7 +13,8 @@ class JobManager:
         self.job_map: dict[uuid.UUID, Job] = {}
         self.reference_image: Path = reference_image
 
-        self.working_dir: Path = Path(mkdtemp())
+        self.working_dir: Path = Path(os.getenv('APPDATA')) / 'bi-form-processor'
+        self.working_dir.mkdir(exist_ok=True)
         logger.info(f'JobManager working directory: {self.working_dir}')
 
     def get_job(self, job_id: uuid.UUID) -> Job | None:

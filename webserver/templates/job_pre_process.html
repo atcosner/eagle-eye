@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}KU BDI Collection Processor - Job Pre Process Results{% endblock %}
+{% block title %}KU BI Form Processor - Pre-Process Results{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="/static/css/job_pre_process.css">
@@ -50,7 +50,7 @@
         <h3 id="image_id" style="margin: 0; padding-left:5px;">1 (1/{{ results_count }})</h3>
     </div>
 
-    {% for index, result in results %}
+    {% for index, result in results.items() %}
         <div
                 id="results-viewport-{{ index }}"
                 {% if index == 0 %}

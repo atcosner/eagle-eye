@@ -93,13 +93,12 @@ def job_status(job_id: uuid.UUID):
 @app.route('/job-status/<uuid:job_id>/pre-process')
 def job_status_pre_process(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
-        pre_process_results = list(enumerate(job.alignment_results))
         return render_template(
             'job_pre_process.html',
             job_id=job_id,
             job_name=job.job_name,
-            results_count=len(pre_process_results),
-            results=pre_process_results,
+            results_count=len(job.alignment_results),
+            results=job.alignment_results,
         )
     else:
         return render_template('unknown_job.html', job_id=job_id)
@@ -108,13 +107,12 @@ def job_status_pre_process(job_id: uuid.UUID):
 @app.route('/job-status/<uuid:job_id>/results')
 def job_status_results(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
-        processing_results = list(enumerate(job.ocr_results))
         return render_template(
             'job_results.html',
             job_id=job_id,
             job_name=job.job_name,
-            results_count=len(processing_results),
-            results=processing_results,
+            results_count=len(job.ocr_results),
+            results=job.ocr_results,
         )
     else:
         return render_template('unknown_job.html', job_id=job_id)

@@ -9,9 +9,10 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.ornithology_form import TOP_OCR_FIELDS
+from .definitions.ornithology_form import TOP_HALF_FIELDS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
-from .processing import OcrResult, process_ocr_regions
+from .processing import process_fields
+from .util import FieldResult
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +54,9 @@ class Job:
         self.exception: Exception | None = None
 
         self.reference_path: Path = reference_image_path
-        self.submitted_images: list[Path] = []
-        self.alignment_results: list[AlignmentResult] = []
-        self.ocr_results: list[list[OcrResult]] = []
+        self.submitted_images: dict[int, Path] = {}
+        self.alignment_results: dict[int, AlignmentResult] = {}
+        self.ocr_results: dict[int, list[FieldResult]] = defaultdict(list)
 
         # Create a working directory for ourselves
         self.working_dir: Path = parent_directory / str(job_id)
@@ -113,7 +114,7 @@ class Job:
             case JobState.FILES_SUBMITTED:
                 self._pre_process()
             case JobState.PRE_PROCESSED:
-                self._process_ocr()
+                self._process()
             case _:
                 logger.warning(f'Unknown state: {current_state}')
 
@@ -147,7 +148,7 @@ class Job:
 
             try:
                 file.save(file_path)
-                self.submitted_images.append(file_path)
+                self.submitted_images[idx] = file_path
             except Exception as e:
                 self._record_exception(e)
             finally:
@@ -184,8 +185,8 @@ class Job:
         return pd.DataFrame(fields_dict)
 
     def _pre_process(self) -> None:
-        for original_path in self.submitted_images:
-            logger.info(f'Pre-processing: {original_path}')
+        for image_id, original_path in self.submitted_images.items():
+            logger.info(f'Pre-processing {image_id}: {original_path}')
 
             try:
                 # Convert the original image to grayscale
@@ -195,7 +196,7 @@ class Job:
                 # Align this image to the reference
                 alignment_result = align_images(gray_path, self.reference_path)
 
-                self.alignment_results.append(alignment_result)
+                self.alignment_results[image_id] = alignment_result
                 logger.info(f'Matched features image: {alignment_result.matched_features_image_path}')
                 logger.info(f'Overlaid image: {alignment_result.overlaid_image_path}')
                 logger.info(f'Aligned image: {alignment_result.aligned_image_path}')
@@ -205,23 +206,23 @@ class Job:
 
         self._change_state(JobState.PRE_PROCESSED)
 
-    def _process_ocr(self) -> None:
-        for result in self.alignment_results:
-            logger.info(f'Attempting OCR on: {result.aligned_image_path}')
+    def _process(self) -> None:
+        for image_id, result in self.alignment_results.items():
+            logger.info(f'Processing: {result.aligned_image_path}')
 
-            for name, fields in {'top': TOP_OCR_FIELDS}.items():
-                # Create a directory to store the OCR roi pictures
+            for name, fields in {'top': TOP_HALF_FIELDS}.items():
+                # Create a directory to store the snipped roi pictures
                 working_dir = result.aligned_image_path.parent / name
                 working_dir.mkdir()
                 logger.info(f'Processing "{name}": {working_dir}')
 
                 try:
-                    results = process_ocr_regions(
+                    results = process_fields(
                         working_dir=working_dir,
                         aligned_image_path=result.aligned_image_path,
                         fields=fields,
                     )
-                    self.ocr_results.append(results)
+                    self.ocr_results[image_id].extend(results)
                 except Exception as e:
                     self._record_exception(e)
                     break

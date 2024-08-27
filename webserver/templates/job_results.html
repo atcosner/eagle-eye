@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}KU BDI Collection Processor - Job Results{% endblock %}
+{% block title %}KU BI Form Processor - Job Results{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="/static/css/job_results.css">
@@ -67,7 +67,7 @@
         <h3 id="image_id" style="margin: 0; padding-left:5px;">1 (1/{{ results_count }})</h3>
     </div>
 
-    {% for image_index, fields in results %}
+    {% for image_index, field_results in results.items() %}
         <div id="results-viewport-{{ image_index }}"  style="display: none;">
             <form
                     id="job-results-corrections"
@@ -81,24 +81,13 @@
                         <th>Extracted Text</th>
                         <th>ROI Image</th>
                     </tr>
-                        {% for field in fields %}
+                        {% for result in field_results %}
                             <tr>
-                                <td>{{ field.field.name }}</td>
-                                <td>
-                                    <input
-                                            type="text"
-                                            name="{{ field.field.name }}"
-                                            class="corrections-box"
-                                            {% if field.user_corrected_text is not none %}
-                                                value="{{ field.user_corrected_text }}"
-                                            {% else %}
-                                                value="{{ field.extracted_text }}"
-                                            {% endif %}
-                                    />
-                                </td>
+                                <td>{{ result.field_name }}</td>
+                                <td>{{ result.get_html_input() | safe }}</td>
                                 <td>
                                     <img
-                                            src="/job-file/{{ job_id }}/{{ image_index }}/top/{{ field.roi_image_path.name }}"
+                                            src="/job-file/{{ job_id }}/{{ image_index }}/top/{{ result.roi_image_path.name }}"
                                             style="border: 2px solid black;"
                                     />
                                 </td>

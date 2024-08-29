@@ -10,6 +10,7 @@ from src.definitions.util import BoxBounds, FormField, TextField, CheckboxMultiF
 from .util import sanitize_filename, OcrResult, CheckboxResult, FieldResult
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
+CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than X% white
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +41,19 @@ def process_text_field(working_dir: Path, aligned_image: np.array, field: TextFi
     logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
     if (white_pixels / total_pixels) > OCR_WHITE_PIXEL_THRESHOLD:
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
-        return OcrResult(field_name=field.name, roi_image_path=roi_image_path, extracted_text='')
+        return OcrResult(field_name=field.name, field=field, roi_image_path=roi_image_path, extracted_text='')
 
     # Attempt OCR on the image
     ocr_string = pytesseract.image_to_string(updated_roi, lang='eng', config=f'--psm {field.segment_option}')
 
     # Post-processing on the returned string
 
-    return OcrResult(field_name=field.name, roi_image_path=roi_image_path, extracted_text=ocr_string.strip())
+    return OcrResult(
+        field_name=field.name,
+        field=field,
+        roi_image_path=roi_image_path,
+        extracted_text=ocr_string.strip(),
+    )
 
 
 def process_checkbox_field(working_dir: Path, aligned_image: np.array, field: CheckboxMultiField) -> CheckboxResult:
@@ -59,10 +65,8 @@ def process_checkbox_field(working_dir: Path, aligned_image: np.array, field: Ch
     cv2.imwrite(str(visual_region_image_path), visual_region)
 
     # Check each option in the field
-    selected_option: str | None = None
+    selected_options: list[str] = []
     for option in field.options:
-        logger.info(f'Checking: {option.name}')
-
         option_roi = snip_roi_image(aligned_image, option.region)
         roi_pixels = option.region.height * option.region.width
 
@@ -72,16 +76,17 @@ def process_checkbox_field(working_dir: Path, aligned_image: np.array, field: Ch
         logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
 
         # Check if there are enough black pixels to confirm a selection
-        if white_pixels != roi_pixels:
-            selected_option = option.name
+        if (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD:
+            logger.info(f'Found selected checkbox: {option.name}')
 
             # TODO: Do OCR if the selected option has a text region
-            break
+            selected_options.append(option.name)
 
     return CheckboxResult(
         field_name=field.name,
+        field=field,
         roi_image_path=visual_region_image_path,
-        selected_option=selected_option,
+        selected_options=selected_options,
     )
 
 

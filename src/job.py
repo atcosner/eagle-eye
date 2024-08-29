@@ -12,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 from .definitions.ornithology_form import TOP_HALF_FIELDS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
-from .util import FieldResult
+from .util import FieldResult, CheckboxResult
 
 logger = logging.getLogger(__name__)
 
@@ -156,21 +156,18 @@ class Job:
 
         self._change_state(JobState.FILES_SUBMITTED)
 
-    def update_results(self, image_id: int, web_form_dict: dict[str, str]) -> None:
+    def update_results(self, image_id: int, web_form_dict: dict[str, str | list[str]]) -> None:
         results = self.ocr_results[image_id]
+        for result in results:
+            if result.field_name in web_form_dict:
+                # Try to see if this key is a list
+                value = web_form_dict.getlist(result.field_name)
+                if len(value) == 1:
+                    value = value[0]
 
-        for key, value in web_form_dict.items():
-            # Check each result for a name match
-            matched = False
-            for result in results:
-                if result.field_name == key:
-                    result.set_correction(value)
-                    matched = True
-                    break
-
-            # Report on match failures
-            if not matched:
-                logger.warning(f'Did not find a match for form element: {key}')
+                result.set_correction(value)
+            else:
+                result.handle_no_correction()
 
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)

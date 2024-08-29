@@ -156,18 +156,15 @@ class Job:
 
         self._change_state(JobState.FILES_SUBMITTED)
 
-    def update_results(self, result_id: int, web_form_dict: dict[str, str]) -> None:
-        results = self.ocr_results[result_id]
+    def update_results(self, image_id: int, web_form_dict: dict[str, str]) -> None:
+        results = self.ocr_results[image_id]
 
         for key, value in web_form_dict.items():
-            # Check each OCR result for a name match
+            # Check each result for a name match
             matched = False
             for result in results:
-                if result.field.name == key:
-                    # Add user corrections only if the text differs
-                    if result.extracted_text != value:
-                        result.user_corrected_text = value
-
+                if result.field_name == key:
+                    result.set_correction(value)
                     matched = True
                     break
 
@@ -177,10 +174,9 @@ class Job:
 
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)
-        for image_result in self.ocr_results:
-            for ocr_result in image_result:
-                text = ocr_result.user_corrected_text if ocr_result.user_corrected_text else ocr_result.extracted_text
-                fields_dict[ocr_result.field.name].append(text)
+        for image_id, image_results in self.ocr_results.items():
+            for result in image_results:
+                fields_dict[result.field_name].append(result.get_text())
 
         return pd.DataFrame(fields_dict)
 

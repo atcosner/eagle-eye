@@ -38,6 +38,10 @@ class OcrResult:
     def get_text(self) -> str:
         return self.user_correction if self.user_correction is not None else self.extracted_text
 
+    def set_correction(self, correction: str) -> None:
+        if self.extracted_text != correction:
+            self.user_correction = correction
+
     def get_html_input(self) -> str:
         return f'''
             <input type="text" name="{self.field_name}" class="corrections-box" value="{self.get_text()}"/>
@@ -56,6 +60,10 @@ class CheckboxResult:
             return self.user_correction
         else:
             return self.selected_option if self.selected_option is not None else ''
+
+    def set_correction(self, correction: str) -> None:
+        if self.selected_option != correction:
+            self.user_correction = correction
 
     def get_html_input(self) -> str:
         return f'''

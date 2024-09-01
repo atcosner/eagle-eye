@@ -1,14 +1,20 @@
-from .util import TextField, BoxBounds, CheckboxMultiField, CheckboxOptionField
+from .util import TextField, BoxBounds, CheckboxMultiField, CheckboxOptionField, CheckboxField
 
 
 TOP_HALF_FIELDS = [
+    #
     # Header
+    #
+
     TextField(name='KT Number', region=BoxBounds(x=242, y=127, width=126, height=46)),
     TextField(name='Prep Number', region=BoxBounds(x=441, y=126, width=209, height=45)),
     TextField(name='KU Number', region=BoxBounds(x=708, y=125, width=201, height=46)),
     TextField(name='OT Number', region=BoxBounds(x=966, y=125, width=221, height=46)),
 
+    #
     # Body
+    #
+
     TextField(name='Locality', region=BoxBounds(x=277, y=187, width=783, height=32)),
 
     TextField(name='Latitude', region=BoxBounds(x=237, y=223, width=235, height=32)),
@@ -65,7 +71,22 @@ TOP_HALF_FIELDS = [
     TextField(name='Tissues', region=BoxBounds(x=839, y=488, width=218, height=40)),
     TextField(name='No. Tubes', region=BoxBounds(x=1163, y=489, width=81, height=39)),
 
-    # TODO: Tissue Preservation
+    CheckboxMultiField(
+        name='Tissue Preservation',
+        visual_region=BoxBounds(x=181, y=579, width=1057, height=54),
+        options=[
+            CheckboxOptionField(name='-20 C', region=BoxBounds(x=332, y=601, width=11, height=11)),
+            CheckboxOptionField(name='-80 C', region=BoxBounds(x=427, y=601, width=11, height=11)),
+            CheckboxOptionField(name='LN2', region=BoxBounds(x=521, y=601, width=11, height=11)),
+            CheckboxOptionField(name='Ethanol', region=BoxBounds(x=603, y=601, width=11, height=11)),
+            CheckboxOptionField(name='QIAzol Lysis', region=BoxBounds(x=716, y=601, width=11, height=11)),
+            CheckboxOptionField(
+                name='Other',
+                region=BoxBounds(x=828, y=601, width=11, height=11),
+                text_region=BoxBounds(x=905, y=590, width=330, height=29),
+            ),
+        ],
+    ),
 
     TextField(name='Iris', region=BoxBounds(x=231, y=616, width=265, height=31)),
     TextField(name='Bill', region=BoxBounds(x=532, y=615, width=719, height=32)),
@@ -89,11 +110,33 @@ TOP_HALF_FIELDS = [
 
     TextField(name='Remarks', region=BoxBounds(x=290, y=860, width=961, height=32)),
 
-    # TODO: Photos
+    CheckboxMultiField(
+        name='Photos',
+        visual_region=BoxBounds(x=187, y=907, width=297, height=42),
+        options=[
+            CheckboxOptionField(name='Habitat', region=BoxBounds(x=280, y=920, width=11, height=11)),
+            CheckboxOptionField(name='Specimen', region=BoxBounds(x=335, y=921, width=11, height=11)),
+        ],
+    ),
 
-    # TODO: Audio
+    CheckboxField(
+        name='Audio',
+        region=BoxBounds(x=535, y=921, width=11, height=11),
+        visual_region=BoxBounds(x=524, y=913, width=93, height=32),
+    ),
 
-    # TODO: Parasite Presence
+    CheckboxMultiField(
+        name='Parasite Presence',
+        visual_region=BoxBounds(x=663, y=911, width=312, height=40),
+        options=[
+            CheckboxOptionField(name='70%', region=BoxBounds(x=821, y=922, width=11, height=11)),
+            CheckboxOptionField(name='95%', region=BoxBounds(x=900, y=922, width=11, height=11)),
+        ],
+    ),
 
-    # TODO: See Back
+    CheckboxField(
+        name='See Back',
+        region=BoxBounds(x=1025, y=922, width=11, height=11),
+        visual_region=BoxBounds(x=1015, y=909, width=128, height=38),
+    ),
 ]

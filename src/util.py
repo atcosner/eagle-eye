@@ -2,9 +2,9 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from .definitions.util import TextField, CheckboxMultiField
+from .definitions.util import TextField, CheckboxMultiField, CheckboxField
 
-UNSAFE_CHARACTERS = ['/', '.', ' ']
+UNSAFE_CHARACTERS = ['/', '.', ' ', '%']
 
 
 def set_up_root_logger(verbose: bool) -> None:
@@ -54,7 +54,7 @@ class OcrResult:
 
 
 @dataclass
-class CheckboxResult:
+class CheckboxMultiResult:
     field_name: str
     field: CheckboxMultiField
     roi_image_path: Path
@@ -68,7 +68,7 @@ class CheckboxResult:
             return ','.join(self.selected_options)
 
     def handle_no_correction(self) -> None:
-        # If not checkboxes are checked the form element is missing
+        # If no checkboxes are checked the form element is missing
         self.user_corrections = []
 
     def set_correction(self, correction: list[str]) -> None:
@@ -82,7 +82,6 @@ class CheckboxResult:
 
         checkboxes = []
         for option in self.field.options:
-            checkboxes.append(f'<label>{option.name}</label>')
             checkboxes.append(f'''
                 <input
                     type="checkbox"
@@ -91,8 +90,43 @@ class CheckboxResult:
                      {"checked" if option.name in valid_options else ""}
                 />
             ''')
+            checkboxes.append(f'<label>{option.name},</label>')
 
         return '\n'.join(checkboxes)
 
 
-FieldResult = OcrResult | CheckboxResult
+@dataclass
+class CheckboxResult:
+    field_name: str
+    field: CheckboxField
+    roi_image_path: Path
+    checked: bool
+    user_correction: bool | None = None
+
+    def get_value(self) -> bool:
+        return self.user_correction if self.user_correction is not None else self.checked
+
+    def get_text(self) -> str:
+        return str(self.get_value())
+
+    def handle_no_correction(self) -> None:
+        self.user_correction = False
+
+    def set_correction(self, correction: str) -> None:
+        correction_bool = correction == 'True'
+        if self.checked != correction_bool:
+            self.user_correction = correction_bool
+
+    def get_html_input(self) -> str:
+        return f'''
+            <input
+                type="checkbox"
+                name="{self.field_name}"
+                class="corrections-box"
+                value="True"
+                {"checked" if self.get_value() else ""}
+            />
+        '''
+
+
+FieldResult = OcrResult | CheckboxMultiResult | CheckboxResult

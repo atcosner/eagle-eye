@@ -12,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 from .definitions.ornithology_form import TOP_HALF_FIELDS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
-from .util import FieldResult, CheckboxResult
+from .util import FieldResult, CheckboxMultiResult
 
 logger = logging.getLogger(__name__)
 

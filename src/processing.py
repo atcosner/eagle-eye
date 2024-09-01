@@ -5,9 +5,9 @@ import numpy as np
 import pytesseract
 from pathlib import Path
 
-from src.definitions.util import BoxBounds, FormField, TextField, CheckboxMultiField
+from src.definitions.util import BoxBounds, FormField, TextField, CheckboxMultiField, CheckboxField
 
-from .util import sanitize_filename, OcrResult, CheckboxResult, FieldResult
+from .util import sanitize_filename, OcrResult, CheckboxMultiResult, FieldResult, CheckboxResult
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than X% white
@@ -15,8 +15,13 @@ CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than
 logger = logging.getLogger(__name__)
 
 
-def snip_roi_image(image: np.array, bounds: BoxBounds) -> np.array:
-    return image[bounds.y:bounds.y + bounds.height, bounds.x:bounds.x + bounds.width]
+def snip_roi_image(image: np.array, bounds: BoxBounds, save_path: Path | None = None) -> np.array:
+    roi = image[bounds.y:bounds.y + bounds.height, bounds.x:bounds.x + bounds.width]
+    if save_path is not None:
+        assert not save_path.exists(), f'Path ({save_path}) already exists!'
+        cv2.imwrite(str(save_path), roi)
+
+    return roi
 
 
 def process_text_field(working_dir: Path, aligned_image: np.array, field: TextField) -> OcrResult:
@@ -56,37 +61,49 @@ def process_text_field(working_dir: Path, aligned_image: np.array, field: TextFi
     )
 
 
-def process_checkbox_field(working_dir: Path, aligned_image: np.array, field: CheckboxMultiField) -> CheckboxResult:
-    # Snip the visual region for debugging
-    visual_region = snip_roi_image(aligned_image, field.visual_region)
+def get_checked(aligned_image: np.array, region: BoxBounds) -> bool:
+    option_roi = snip_roi_image(aligned_image, region)
+    roi_pixels = region.height * region.width
 
+    # Threshold and count the number of white pixels
+    _, threshold = cv2.threshold(option_roi, 200, 255, cv2.THRESH_BINARY)
+    white_pixels = cv2.countNonZero(threshold)
+    logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
+
+    # Check if there are enough black pixels to confirm a selection
+    return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
+
+
+def process_checkbox_multi_field(working_dir: Path, aligned_image: np.array, field: CheckboxMultiField) -> CheckboxMultiResult:
+    # Snip the visual region for debugging
     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    assert not visual_region_image_path.exists(), f'Path ({visual_region_image_path}) already exists!'
-    cv2.imwrite(str(visual_region_image_path), visual_region)
+    visual_region = snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
 
     # Check each option in the field
     selected_options: list[str] = []
     for option in field.options:
-        option_roi = snip_roi_image(aligned_image, option.region)
-        roi_pixels = option.region.height * option.region.width
-
-        # Threshold and count the number of white pixels
-        _, threshold = cv2.threshold(option_roi, 200, 255, cv2.THRESH_BINARY)
-        white_pixels = cv2.countNonZero(threshold)
-        logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
-
-        # Check if there are enough black pixels to confirm a selection
-        if (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD:
-            logger.info(f'Found selected checkbox: {option.name}')
-
+        if get_checked(aligned_image, option.region):
             # TODO: Do OCR if the selected option has a text region
             selected_options.append(option.name)
+
+    return CheckboxMultiResult(
+        field_name=field.name,
+        field=field,
+        roi_image_path=visual_region_image_path,
+        selected_options=selected_options,
+    )
+
+
+def process_checkbox_field(working_dir: Path, aligned_image: np.array, field: CheckboxField) -> CheckboxResult:
+    # Snip the visual region for debugging
+    visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+    snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
 
     return CheckboxResult(
         field_name=field.name,
         field=field,
         roi_image_path=visual_region_image_path,
-        selected_options=selected_options,
+        checked=get_checked(aligned_image, field.region),
     )
 
 
@@ -101,11 +118,14 @@ def process_fields(working_dir: Path, aligned_image_path: Path, fields: list[For
 
         if isinstance(field, TextField):
             result = process_text_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
-            results.append(result)
         elif isinstance(field, CheckboxMultiField):
+            result = process_checkbox_multi_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
+        elif isinstance(field, CheckboxField):
             result = process_checkbox_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
-            results.append(result)
         else:
             logger.warning(f'Unknown field type: {type(field)}')
+            continue
+
+        results.append(result)
 
     return results

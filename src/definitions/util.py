@@ -27,4 +27,10 @@ class CheckboxMultiField(NamedTuple):
     options: list[CheckboxOptionField]
 
 
-FormField = TextField | CheckboxMultiField
+class CheckboxField(NamedTuple):
+    name: str
+    region: BoxBounds
+    visual_region: BoxBounds
+
+
+FormField = TextField | CheckboxMultiField | CheckboxField

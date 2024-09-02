@@ -1,8 +1,8 @@
 import cv2
 import logging
-
 import numpy as np
 import pytesseract
+from google.cloud import vision
 from pathlib import Path
 
 from src.definitions.util import BoxBounds, FormField, TextField, CheckboxMultiField, CheckboxField
@@ -13,6 +13,7 @@ OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than X% white
 
 logger = logging.getLogger(__name__)
+client = vision.ImageAnnotatorClient()
 
 
 def snip_roi_image(image: np.array, bounds: BoxBounds, save_path: Path | None = None) -> np.array:
@@ -49,7 +50,21 @@ def process_text_field(working_dir: Path, aligned_image: np.array, field: TextFi
         return OcrResult(field_name=field.name, field=field, roi_image_path=roi_image_path, extracted_text='')
 
     # Attempt OCR on the image
-    ocr_string = pytesseract.image_to_string(updated_roi, lang='eng', config=f'--psm {field.segment_option}')
+
+    # Google Vision API
+    with roi_image_path.open("rb") as image_file:
+        content = image_file.read()
+    image = vision.Image(content=content)
+    response = client.text_detection(image=image)
+    ocr_string = ''
+    for text in response.text_annotations:
+        if len(text.description) > len(ocr_string):
+            ocr_string = text.description
+    ocr_string = ocr_string.strip().replace('\n', ' ')
+    logger.info(f'Detected: "{ocr_string}"')
+
+    # # Tesseract
+    # ocr_string = pytesseract.image_to_string(updated_roi, lang='eng', config=f'--psm {field.segment_option}')
 
     # Post-processing on the returned string
 

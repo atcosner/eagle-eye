@@ -42,8 +42,7 @@ def rotate_image(image: np.array, degrees: int) -> np.array:
 
 
 def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMark]]:
-    found_marks = []
-    used_rotation = 0
+    found_marks: dict[int, list[AlignmentMark]] = {}
     for attempt_degrees in ROTATION_ATTEMPTS:
         logger.info(f'Trying {attempt_degrees} degree rotation')
 
@@ -67,26 +66,28 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
             color_ratio = white_pixels / (height * width)
 
             # Check that the mark is mostly square and contains almost all black pixels
-            if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
+            if (0.9 < side_ratio < 1.1) and (color_ratio < 0.4):
                 marks.append(AlignmentMark(x, y, height, width))
 
         logger.info(f'Found {len(marks)} marks')
+        found_marks[attempt_degrees] = marks
 
-        # Look to see if we found 8 qualifying marks
-        if len(marks) == 8:
-            found_marks = marks
-            used_rotation = attempt_degrees
-            break
+    # Choose the angle that gave us the most alignment marks
+    marks_by_angle = sorted([(key, len(value) for key, value in found_marks.items())], key=lambda x: x[1])
+    best_rotation, marks = marks_by_angle[-1]
 
-    if not found_marks:
+    # TODO: Require at least X marks to continue
+    if not marks:
         raise RuntimeError('Failed to detect alignment marks')
 
+    logger.info(f'Using a rotation of {best_rotation} degrees found our max of {len(marks)} alignment marks')
+
     # Order the marks in left-to-right and top-to-bottom order
-    marks_x_sort = sorted(found_marks, key=lambda m: m.x)
+    marks_x_sort = sorted(marks, key=lambda m: m.x)
     sorted_marks = sorted(marks_x_sort[:4], key=lambda m: m.y) + sorted(marks_x_sort[4:], key=lambda m: m.y)
 
     # Rotate the image and return the alignment marks
-    rotated_image = rotate_image(image, used_rotation)
+    rotated_image = rotate_image(image, best_rotation)
     return rotated_image, sorted_marks
 
 

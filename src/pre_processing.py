@@ -42,7 +42,7 @@ def rotate_image(image: np.array, degrees: int) -> np.array:
 
 
 def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMark]]:
-    found_marks: dict[int, list[AlignmentMark]] = {}
+    found_marks: tuple[int, list[AlignmentMark]] | None = None
     for attempt_degrees in ROTATION_ATTEMPTS:
         logger.info(f'Trying {attempt_degrees} degree rotation')
 
@@ -66,21 +66,20 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
             color_ratio = white_pixels / (height * width)
 
             # Check that the mark is mostly square and contains almost all black pixels
-            if (0.9 < side_ratio < 1.1) and (color_ratio < 0.4):
+            if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
                 marks.append(AlignmentMark(x, y, height, width))
 
         logger.info(f'Found {len(marks)} marks')
-        found_marks[attempt_degrees] = marks
-
-    # Choose the angle that gave us the most alignment marks
-    marks_by_angle = sorted([(key, len(value) for key, value in found_marks.items())], key=lambda x: x[1])
-    best_rotation, marks = marks_by_angle[-1]
+        if len(marks) == 16:
+            found_marks = (attempt_degrees, marks)
+            break
 
     # TODO: Require at least X marks to continue
-    if not marks:
+    if found_marks is None:
         raise RuntimeError('Failed to detect alignment marks')
 
-    logger.info(f'Using a rotation of {best_rotation} degrees found our max of {len(marks)} alignment marks')
+    best_rotation, marks = found_marks
+    logger.info(f'Using a rotation of {best_rotation} degrees found {len(marks)} alignment marks')
 
     # Order the marks in left-to-right and top-to-bottom order
     marks_x_sort = sorted(marks, key=lambda m: m.x)

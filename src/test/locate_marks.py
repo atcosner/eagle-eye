@@ -12,6 +12,7 @@ def locate_alignment_marks(test_image) -> None:
     cv2.waitKey(0)
 
     contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    matched = 0
     for c in contours:
         x, y, width, height = cv2.boundingRect(c)
         side_ratio = height / width
@@ -24,7 +25,9 @@ def locate_alignment_marks(test_image) -> None:
             print(f'{side_ratio:.2f} | {color_ratio:.2f}')
             # print(contour_roi)
             cv2.rectangle(test_image, (x, y), (x + width, y + height), (36, 255, 12), 3)
+            matched += 1
 
+    print(matched)
     cv2.imshow('Contours', imutils.resize(test_image, width=500))
     cv2.waitKey(0)
 
@@ -38,5 +41,5 @@ def locate_alignment_marks(test_image) -> None:
 if __name__ == '__main__':
     resource_path = Path.cwd() / '..' / '..' / 'forms'
 
-    test_img = cv2.imread(str(resource_path / 'production' / 'kt_field_form_v8.png'))
+    test_img = cv2.imread(str(resource_path / 'dev' / 'test_form__blank_big.jpg'))
     locate_alignment_marks(test_img)

@@ -2,7 +2,6 @@ from typing import NamedTuple
 
 
 class BoxBounds(NamedTuple):
-    # Top Left Coordinate
     x: int
     y: int
     width: int
@@ -12,7 +11,18 @@ class BoxBounds(NamedTuple):
 class TextField(NamedTuple):
     name: str
     region: BoxBounds
-    segment_option: str = '7'  # Specific to Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html#page-segmentation-method)
+
+
+class MultilineTextField(NamedTuple):
+    name: str
+    regions: list[BoxBounds]
+
+
+class TextFieldOrCheckbox(NamedTuple):
+    name: str
+    visual_region: BoxBounds
+    text_region: BoxBounds
+    checkbox_region: BoxBounds
 
 
 class CheckboxOptionField(NamedTuple):
@@ -21,7 +31,7 @@ class CheckboxOptionField(NamedTuple):
     text_region: BoxBounds | None = None
 
 
-class CheckboxMultiField(NamedTuple):
+class MultiCheckboxField(NamedTuple):
     name: str
     visual_region: BoxBounds
     options: list[CheckboxOptionField]
@@ -33,4 +43,4 @@ class CheckboxField(NamedTuple):
     visual_region: BoxBounds
 
 
-FormField = TextField | CheckboxMultiField | CheckboxField
+FormField = TextField | MultilineTextField | TextFieldOrCheckbox | MultiCheckboxField | CheckboxField

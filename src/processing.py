@@ -1,11 +1,10 @@
 import cv2
 import logging
 import numpy as np
-import pytesseract
 from google.cloud import vision
 from pathlib import Path
 
-from src.definitions.util import BoxBounds, FormField, TextField, CheckboxMultiField, CheckboxField
+from src.definitions.util import BoxBounds, FormField, TextField, MultiCheckboxField, CheckboxField
 
 from .util import sanitize_filename, OcrResult, CheckboxMultiResult, FieldResult, CheckboxResult
 
@@ -31,8 +30,6 @@ def process_text_field(working_dir: Path, aligned_image: np.array, field: TextFi
     total_pixels = field.region.height * field.region.width
 
     # Apply pre-processing to the ROI
-    # updated_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-    # updated_roi = cv2.GaussianBlur(updated_roi, (3, 3), 0)
     updated_roi = cv2.copyMakeBorder(roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
 
     # Save the image off for further analysis
@@ -63,9 +60,6 @@ def process_text_field(working_dir: Path, aligned_image: np.array, field: TextFi
     ocr_string = ocr_string.strip().replace('\n', ' ')
     logger.info(f'Detected: "{ocr_string}"')
 
-    # # Tesseract
-    # ocr_string = pytesseract.image_to_string(updated_roi, lang='eng', config=f'--psm {field.segment_option}')
-
     # Post-processing on the returned string
 
     return OcrResult(
@@ -89,10 +83,10 @@ def get_checked(aligned_image: np.array, region: BoxBounds) -> bool:
     return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
 
 
-def process_checkbox_multi_field(working_dir: Path, aligned_image: np.array, field: CheckboxMultiField) -> CheckboxMultiResult:
+def process_checkbox_multi_field(working_dir: Path, aligned_image: np.array, field: MultiCheckboxField) -> CheckboxMultiResult:
     # Snip the visual region for debugging
     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    visual_region = snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
+    snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
 
     # Check each option in the field
     selected_options: list[str] = []
@@ -133,7 +127,7 @@ def process_fields(working_dir: Path, aligned_image_path: Path, fields: list[For
 
         if isinstance(field, TextField):
             result = process_text_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
-        elif isinstance(field, CheckboxMultiField):
+        elif isinstance(field, MultiCheckboxField):
             result = process_checkbox_multi_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
         elif isinstance(field, CheckboxField):
             result = process_checkbox_field(working_dir=working_dir, aligned_image=aligned_image, field=field)

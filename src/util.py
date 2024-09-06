@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-from .definitions.util import TextField, CheckboxMultiField, CheckboxField
+from .definitions.util import TextField, MultiCheckboxField, CheckboxField
 
 UNSAFE_CHARACTERS = ['/', '.', ' ', '%']
 
@@ -56,7 +56,7 @@ class OcrResult:
 @dataclass
 class CheckboxMultiResult:
     field_name: str
-    field: CheckboxMultiField
+    field: MultiCheckboxField
     roi_image_path: Path
     selected_options: list[str]
     user_corrections: list[str] | None = None

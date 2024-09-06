@@ -1,4 +1,12 @@
-from .util import TextField, BoxBounds, CheckboxMultiField, CheckboxOptionField, CheckboxField
+from .util import (
+    TextField,
+    BoxBounds,
+    MultiCheckboxField,
+    CheckboxOptionField,
+    CheckboxField,
+    MultilineTextField,
+    TextFieldOrCheckbox,
+)
 
 
 TOP_HALF_FIELDS = [
@@ -6,137 +14,191 @@ TOP_HALF_FIELDS = [
     # Header
     #
 
-    TextField(name='KT Number', region=BoxBounds(x=242, y=127, width=126, height=46)),
-    TextField(name='Prep Number', region=BoxBounds(x=441, y=126, width=209, height=45)),
-    TextField(name='KU Number', region=BoxBounds(x=708, y=125, width=201, height=46)),
-    TextField(name='OT Number', region=BoxBounds(x=966, y=125, width=221, height=46)),
+    TextField(name='KT Number', region=BoxBounds(x=248, y=120, width=120, height=44)),
+    TextField(name='Prep Number', region=BoxBounds(x=441, y=120, width=207, height=46)),
+    TextField(name='KU Number', region=BoxBounds(x=707, y=120, width=207, height=46)),
+    TextField(name='OT Number', region=BoxBounds(x=972, y=120, width=215, height=46)),
 
     #
     # Body
     #
 
-    TextField(name='Locality', region=BoxBounds(x=277, y=187, width=783, height=32)),
+    TextField(name='Locality', region=BoxBounds(x=249, y=183, width=992, height=39)),
 
-    TextField(name='Latitude', region=BoxBounds(x=237, y=223, width=235, height=32)),
-    TextField(name='Longitude', region=BoxBounds(x=534, y=221, width=235, height=34)),
-    TextField(name='Source', region=BoxBounds(x=846, y=222, width=198, height=33)),
-    TextField(name='Error (m)', region=BoxBounds(x=1139, y=221, width=117, height=34)),
+    TextField(name='Latitude', region=BoxBounds(x=210, y=227, width=250, height=31)),
+    TextField(name='Longitude', region=BoxBounds(x=511, y=225, width=253, height=33)),
+    TextField(name='GPS Waypoint', region=BoxBounds(x=860, y=224, width=164, height=34)),
+    TextField(name='Error (m)', region=BoxBounds(x=1120, y=225, width=108, height=33)),
 
-    TextField(name='Species', region=BoxBounds(x=281, y=259, width=672, height=33)),
-    TextField(name='GPS Waypoint', region=BoxBounds(x=1049, y=259, width=202, height=33)),
+    TextField(name='Species', region=BoxBounds(x=253, y=262, width=594, height=33)),
+    TextField(name='Coordinate Source', region=BoxBounds(x=997, y=262, width=235, height=33)),
 
-    TextField(name='Habitat', region=BoxBounds(x=242, y=295, width=1028, height=34)),
+    TextField(name='Collection Date', region=BoxBounds(x=274, y=300, width=411, height=32)),
+    TextField(name='Collector', region=BoxBounds(x=790, y=299, width=435, height=33)),
 
-    TextField(name='Collection Date', region=BoxBounds(x=296, y=332, width=423, height=33)),
-    TextField(name='Collector', region=BoxBounds(x=817, y=332, width=443, height=33)),
+    TextField(name='Habitat', region=BoxBounds(x=217, y=336, width=1012, height=32)),
 
-    TextField(name='Prep Date', region=BoxBounds(x=305, y=369, width=411, height=33)),
-    TextField(name='Preparator', region=BoxBounds(x=830, y=369, width=428, height=33)),
-
-    CheckboxMultiField(
+    MultiCheckboxField(
         name='Collection Method',
-        visual_region=BoxBounds(x=187, y=406, width=1056, height=49),
+        visual_region=BoxBounds(x=163, y=376, width=1061, height=35),
         options=[
-            CheckboxOptionField(name='Shot', region=BoxBounds(x=337, y=427, width=11, height=11)),
-            CheckboxOptionField(name='Net/Trap', region=BoxBounds(x=413, y=427, width=11, height=11)),
-            CheckboxOptionField(name='Salvage', region=BoxBounds(x=535, y=427, width=11, height=11)),
-            CheckboxOptionField(name='Unknown', region=BoxBounds(x=646, y=427, width=11, height=11)),
+            CheckboxOptionField(name='Shot', region=BoxBounds(x=308, y=387, width=13, height=13)),
+            CheckboxOptionField(name='Net/Trap', region=BoxBounds(x=391, y=387, width=13, height=13)),
+            CheckboxOptionField(name='Salvage', region=BoxBounds(x=520, y=387, width=13, height=13)),
+            CheckboxOptionField(name='Unknown', region=BoxBounds(x=637, y=387, width=13, height=13)),
             CheckboxOptionField(
                 name='Other',
-                region=BoxBounds(x=723, y=427, width=11, height=11),
-                text_region=BoxBounds(x=799, y=408, width=443, height=37),
+                region=BoxBounds(x=720, y=387, width=13, height=13),
+                text_region=BoxBounds(x=801, y=372, width=420, height=34),
             ),
         ],
     ),
 
-    CheckboxMultiField(
-        name='Preps',
-        visual_region=BoxBounds(x=187, y=460, width=1055, height=48),
+    TextFieldOrCheckbox(
+        name='Iris',
+        visual_region=BoxBounds(x=157, y=413, width=379, height=40),
+        text_region=BoxBounds(x=287, y=411, width=247, height=32),
+        checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
+    ),
+    TextField(name='Bill', region=BoxBounds(x=577, y=412, width=648, height=31)),
+
+    TextField(name='Feet/Legs', region=BoxBounds(x=242, y=450, width=726, height=30)),
+    TextField(name='Weight (g)', region=BoxBounds(x=1035, y=447, width=190, height=33)),
+
+    MultiCheckboxField(
+        name='Tissue Date',
+        visual_region=BoxBounds(x=160, y=488, width=283, height=35),
         options=[
-            CheckboxOptionField(name='Round Skin', region=BoxBounds(x=269, y=469, width=11, height=11)),
-            CheckboxOptionField(name='Skeleton', region=BoxBounds(x=406, y=469, width=11, height=11)),
-            CheckboxOptionField(name='Partial Skeleton', region=BoxBounds(x=523, y=469, width=11, height=11)),
-            CheckboxOptionField(name='Wingspread', region=BoxBounds(x=666, y=469, width=11, height=11)),
-            CheckboxOptionField(name='Alcohol', region=BoxBounds(x=814, y=469, width=11, height=11)),
-            CheckboxOptionField(
-                name='Other',
-                region=BoxBounds(x=884, y=469, width=11, height=11),
-                text_region=BoxBounds(x=960, y=449, width=284, height=38),
-            ),
+            CheckboxOptionField(name='Collection', region=BoxBounds(x=280, y=498, width=13, height=13)),
+            CheckboxOptionField(name='Preparation', region=BoxBounds(x=360, y=498, width=13, height=13)),
         ],
     ),
+    TextField(name='Time of Death', region=BoxBounds(x=637, y=484, width=161, height=33)),
+    TextFieldOrCheckbox(
+        name='Time of Tissue Preservation',
+        visual_region=BoxBounds(x=797, y=485, width=423, height=40),
+        text_region=BoxBounds(x=988, y=468, width=154, height=31),
+        checkbox_region=BoxBounds(x=1150, y=498, width=13, height=13),
+    ),
 
-    # TODO: Tissue Date
-
-    TextField(name='Tissues', region=BoxBounds(x=839, y=488, width=218, height=40)),
-    TextField(name='No. Tubes', region=BoxBounds(x=1163, y=489, width=81, height=39)),
-
-    CheckboxMultiField(
+    TextField(name='Tissues', region=BoxBounds(x=251, y=520, width=147, height=35)),
+    TextField(name='No. Tubes', region=BoxBounds(x=509, y=523, width=56, height=32)),
+    MultiCheckboxField(
         name='Tissue Preservation',
-        visual_region=BoxBounds(x=181, y=579, width=1057, height=54),
+        visual_region=BoxBounds(x=569, y=527, width=669, height=33),
         options=[
-            CheckboxOptionField(name='-20 C', region=BoxBounds(x=332, y=601, width=11, height=11)),
-            CheckboxOptionField(name='-80 C', region=BoxBounds(x=427, y=601, width=11, height=11)),
-            CheckboxOptionField(name='LN2', region=BoxBounds(x=521, y=601, width=11, height=11)),
-            CheckboxOptionField(name='Ethanol', region=BoxBounds(x=603, y=601, width=11, height=11)),
-            CheckboxOptionField(name='QIAzol Lysis', region=BoxBounds(x=716, y=601, width=11, height=11)),
+            CheckboxOptionField(name='-20 C', region=BoxBounds(x=693, y=536, width=13, height=13)),
+            CheckboxOptionField(name='-80 C', region=BoxBounds(x=791, y=536, width=13, height=13)),
+            CheckboxOptionField(name='LN2', region=BoxBounds(x=889, y=536, width=13, height=13)),
+            CheckboxOptionField(name='Ethanol', region=BoxBounds(x=970, y=536, width=13, height=13)),
             CheckboxOptionField(
                 name='Other',
-                region=BoxBounds(x=828, y=601, width=11, height=11),
-                text_region=BoxBounds(x=905, y=590, width=330, height=29),
+                region=BoxBounds(x=1065, y=536, width=13, height=13),
+                text_region=BoxBounds(x=1145, y=526, width=84, height=29),
             ),
         ],
     ),
 
-    TextField(name='Iris', region=BoxBounds(x=231, y=616, width=265, height=31)),
-    TextField(name='Bill', region=BoxBounds(x=532, y=615, width=719, height=32)),
+    TextField(name='Prep Date', region=BoxBounds(x=279, y=560, width=378, height=32)),
+    TextField(name='Preparator', region=BoxBounds(x=776, y=562, width=451, height=30)),
 
-    TextField(name='Feet/Legs', region=BoxBounds(x=269, y=650, width=483, height=31)),
-    TextField(name='Weight (g)', region=BoxBounds(x=817, y=650, width=163, height=31)),
-    TextField(name='Age', region=BoxBounds(x=1030, y=650, width=103, height=31)),
-    TextField(name='Sex', region=BoxBounds(x=1178, y=650, width=75, height=31)),
-
-    TextField(name='Molt', region=BoxBounds(x=243, y=685, width=1017, height=30)),
-
-    TextField(name='Gonads', region=BoxBounds(x=280, y=718, width=970, height=30)),
-
-    TextField(name='Skull', region=BoxBounds(x=249, y=752, width=300, height=30)),
-    TextField(name='Fat', region=BoxBounds(x=591, y=752, width=276, height=30)),
-    TextField(name='Bursa', region=BoxBounds(x=932, y=752, width=330, height=30)),
-
-    TextField(name='Stomach', region=BoxBounds(x=259, y=786, width=994, height=30)),
-
-    # TODO: Parasites
-
-    TextField(name='Remarks', region=BoxBounds(x=290, y=860, width=961, height=32)),
-
-    CheckboxMultiField(
-        name='Photos',
-        visual_region=BoxBounds(x=187, y=907, width=297, height=42),
+    MultiCheckboxField(
+        name='Preps',
+        visual_region=BoxBounds(x=158, y=600, width=1077, height=36),
         options=[
-            CheckboxOptionField(name='Habitat', region=BoxBounds(x=280, y=920, width=11, height=11)),
-            CheckboxOptionField(name='Specimen', region=BoxBounds(x=335, y=921, width=11, height=11)),
+            CheckboxOptionField(name='Round Skin', region=BoxBounds(x=242, y=610, width=13, height=13)),
+            CheckboxOptionField(name='Skeleton', region=BoxBounds(x=385, y=610, width=13, height=13)),
+            CheckboxOptionField(name='Partial Skeleton', region=BoxBounds(x=508, y=610, width=13, height=13)),
+            CheckboxOptionField(name='Wingspread', region=BoxBounds(x=657, y=610, width=13, height=13)),
+            CheckboxOptionField(name='Alcohol', region=BoxBounds(x=811, y=610, width=13, height=13)),
+            CheckboxOptionField(
+                name='Other',
+                region=BoxBounds(x=887, y=610, width=13, height=13),
+                text_region=BoxBounds(x=971, y=597, width=258, height=32),
+            ),
         ],
     ),
 
-    CheckboxField(
-        name='Audio',
-        region=BoxBounds(x=535, y=921, width=11, height=11),
-        visual_region=BoxBounds(x=524, y=913, width=93, height=32),
-    ),
+    TextField(name='Molt', region=BoxBounds(x=220, y=634, width=1004, height=32)),
 
-    CheckboxMultiField(
-        name='Parasite Presence',
-        visual_region=BoxBounds(x=663, y=911, width=312, height=40),
+    TextField(name='Gonads', region=BoxBounds(x=255, y=671, width=967, height=31)),
+
+    TextField(name='Skull', region=BoxBounds(x=222, y=706, width=257, height=34)),
+    MultiCheckboxField(
+        name='Fat',
+        visual_region=BoxBounds(x=479, y=706, width=384, height=41),
         options=[
-            CheckboxOptionField(name='70%', region=BoxBounds(x=821, y=922, width=11, height=11)),
-            CheckboxOptionField(name='95%', region=BoxBounds(x=900, y=922, width=11, height=11)),
+            CheckboxOptionField(name='None', region=BoxBounds(x=536, y=721, width=13, height=13)),
+            CheckboxOptionField(name='Light', region=BoxBounds(x=599, y=721, width=13, height=13)),
+            CheckboxOptionField(name='Medium', region=BoxBounds(x=658, y=721, width=13, height=13)),
+            CheckboxOptionField(name='Heavy', region=BoxBounds(x=724, y=721, width=13, height=13)),
+            CheckboxOptionField(name='Very Heavy', region=BoxBounds(x=787, y=721, width=13, height=13)),
+        ],
+    ),
+    TextField(name='Bursa', region=BoxBounds(x=980, y=709, width=243, height=31)),
+
+    TextField(name='Stomach', region=BoxBounds(x=232, y=745, width=992, height=32)),
+
+    MultiCheckboxField(
+        name='Sex',
+        visual_region=BoxBounds(x=162, y=786, width=329, height=31),
+        options=[
+            CheckboxOptionField(name='Female', region=BoxBounds(x=222, y=795, width=13, height=13)),
+            CheckboxOptionField(name='Male', region=BoxBounds(x=329, y=795, width=13, height=13)),
+            CheckboxOptionField(name='Unknown', region=BoxBounds(x=418, y=795, width=13, height=13)),
+        ],
+    ),
+    TextField(name='Age', region=BoxBounds(x=579, y=783, width=315, height=31)),
+    MultiCheckboxField(
+        name='Parasites Collected',
+        visual_region=BoxBounds(x=895, y=787, width=333, height=29),
+        options=[
+            CheckboxOptionField(name='Ecto', region=BoxBounds(x=1054, y=795, width=13, height=13)),
+            CheckboxOptionField(name='Endo', region=BoxBounds(x=1143, y=795, width=13, height=13)),
         ],
     ),
 
+    MultilineTextField(
+        name='Remarks',
+        regions=[
+            BoxBounds(x=265, y=816, width=962, height=35),
+            BoxBounds(x=162, y=856, width=937, height=32)
+        ],
+    ),
     CheckboxField(
         name='See Back',
-        region=BoxBounds(x=1025, y=922, width=11, height=11),
-        visual_region=BoxBounds(x=1015, y=909, width=128, height=38),
+        region=BoxBounds(x=1104, y=869, width=13, height=13),
+        visual_region=BoxBounds(x=1095, y=855, width=133, height=40),
+    ),
+
+    MultiCheckboxField(
+        name='Photos',
+        visual_region=BoxBounds(x=162, y=898, width=259, height=35),
+        options=[
+            CheckboxOptionField(name='Habitat', region=BoxBounds(x=253, y=907, width=13, height=13)),
+            CheckboxOptionField(name='Specimen', region=BoxBounds(x=334, y=907, width=13, height=13)),
+        ],
+    ),
+    CheckboxField(
+        name='Audio',
+        region=BoxBounds(x=479, y=907, width=13, height=13),
+        visual_region=BoxBounds(x=471, y=899, width=93, height=30),
+    ),
+    MultiCheckboxField(
+        name='Parasite Presence',
+        visual_region=BoxBounds(x=612, y=897, width=408, height=33),
+        options=[
+            CheckboxOptionField(name='70%', region=BoxBounds(x=773, y=907, width=13, height=13)),
+            CheckboxOptionField(name='80%', region=BoxBounds(x=858, y=907, width=13, height=13)),
+            CheckboxOptionField(name='95%', region=BoxBounds(x=944, y=907, width=13, height=13)),
+        ],
+    ),
+    CheckboxField(
+        name='Washed',
+        region=BoxBounds(x=1076, y=907, width=13, height=13),
+        visual_region=BoxBounds(x=1067, y=898, width=119, height=31),
     ),
 ]
+
+BOTTOM_HALF_Y_OFFSET = 0
+# TODO: Construct the bottom half from the top half + a Y coordinate offset

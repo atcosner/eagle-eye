@@ -16,6 +16,8 @@ from .definitions.results import FieldResult
 
 logger = logging.getLogger(__name__)
 
+RegionResults = dict[str, list[FieldResult]]
+
 
 class JobState(Enum):
     CREATED = auto()
@@ -56,7 +58,7 @@ class Job:
         self.reference_path: Path = reference_image_path
         self.submitted_images: dict[int, Path] = {}
         self.alignment_results: dict[int, AlignmentResult] = {}
-        self.ocr_results: dict[int, list[FieldResult]] = defaultdict(list)
+        self.ocr_results: dict[int, RegionResults] = defaultdict(lambda: defaultdict(list))
 
         # Create a working directory for ourselves
         self.working_dir: Path = parent_directory / str(job_id)
@@ -118,12 +120,6 @@ class Job:
             case _:
                 logger.warning(f'Unknown state: {current_state}')
 
-    def num_images(self) -> int:
-        return len(self.submitted_images)
-
-    def num_results(self) -> int:
-        return len(self.ocr_results)
-
     def save_files(self, files: list[FileStorage]) -> None:
         idx = 0
         for file in files:
@@ -157,23 +153,24 @@ class Job:
         self._change_state(JobState.FILES_SUBMITTED)
 
     def update_results(self, image_id: int, web_form_dict: dict[str, str | list[str]]) -> None:
-        results = self.ocr_results[image_id]
-        for result in results:
-            if result.field_name in web_form_dict:
-                # Try to see if this key is a list
-                value = web_form_dict.getlist(result.field_name)
-                if len(value) == 1:
-                    value = value[0]
+        for page_region, region_results in self.ocr_results[image_id].items():
+            for result in region_results:
+                if result.get_html_form_name() in web_form_dict:
+                    # Try to see if this key is a list
+                    value = web_form_dict.getlist(result.get_html_form_name())
+                    if len(value) == 1:
+                        value = value[0]
 
-                result.set_correction(value)
-            else:
-                result.handle_no_correction()
+                    result.set_correction(value)
+                else:
+                    result.handle_no_correction()
 
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)
         for image_id, image_results in self.ocr_results.items():
-            for result in image_results:
-                fields_dict[result.field_name].append(result.get_text())
+            for _, results in image_results.items():
+                for result in results:
+                    fields_dict[result.field_name].append(result.get_text())
 
         return pd.DataFrame(fields_dict)
 
@@ -203,20 +200,20 @@ class Job:
         for image_id, result in self.alignment_results.items():
             logger.info(f'Processing: {result.aligned_image_path}')
 
-            for name, fields in ALL_FIELDS.items():
+            for page_region, fields in ALL_FIELDS.items():
                 # Create a directory to store the snipped roi pictures
-                working_dir = result.aligned_image_path.parent / name
+                working_dir = result.aligned_image_path.parent / page_region
                 working_dir.mkdir()
-                logger.info(f'Processing "{name}": {working_dir}')
+                logger.info(f'Processing "{page_region}": {working_dir}')
 
                 try:
                     results = process_fields(
                         working_dir=working_dir,
                         aligned_image_path=result.aligned_image_path,
-                        page_region=name,
+                        page_region=page_region,
                         fields=fields,
                     )
-                    self.ocr_results[image_id].extend(results)
+                    self.ocr_results[image_id][page_region].extend(results)
                 except Exception as e:
                     self._record_exception(e)
                     break

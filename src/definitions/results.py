@@ -10,6 +10,9 @@ class BaseResult:
     page_region: str
     roi_image_path: Path
 
+    def get_html_form_name(self) -> str:
+        return f'{self.page_region}-{self.field_name}'
+
 
 @dataclass
 class TextResult(BaseResult):
@@ -28,7 +31,7 @@ class TextResult(BaseResult):
 
     def get_html_input(self) -> str:
         return f'''
-            <input type="text" name="{self.field_name}" class="corrections-box" value="{self.text}"/>
+            <input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>
         '''
 
 
@@ -53,7 +56,7 @@ class CheckboxMultiResult(BaseResult):
             checkboxes.append(f'''
                 <input
                     type="checkbox"
-                    name="{self.field_name}"
+                    name="{self.get_html_form_name()}"
                     value="{option.name}"
                      {"checked" if option.name in self.selected_options else ""}
                 />
@@ -81,7 +84,7 @@ class CheckboxResult(BaseResult):
         return f'''
             <input
                 type="checkbox"
-                name="{self.field_name}"
+                name="{self.get_html_form_name()}"
                 class="corrections-box"
                 value="True"
                 {"checked" if self.checked else ""}
@@ -98,16 +101,15 @@ class TextOrCheckboxResult(BaseResult):
         return self.text
 
     def handle_no_correction(self) -> None:
-        # TODO
+        # Text fields always come back on HTML forms
         pass
 
     def set_correction(self, correction: str) -> None:
-        # TODO
-        pass
+        self.text = correction
 
     def get_html_input(self) -> str:
         return f'''
-            <input type="text" name="{self.field_name}" class="corrections-box" value="{self.text}"/>
+            <input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>
         '''
 
 

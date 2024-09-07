@@ -1,3 +1,12 @@
+table {
+    border: 2px solid black;
+    border-collapse: collapse;
+}
+
+td {
+    border-bottom: 2px solid black;
+}
+
 .corrections-box {
     width: 350px;
     margin-left: 10px;

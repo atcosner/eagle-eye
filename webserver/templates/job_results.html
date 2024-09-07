@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/static/css/job_results.css">
     <script>
         var CURRENT_INDEX = 0;
-        var RESULTS_COUNT = {{ results_count }};
+        var IMAGE_COUNT = {{ image_count }};
 
         function updateViewport(forward, force_id) {
             // Determine the new iterator
@@ -19,10 +19,10 @@
                 }
 
                 // Handle overflow/underflow
-                if (temp_index >= RESULTS_COUNT) {
+                if (temp_index >= IMAGE_COUNT) {
                     temp_index = 0;
                 } else if (temp_index < 0) {
-                    temp_index = RESULTS_COUNT - 1;
+                    temp_index = IMAGE_COUNT - 1;
                 }
             } else {
                 temp_index = force_id;
@@ -38,7 +38,7 @@
             // Update the image label
             var image_label = document.getElementById("image_id");
             var display_index = temp_index + 1;
-            image_label.innerHTML = display_index + " (" + display_index + "/" + RESULTS_COUNT + ")";
+            image_label.innerHTML = display_index + " (" + display_index + "/" + IMAGE_COUNT + ")";
             CURRENT_INDEX = temp_index;
         }
 
@@ -64,10 +64,10 @@
         <button onclick="updateViewport(false, null)">Previous</button>
         <button onclick="updateViewport(true, null)">Next</button>
         <h3 style="margin: 0; padding-left: 10px;">Image: </h3>
-        <h3 id="image_id" style="margin: 0; padding-left:5px;">1 (1/{{ results_count }})</h3>
+        <h3 id="image_id" style="margin: 0; padding-left:5px;">1 (1/{{ image_count }})</h3>
     </div>
 
-    {% for image_index, field_results in results.items() %}
+    {% for image_index, region_results in results.items() %}
         <div id="results-viewport-{{ image_index }}"  style="display: none;">
             <form
                     id="job-results-corrections"
@@ -75,25 +75,31 @@
                     method="post"
                     enctype="multipart/form-data"
             >
-                <table>
-                    <tr>
-                        <th>Data Field</th>
-                        <th>Extracted Text</th>
-                        <th>ROI Image</th>
-                    </tr>
-                        {% for result in field_results %}
-                            <tr>
-                                <td>{{ result.field_name }}</td>
-                                <td>{{ result.get_html_input() | safe }}</td>
-                                <td>
-                                    <img
-                                            src="/job-file/{{ job_id }}/{{ image_index }}/{{ result.page_region }}/{{ result.roi_image_path.name }}"
-                                            style="border: 2px solid black;"
-                                    />
-                                </td>
-                            </tr>
-                        {% endfor %}
-                </table>
+                {% for page_region, results in region_results.items() %}
+                    <h3>Page Region: {{ page_region.capitalize() }}</h3>
+
+                    <table>
+                        <tr>
+                            <th>Data Field</th>
+                            <th>Extracted Text</th>
+                            <th>ROI Image</th>
+                        </tr>
+                            {% for result in results %}
+                                <tr>
+                                    <td>{{ result.field_name }}</td>
+                                    <td>{{ result.get_html_input() | safe }}</td>
+                                    <td>
+                                        <img
+                                                src="/job-file/{{ job_id }}/{{ image_index }}/{{ page_region }}/{{ result.roi_image_path.name }}"
+                                                style="border: 2px solid black;"
+                                        />
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                    </table>
+
+                    <br>
+                {% endfor %}
 
                 <input type="submit" value="Submit"/>
             </form>

@@ -111,7 +111,7 @@ def job_status_results(job_id: uuid.UUID):
             'job_results.html',
             job_id=job_id,
             job_name=job.job_name,
-            results_count=len(job.ocr_results),
+            image_count=len(job.ocr_results),
             results=job.ocr_results,
         )
     else:

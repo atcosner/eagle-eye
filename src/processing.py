@@ -42,7 +42,7 @@ def ocr_text_region(image: np.array, region: BoxBounds) -> str:
             ocr_string = text.description
 
     # Clean up the string
-    ocr_string = ocr_string.strip().lower().replace('\n', ' ')
+    ocr_string = ocr_string.strip().replace('\n', ' ')
     logger.info(f'Detected: "{ocr_string}"')
     return ocr_string
 
@@ -61,8 +61,11 @@ def process_text_field(working_dir: Path, aligned_image: np.array, page_region: 
     cv2.imwrite(str(roi_image_path), updated_roi)
 
     # Threshold the image to determine if there is text in it
-    # TODO: Use the inner part of the image to remove top and bottom lines that appear after alignment
-    _, threshold = cv2.threshold(roi, 127, 255, cv2.THRESH_BINARY)
+    inner_roi = aligned_image[
+        field.region.y + (field.region.height // 10):field.region.y + field.region.height - (field.region.height // 10),
+        field.region.x:field.region.x + field.region.width
+    ]
+    _, threshold = cv2.threshold(inner_roi, 127, 255, cv2.THRESH_BINARY)
     white_pixels = cv2.countNonZero(threshold)
     logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
 

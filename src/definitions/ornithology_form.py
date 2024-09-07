@@ -1,13 +1,8 @@
 from .util import (
-    TextField,
     BoxBounds,
-    MultiCheckboxField,
-    CheckboxOptionField,
-    CheckboxField,
-    MultilineTextField,
-    TextFieldOrCheckbox,
 )
-
+from .fields import TextField, MultilineTextField, TextFieldOrCheckbox, CheckboxOptionField, MultiCheckboxField, \
+    CheckboxField
 
 TOP_HALF_FIELDS = [
     #
@@ -59,6 +54,7 @@ TOP_HALF_FIELDS = [
         visual_region=BoxBounds(x=157, y=413, width=379, height=40),
         text_region=BoxBounds(x=287, y=411, width=247, height=32),
         checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
+        checkbox_text='dark brown',
     ),
     TextField(name='Bill', region=BoxBounds(x=577, y=412, width=648, height=31)),
 
@@ -79,6 +75,7 @@ TOP_HALF_FIELDS = [
         visual_region=BoxBounds(x=797, y=485, width=423, height=40),
         text_region=BoxBounds(x=988, y=468, width=154, height=31),
         checkbox_region=BoxBounds(x=1150, y=498, width=13, height=13),
+        checkbox_text='unknown',
     ),
 
     TextField(name='Tissues', region=BoxBounds(x=251, y=520, width=147, height=35)),

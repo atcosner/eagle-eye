@@ -2,7 +2,7 @@ from .util import (
     BoxBounds,
 )
 from .fields import TextField, MultilineTextField, TextFieldOrCheckbox, CheckboxOptionField, MultiCheckboxField, \
-    CheckboxField
+    CheckboxField, create_field_with_offset
 
 TOP_HALF_FIELDS = [
     #
@@ -73,7 +73,7 @@ TOP_HALF_FIELDS = [
     TextFieldOrCheckbox(
         name='Time of Tissue Preservation',
         visual_region=BoxBounds(x=797, y=485, width=423, height=40),
-        text_region=BoxBounds(x=988, y=468, width=154, height=31),
+        text_region=BoxBounds(x=988, y=486, width=154, height=31),
         checkbox_region=BoxBounds(x=1150, y=498, width=13, height=13),
         checkbox_text='unknown',
     ),
@@ -197,5 +197,7 @@ TOP_HALF_FIELDS = [
     ),
 ]
 
-BOTTOM_HALF_Y_OFFSET = 0
-# TODO: Construct the bottom half from the top half + a Y coordinate offset
+BOTTOM_HALF_Y_OFFSET = 842
+BOTTOM_HALF_FIELDS = [create_field_with_offset(field, BOTTOM_HALF_Y_OFFSET) for field in TOP_HALF_FIELDS]
+
+ALL_FIELDS = {'top': TOP_HALF_FIELDS, 'bottom': BOTTOM_HALF_FIELDS}

@@ -47,7 +47,7 @@ def ocr_text_region(image: np.array, region: BoxBounds) -> str:
     return ocr_string
 
 
-def process_text_field(working_dir: Path, aligned_image: np.array, field: TextField) -> TextResult:
+def process_text_field(working_dir: Path, aligned_image: np.array, page_region: str, field: TextField) -> TextResult:
     # Extract the region of interest from the larger image
     roi = snip_roi_image(aligned_image, field.region)
     total_pixels = field.region.height * field.region.width
@@ -65,19 +65,20 @@ def process_text_field(working_dir: Path, aligned_image: np.array, field: TextFi
     _, threshold = cv2.threshold(roi, 127, 255, cv2.THRESH_BINARY)
     white_pixels = cv2.countNonZero(threshold)
     logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
-    if (white_pixels / total_pixels) > OCR_WHITE_PIXEL_THRESHOLD:
+
+    if (white_pixels / total_pixels) <= OCR_WHITE_PIXEL_THRESHOLD:
+        ocr_result = ocr_text_region(aligned_image, field.region)
+
+        # TODO: Result verification and correction here
+    else:
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
-        return TextResult(field_name=field.name, field=field, roi_image_path=roi_image_path, text='')
-
-    # Attempt OCR on the image
-    ocr_result = ocr_text_region(aligned_image, field.region)
-
-    # TODO: Result verification and correction here
+        ocr_result = ''
 
     return TextResult(
         field_name=field.name,
-        field=field,
+        page_region=page_region,
         roi_image_path=roi_image_path,
+        field=field,
         text=ocr_result,
     )
 
@@ -95,7 +96,12 @@ def get_checked(aligned_image: np.array, region: BoxBounds) -> bool:
     return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
 
 
-def process_checkbox_multi_field(working_dir: Path, aligned_image: np.array, field: MultiCheckboxField) -> CheckboxMultiResult:
+def process_checkbox_multi_field(
+        working_dir: Path,
+        aligned_image: np.array,
+        page_region: str,
+        field: MultiCheckboxField,
+) -> CheckboxMultiResult:
     # Snip the visual region for debugging
     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
     snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
@@ -109,26 +115,38 @@ def process_checkbox_multi_field(working_dir: Path, aligned_image: np.array, fie
 
     return CheckboxMultiResult(
         field_name=field.name,
-        field=field,
+        page_region=page_region,
         roi_image_path=visual_region_image_path,
+        field=field,
         selected_options=selected_options,
     )
 
 
-def process_checkbox_field(working_dir: Path, aligned_image: np.array, field: CheckboxField) -> CheckboxResult:
+def process_checkbox_field(
+        working_dir: Path,
+        aligned_image: np.array,
+        page_region: str,
+        field: CheckboxField,
+) -> CheckboxResult:
     # Snip the visual region for debugging
     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
     snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
 
     return CheckboxResult(
         field_name=field.name,
-        field=field,
+        page_region=page_region,
         roi_image_path=visual_region_image_path,
+        field=field,
         checked=get_checked(aligned_image, field.region),
     )
 
 
-def process_text_or_checkbox(working_dir: Path, aligned_image: np.array, field: TextFieldOrCheckbox) -> TextOrCheckboxResult:
+def process_text_or_checkbox(
+        working_dir: Path,
+        aligned_image: np.array,
+        page_region: str,
+        field: TextFieldOrCheckbox,
+) -> TextOrCheckboxResult:
     # Snip the visual region for debugging
     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
     snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
@@ -142,13 +160,14 @@ def process_text_or_checkbox(working_dir: Path, aligned_image: np.array, field: 
 
     return TextOrCheckboxResult(
         field_name=field.name,
-        field=field,
+        page_region=page_region,
         roi_image_path=visual_region_image_path,
+        field=field,
         text=text,
     )
 
 
-def process_fields(working_dir: Path, aligned_image_path: Path, fields: list[FormField]) -> list[FieldResult]:
+def process_fields(working_dir: Path, aligned_image_path: Path, page_region: str, fields: list[FormField]) -> list[FieldResult]:
     # Load the aligned image
     aligned_image = cv2.imread(str(aligned_image_path), flags=cv2.IMREAD_GRAYSCALE)
 
@@ -158,13 +177,13 @@ def process_fields(working_dir: Path, aligned_image_path: Path, fields: list[For
         logger.info(f'Processing field: {field.name}')
 
         if isinstance(field, TextField):
-            result = process_text_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
+            result = process_text_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, MultiCheckboxField):
-            result = process_checkbox_multi_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
+            result = process_checkbox_multi_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, CheckboxField):
-            result = process_checkbox_field(working_dir=working_dir, aligned_image=aligned_image, field=field)
+            result = process_checkbox_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, TextFieldOrCheckbox):
-            result = process_text_or_checkbox(working_dir=working_dir, aligned_image=aligned_image, field=field)
+            result = process_text_or_checkbox(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         else:
             logger.warning(f'Unknown field type: {type(field)}')
             continue

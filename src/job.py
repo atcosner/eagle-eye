@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.ornithology_form import TOP_HALF_FIELDS
+from .definitions.ornithology_form import ALL_FIELDS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
-from .definitions.results import CheckboxMultiResult, FieldResult
+from .definitions.results import FieldResult
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +203,7 @@ class Job:
         for image_id, result in self.alignment_results.items():
             logger.info(f'Processing: {result.aligned_image_path}')
 
-            for name, fields in {'top': TOP_HALF_FIELDS}.items():
+            for name, fields in ALL_FIELDS.items():
                 # Create a directory to store the snipped roi pictures
                 working_dir = result.aligned_image_path.parent / name
                 working_dir.mkdir()
@@ -213,6 +213,7 @@ class Job:
                     results = process_fields(
                         working_dir=working_dir,
                         aligned_image_path=result.aligned_image_path,
+                        page_region=name,
                         fields=fields,
                     )
                     self.ocr_results[image_id].extend(results)

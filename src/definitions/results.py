@@ -5,10 +5,15 @@ from src.definitions.fields import TextField, MultiCheckboxField, CheckboxField,
 
 
 @dataclass
-class TextResult:
+class BaseResult:
     field_name: str
-    field: TextField
+    page_region: str
     roi_image_path: Path
+
+
+@dataclass
+class TextResult(BaseResult):
+    field: TextField
     text: str
 
     def get_text(self) -> str:
@@ -28,10 +33,8 @@ class TextResult:
 
 
 @dataclass
-class CheckboxMultiResult:
-    field_name: str
+class CheckboxMultiResult(BaseResult):
     field: MultiCheckboxField
-    roi_image_path: Path
     selected_options: list[str]
 
     def get_text(self) -> str:
@@ -61,10 +64,8 @@ class CheckboxMultiResult:
 
 
 @dataclass
-class CheckboxResult:
-    field_name: str
+class CheckboxResult(BaseResult):
     field: CheckboxField
-    roi_image_path: Path
     checked: bool
 
     def get_text(self) -> str:
@@ -89,10 +90,8 @@ class CheckboxResult:
 
 
 @dataclass
-class TextOrCheckboxResult:
-    field_name: str
+class TextOrCheckboxResult(BaseResult):
     field: TextFieldOrCheckbox
-    roi_image_path: Path
     text: str
 
     def get_text(self) -> str:

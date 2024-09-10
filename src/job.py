@@ -1,5 +1,7 @@
 import logging
 import pandas as pd
+import requests
+import subprocess
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass
@@ -197,6 +199,24 @@ class Job:
         self._change_state(JobState.PRE_PROCESSED)
 
     def _process(self) -> None:
+        # TODO: Read this in at program start
+        access_token = subprocess.run(
+            'gcloud auth print-access-token',
+            check=True,
+            capture_output=True,
+            shell=True,
+            text=True,
+        ).stdout.strip()
+
+        # Establish a session to persist an HTTP connection for back-to-back requests
+        session = requests.Session()
+        session.headers.update(
+            {
+                'Authorization': f'Bearer {access_token}',
+                'x-goog-user-project': 'vision-api-test-434415',
+            }
+        )
+
         for image_id, result in self.alignment_results.items():
             logger.info(f'Processing: {result.aligned_image_path}')
 
@@ -208,6 +228,7 @@ class Job:
 
                 try:
                     results = process_fields(
+                        session=session,
                         working_dir=working_dir,
                         aligned_image_path=result.aligned_image_path,
                         page_region=page_region,

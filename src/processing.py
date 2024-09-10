@@ -1,6 +1,8 @@
+import base64
 import cv2
 import logging
 import numpy as np
+import requests
 from google.cloud import vision
 from pathlib import Path
 
@@ -26,28 +28,59 @@ def snip_roi_image(image: np.array, bounds: BoxBounds, save_path: Path | None = 
     return roi
 
 
-def ocr_text_region(image: np.array, region: BoxBounds) -> str:
+def ocr_text_region(session: requests.Session, image: np.array, region: BoxBounds) -> str:
     roi = image[region.y:region.y + region.height, region.x:region.x + region.width]
     _, buffer = cv2.imencode('.jpg', roi)
+    encoded_bytes = base64.b64encode(buffer.tobytes()).decode('ascii')
 
-    # TODO: Should we use the REST API here?
-    # TODO: Add an english language hint
-    image = vision.Image(content=buffer.tobytes())
-    response = client.text_detection(image=image)
+    # https://cloud.google.com/vision/docs/ocr
+    data_payload = {
+        'requests': [
+            {
+                'image': {
+                    'content': encoded_bytes,
+                },
+                'features': [
+                    {
+                        'type': 'TEXT_DETECTION',
+                    }
+                ],
+                'imageContext': {
+                    'languageHints': [
+                        'en-t-i0-handwrit',
+                    ],
+                },
+            },
+        ],
+    }
 
-    # There are likely any results so choose the longest one
-    ocr_string = ''
-    for text in response.text_annotations:
-        if len(text.description) > len(ocr_string):
-            ocr_string = text.description
+    result = session.post(
+        'https://vision.googleapis.com/v1/images:annotate',
+        json=data_payload,
+    )
+    result.raise_for_status()
+    logger.debug(result.json())
+
+    ocr_string: str | None = None
+    for response in result.json()['responses']:
+        if 'fullTextAnnotation' in response:
+            ocr_string = response['fullTextAnnotation']['text']
 
     # Clean up the string
-    ocr_string = ocr_string.strip().replace('\n', ' ')
+    if ocr_string is not None:
+        ocr_string = ocr_string.strip().replace('\n', ' ')
+
     logger.info(f'Detected: "{ocr_string}"')
-    return ocr_string
+    return ocr_string if ocr_string is not None else ''
 
 
-def process_text_field(working_dir: Path, aligned_image: np.array, page_region: str, field: TextField) -> TextResult:
+def process_text_field(
+        session: requests.Session,
+        working_dir: Path,
+        aligned_image: np.array,
+        page_region: str,
+        field: TextField,
+) -> TextResult:
     # Extract the region of interest from the larger image
     roi = snip_roi_image(aligned_image, field.region)
     total_pixels = field.region.height * field.region.width
@@ -70,7 +103,7 @@ def process_text_field(working_dir: Path, aligned_image: np.array, page_region: 
     logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
 
     if (white_pixels / total_pixels) <= OCR_WHITE_PIXEL_THRESHOLD:
-        ocr_result = ocr_text_region(aligned_image, field.region)
+        ocr_result = ocr_text_region(session, aligned_image, field.region)
 
         # TODO: Result verification and correction here
     else:
@@ -145,6 +178,7 @@ def process_checkbox_field(
 
 
 def process_text_or_checkbox(
+        session: requests.Session,
         working_dir: Path,
         aligned_image: np.array,
         page_region: str,
@@ -159,7 +193,7 @@ def process_text_or_checkbox(
     if checked:
         text = field.checkbox_text
     else:
-        text = ocr_text_region(aligned_image, field.text_region)
+        text = ocr_text_region(session, aligned_image, field.text_region)
 
     return TextOrCheckboxResult(
         field_name=field.name,
@@ -170,7 +204,13 @@ def process_text_or_checkbox(
     )
 
 
-def process_fields(working_dir: Path, aligned_image_path: Path, page_region: str, fields: list[FormField]) -> list[FieldResult]:
+def process_fields(
+        session: requests.Session,
+        working_dir: Path,
+        aligned_image_path: Path,
+        page_region: str,
+        fields: list[FormField],
+) -> list[FieldResult]:
     # Load the aligned image
     aligned_image = cv2.imread(str(aligned_image_path), flags=cv2.IMREAD_GRAYSCALE)
 
@@ -180,13 +220,13 @@ def process_fields(working_dir: Path, aligned_image_path: Path, page_region: str
         logger.info(f'Processing field: {field.name}')
 
         if isinstance(field, TextField):
-            result = process_text_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
+            result = process_text_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, MultiCheckboxField):
             result = process_checkbox_multi_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, CheckboxField):
             result = process_checkbox_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, TextFieldOrCheckbox):
-            result = process_text_or_checkbox(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
+            result = process_text_or_checkbox(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         else:
             logger.warning(f'Unknown field type: {type(field)}')
             continue

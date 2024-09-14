@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.definitions.fields import TextField, MultiCheckboxField, CheckboxField, TextFieldOrCheckbox
+from src.definitions.fields import TextField, MultiCheckboxField, CheckboxField, TextFieldOrCheckbox, MultilineTextField
 
 
 @dataclass
@@ -128,4 +128,25 @@ class TextOrCheckboxResult(BaseResult):
         '''
 
 
-FieldResult = TextResult | CheckboxMultiResult | CheckboxResult | TextOrCheckboxResult
+@dataclass
+class MultilineTextResult(BaseResult):
+    field: MultilineTextField
+    text: str
+
+    def get_text(self) -> str:
+        return self.text
+
+    def handle_no_correction(self) -> None:
+        # Text fields always come back on HTML forms
+        pass
+
+    def set_correction(self, correction: str) -> None:
+        self.text = correction
+
+    def get_html_input(self) -> str:
+        return f'''
+            <input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>
+        '''
+
+
+FieldResult = TextResult | CheckboxMultiResult | CheckboxResult | TextOrCheckboxResult | MultilineTextResult

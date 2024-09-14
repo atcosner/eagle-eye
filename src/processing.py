@@ -1,16 +1,18 @@
 import base64
 import cv2
 import logging
+
+import imutils
 import numpy as np
 import requests
 from google.cloud import vision
 from pathlib import Path
 
 from src.definitions.util import BoxBounds
-from .definitions.fields import TextField, TextFieldOrCheckbox, MultiCheckboxField, CheckboxField, FormField
+from .definitions.fields import TextField, TextFieldOrCheckbox, MultiCheckboxField, CheckboxField, MultilineTextField, FormField
 
 from .util import sanitize_filename
-from .definitions.results import TextResult, CheckboxMultiResult, CheckboxResult, FieldResult, TextOrCheckboxResult
+from .definitions.results import TextResult, CheckboxMultiResult, CheckboxResult, FieldResult, TextOrCheckboxResult, MultilineTextResult
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than X% white
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 client = vision.ImageAnnotatorClient()
 
 
-def snip_roi_image(image: np.array, bounds: BoxBounds, save_path: Path | None = None) -> np.array:
+def snip_roi_image(image: np.ndarray, bounds: BoxBounds, save_path: Path | None = None) -> np.ndarray:
     roi = image[bounds.y:bounds.y + bounds.height, bounds.x:bounds.x + bounds.width]
     if save_path is not None:
         assert not save_path.exists(), f'Path ({save_path}) already exists!'
@@ -28,8 +30,58 @@ def snip_roi_image(image: np.array, bounds: BoxBounds, save_path: Path | None = 
     return roi
 
 
-def ocr_text_region(session: requests.Session, image: np.array, region: BoxBounds) -> str:
-    roi = image[region.y:region.y + region.height, region.x:region.x + region.width]
+def should_ocr_region(image: np.ndarray, region: BoxBounds, shrink_factor: float = 0.1) -> bool:
+    total_pixels = region.height * region.width
+    inner_roi = image[
+        region.y + int(region.height * shrink_factor):region.y + region.height - int(region.height * shrink_factor),
+        region.x:region.x + region.width
+    ]
+
+    # Threshold the image to determine if there is text in it
+    _, threshold = cv2.threshold(inner_roi, 127, 255, cv2.THRESH_BINARY)
+    white_pixels = cv2.countNonZero(threshold)
+    logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
+
+    return (white_pixels / total_pixels) <= OCR_WHITE_PIXEL_THRESHOLD
+
+
+def stitch_images(image: np.ndarray, regions: list[BoxBounds]) -> np.ndarray:
+    total_width = sum([region.width for region in regions])
+    max_height = max([region.height for region in regions])
+
+    # Create a white canvas
+    stitch_canvas = np.full(
+        shape=(max_height, total_width),
+        fill_value=255,
+        dtype=np.uint8,
+    )
+
+    # Copy each image into the canvas
+    cursor_x = 0
+    for region in regions:
+        roi = snip_roi_image(image, region)
+        stitch_canvas[0:region.height, cursor_x:cursor_x + region.width] = roi
+
+        cursor_x = cursor_x + region.width
+
+    return stitch_canvas
+
+
+def ocr_text_region(
+        session: requests.Session,
+        image: np.ndarray | None = None,
+        region: BoxBounds | None = None,
+        roi: np.ndarray | None = None,
+        add_border: bool = False,
+) -> str:
+    if roi is None:
+        assert image is not None
+        assert region is not None
+        roi = image[region.y:region.y + region.height, region.x:region.x + region.width]
+
+    if add_border:
+        roi = cv2.copyMakeBorder(roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
+
     _, buffer = cv2.imencode('.jpg', roi)
     encoded_bytes = base64.b64encode(buffer.tobytes()).decode('ascii')
 
@@ -77,33 +129,15 @@ def ocr_text_region(session: requests.Session, image: np.array, region: BoxBound
 def process_text_field(
         session: requests.Session,
         working_dir: Path,
-        aligned_image: np.array,
+        aligned_image: np.ndarray,
         page_region: str,
         field: TextField,
 ) -> TextResult:
-    # Extract the region of interest from the larger image
-    roi = snip_roi_image(aligned_image, field.visual_region)
-    total_pixels = field.visual_region.height * field.visual_region.width
-
-    # Apply pre-processing to the ROI
-    updated_roi = cv2.copyMakeBorder(roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
-
-    # Save the image off for further analysis
     roi_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    assert not roi_image_path.exists(), f'Path ({roi_image_path}) already exists!'
-    cv2.imwrite(str(roi_image_path), updated_roi)
+    snip_roi_image(aligned_image, field.visual_region, save_path=roi_image_path)
 
-    # Threshold the image to determine if there is text in it
-    inner_roi = aligned_image[
-        field.visual_region.y + (field.visual_region.height // 10):field.visual_region.y + field.visual_region.height - (field.visual_region.height // 10),
-        field.visual_region.x:field.visual_region.x + field.visual_region.width
-    ]
-    _, threshold = cv2.threshold(inner_roi, 127, 255, cv2.THRESH_BINARY)
-    white_pixels = cv2.countNonZero(threshold)
-    logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
-
-    if (white_pixels / total_pixels) <= OCR_WHITE_PIXEL_THRESHOLD:
-        ocr_result = ocr_text_region(session, aligned_image, field.visual_region)
+    if should_ocr_region(aligned_image, field.visual_region):
+        ocr_result = ocr_text_region(session, aligned_image, field.visual_region, add_border=True)
 
         # TODO: Result verification and correction here
     else:
@@ -119,7 +153,7 @@ def process_text_field(
     )
 
 
-def get_checked(aligned_image: np.array, region: BoxBounds) -> bool:
+def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
     option_roi = snip_roi_image(aligned_image, region)
     roi_pixels = region.height * region.width
 
@@ -134,7 +168,7 @@ def get_checked(aligned_image: np.array, region: BoxBounds) -> bool:
 
 def process_checkbox_multi_field(
         working_dir: Path,
-        aligned_image: np.array,
+        aligned_image: np.ndarray,
         page_region: str,
         field: MultiCheckboxField,
 ) -> CheckboxMultiResult:
@@ -160,7 +194,7 @@ def process_checkbox_multi_field(
 
 def process_checkbox_field(
         working_dir: Path,
-        aligned_image: np.array,
+        aligned_image: np.ndarray,
         page_region: str,
         field: CheckboxField,
 ) -> CheckboxResult:
@@ -180,7 +214,7 @@ def process_checkbox_field(
 def process_text_or_checkbox(
         session: requests.Session,
         working_dir: Path,
-        aligned_image: np.array,
+        aligned_image: np.ndarray,
         page_region: str,
         field: TextFieldOrCheckbox,
 ) -> TextOrCheckboxResult:
@@ -201,6 +235,39 @@ def process_text_or_checkbox(
         roi_image_path=visual_region_image_path,
         field=field,
         text=text,
+    )
+
+
+def process_multiline_text_field(
+        session: requests.Session,
+        working_dir: Path,
+        aligned_image: np.ndarray,
+        page_region: str,
+        field: MultilineTextField,
+) -> MultilineTextResult:
+    roi_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+    snip_roi_image(aligned_image, field.visual_region, save_path=roi_image_path)
+
+    # Multiline images need to be stitched together for OCR
+    stitched_image = stitch_images(aligned_image, field.line_regions)
+
+    # Check if any of our regions need to be OCR'd
+    ocr_checks = [should_ocr_region(aligned_image, region) for region in field.line_regions]
+
+    if any(ocr_checks):
+        ocr_result = ocr_text_region(session, roi=stitched_image, add_border=True)
+
+        # TODO: Result verification and correction here
+    else:
+        logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
+        ocr_result = ''
+
+    return MultilineTextResult(
+        field_name=field.name,
+        page_region=page_region,
+        roi_image_path=roi_image_path,
+        field=field,
+        text=ocr_result,
     )
 
 
@@ -227,6 +294,8 @@ def process_fields(
             result = process_checkbox_field(working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         elif isinstance(field, TextFieldOrCheckbox):
             result = process_text_or_checkbox(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
+        elif isinstance(field, MultilineTextField):
+            result = process_multiline_text_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         else:
             logger.warning(f'Unknown field type: {type(field)}')
             continue

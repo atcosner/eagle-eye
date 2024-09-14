@@ -82,8 +82,8 @@ def process_text_field(
         field: TextField,
 ) -> TextResult:
     # Extract the region of interest from the larger image
-    roi = snip_roi_image(aligned_image, field.region)
-    total_pixels = field.region.height * field.region.width
+    roi = snip_roi_image(aligned_image, field.visual_region)
+    total_pixels = field.visual_region.height * field.visual_region.width
 
     # Apply pre-processing to the ROI
     updated_roi = cv2.copyMakeBorder(roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
@@ -95,15 +95,15 @@ def process_text_field(
 
     # Threshold the image to determine if there is text in it
     inner_roi = aligned_image[
-        field.region.y + (field.region.height // 10):field.region.y + field.region.height - (field.region.height // 10),
-        field.region.x:field.region.x + field.region.width
+        field.visual_region.y + (field.visual_region.height // 10):field.visual_region.y + field.visual_region.height - (field.visual_region.height // 10),
+        field.visual_region.x:field.visual_region.x + field.visual_region.width
     ]
     _, threshold = cv2.threshold(inner_roi, 127, 255, cv2.THRESH_BINARY)
     white_pixels = cv2.countNonZero(threshold)
     logger.debug(f'White: {white_pixels}, Total: {total_pixels}, Pct: {white_pixels / total_pixels}')
 
     if (white_pixels / total_pixels) <= OCR_WHITE_PIXEL_THRESHOLD:
-        ocr_result = ocr_text_region(session, aligned_image, field.region)
+        ocr_result = ocr_text_region(session, aligned_image, field.visual_region)
 
         # TODO: Result verification and correction here
     else:
@@ -173,7 +173,7 @@ def process_checkbox_field(
         page_region=page_region,
         roi_image_path=visual_region_image_path,
         field=field,
-        checked=get_checked(aligned_image, field.region),
+        checked=get_checked(aligned_image, field.checkbox_region),
     )
 
 

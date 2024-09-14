@@ -1,46 +1,51 @@
 import copy
-from typing import NamedTuple, get_args
+from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import NamedTuple, get_args, Callable
 
 from src.definitions.util import BoxBounds
 
 
-class TextField(NamedTuple):
-    name: str
-    region: BoxBounds
-
-
-class MultilineTextField(NamedTuple):
-    name: str
-    regions: list[BoxBounds]
-
-
-class TextFieldOrCheckbox(NamedTuple):
+@dataclass
+class FormField:
     name: str
     visual_region: BoxBounds
+
+
+@dataclass
+class TextField(FormField):
+    validation_function: Callable[[str], bool] = lambda x: True
+    allow_copy: bool | None = None
+
+
+@dataclass
+class MultilineTextField(FormField):
+    line_regions: list[BoxBounds]
+
+
+@dataclass
+class TextFieldOrCheckbox(FormField):
     text_region: BoxBounds
     checkbox_region: BoxBounds
     checkbox_text: str
 
 
-class CheckboxOptionField(NamedTuple):
+@dataclass
+# Explicitly not a 'FormField' since it cannot stand alone
+class CheckboxOptionField:
     name: str
     region: BoxBounds
     text_region: BoxBounds | None = None
 
 
-class MultiCheckboxField(NamedTuple):
-    name: str
-    visual_region: BoxBounds
+@dataclass
+class MultiCheckboxField(FormField):
     options: list[CheckboxOptionField]
 
 
-class CheckboxField(NamedTuple):
-    name: str
-    region: BoxBounds
-    visual_region: BoxBounds
-
-
-FormField = TextField | MultilineTextField | TextFieldOrCheckbox | MultiCheckboxField | CheckboxField | CheckboxOptionField
+@dataclass
+class CheckboxField(FormField):
+    checkbox_region: BoxBounds
 
 
 def offset_object(item: object, y_offset: int) -> object:
@@ -54,15 +59,24 @@ def offset_object(item: object, y_offset: int) -> object:
 
 def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
     replacements = {}
-    for key, value in field._asdict().items():
-        if isinstance(value, get_args(FormField)):
+    for key, value in vars(field).items():
+        # Throw out callables and dunder functions
+        if callable(value) or key.startswith('__'):
+            continue
+
+        if isinstance(value, FormField):
             # Recurse to replace the entire object
             replacements[key] = create_field_with_offset(value, y_offset)
-        elif isinstance(value, list) and isinstance(value[0], get_args(FormField)):
+        elif isinstance(value, list) and isinstance(value[0], FormField):
             # Recuse for collections of form fields
             replacements[key] = [create_field_with_offset(part, y_offset) for part in value]
         else:
             # Replacements that do not require recursion
             replacements[key] = offset_object(value, y_offset)
 
-    return field._replace(**replacements)
+    # Deep copy the object and then perform replacements
+    new_field = copy.deepcopy(field)
+    for key, value in replacements.items():
+        setattr(new_field, key, value)
+
+    return new_field

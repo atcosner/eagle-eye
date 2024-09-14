@@ -48,13 +48,13 @@ class CheckboxField(FormField):
     checkbox_region: BoxBounds
 
 
-def offset_object(item: object, y_offset: int) -> object:
+def offset_object(item: object, y_offset: int) -> object | None:
     if isinstance(item, BoxBounds):
         return item._replace(y=item.y + y_offset)
     elif isinstance(item, list):
-        return [offset_object(part, y_offset) for part in item]
+        return [offset_object(part, y_offset) for part in item if offset_object(part, y_offset) is not None]
     else:
-        return item
+        return None
 
 
 def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
@@ -72,7 +72,16 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
             replacements[key] = [create_field_with_offset(part, y_offset) for part in value]
         else:
             # Replacements that do not require recursion
-            replacements[key] = offset_object(value, y_offset)
+
+            # Edge Case: 'allow_copy'
+            if key == 'allow_copy':
+                # This can either be a bool or None. If this is set to a bool, replace it with 'True' in the new object
+                # i.e. Locality has allow_copy=False in the top section, so we need to override it to True for the bottom
+                if value is not None:
+                    replacements[key] = True
+            else:
+                if (new_value := offset_object(value, y_offset)) is not None:
+                    replacements[key] = new_value
 
     # Deep copy the object and then perform replacements
     new_field = copy.deepcopy(field)

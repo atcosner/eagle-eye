@@ -8,7 +8,12 @@ td {
 }
 
 .corrections-box {
-    width: 350px;
-    margin-left: 10px;
+    width: 100%;
+    min-width: 350px;
+    #margin-left: 10px;
     margin-right: 10px;
+}
+
+.copy-button {
+    white-space: nowrap;
 }

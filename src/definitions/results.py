@@ -30,9 +30,24 @@ class TextResult(BaseResult):
         self.text = correction
 
     def get_html_input(self) -> str:
-        return f'''
-            <input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>
-        '''
+        html_elements = []
+        if self.field.allow_copy:
+            source_name = self.get_html_form_name().replace('bottom', 'top')
+            html_elements.append(
+                f'''<button
+                        type="button"
+                        onclick="copyFromTopRegion('{source_name}', '{self.get_html_form_name()}')"
+                        class="copy-button"
+                    >
+                        From Above
+                    </button>
+                '''
+            )
+
+        html_elements.append(
+            f'<input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>'
+        )
+        return f'<div style="display: flex;">{"".join(html_elements)}</div>'
 
 
 @dataclass

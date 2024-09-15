@@ -35,12 +35,14 @@
                     <table>
                         <tr>
                             <th>Data Field</th>
+                            <th>Validation</th>
                             <th>Extracted Text</th>
                             <th>ROI Image</th>
                         </tr>
                             {% for result in results %}
                                 <tr>
                                     <td>{{ result.field_name }}</td>
+                                    <td style="text-align: center;">{{ result.get_validation_image_html() | safe }}</td>
                                     <td>{{ result.get_html_input() | safe }}</td>
                                     <td>
                                         <img

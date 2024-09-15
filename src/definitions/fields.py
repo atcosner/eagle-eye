@@ -1,9 +1,10 @@
 import copy
-from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import NamedTuple, get_args, Callable
+from typing import Type
 
 from src.definitions.util import BoxBounds
+
+from .validation import Validator, NoValidation
 
 
 @dataclass
@@ -14,7 +15,7 @@ class FormField:
 
 @dataclass
 class TextField(FormField):
-    validation_function: Callable[[str], bool] = lambda x: True
+    validator: Type[Validator] = NoValidation
     allow_copy: bool | None = None
 
 

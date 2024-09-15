@@ -138,18 +138,20 @@ def process_text_field(
 
     if should_ocr_region(aligned_image, field.visual_region):
         ocr_result = ocr_text_region(session, aligned_image, field.visual_region, add_border=True)
-
-        # TODO: Result verification and correction here
     else:
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
         ocr_result = ''
+
+    result, new_text = field.validator.validate(ocr_result)
+    logger.info(f'Validation: result={result.name}, new_text="{new_text}"')
 
     return TextResult(
         field_name=field.name,
         page_region=page_region,
         roi_image_path=roi_image_path,
         field=field,
-        text=ocr_result,
+        validation_result=result,
+        text=new_text,
     )
 
 

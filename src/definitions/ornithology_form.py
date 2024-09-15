@@ -1,6 +1,7 @@
 from .fields import TextField, MultilineTextField, TextFieldOrCheckbox, CheckboxOptionField, MultiCheckboxField, \
     CheckboxField, create_field_with_offset
 from .util import BoxBounds
+from . import validation as val
 
 
 TOP_HALF_FIELDS = [
@@ -8,8 +9,8 @@ TOP_HALF_FIELDS = [
     # Header
     #
 
-    TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44)),
-    TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46)),
+    TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44), validator=val.KtNumber),
+    TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46), validator=val.PrepNumber),
     TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46)),
     TextField(name='OT Number', visual_region=BoxBounds(x=972, y=120, width=215, height=46)),
 

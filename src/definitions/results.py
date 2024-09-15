@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from src.definitions.fields import TextField, MultiCheckboxField, CheckboxField, TextFieldOrCheckbox, MultilineTextField
+from src.definitions.validation import ValidationResult, get_result_image_path
 
 
 @dataclass
@@ -13,10 +14,26 @@ class BaseResult:
     def get_html_form_name(self) -> str:
         return f'{self.page_region}-{self.field_name}'
 
+    def get_validation_image_html(self) -> str:
+        try:
+            result = getattr(self, 'validation_result')
+        except AttributeError:
+            if isinstance(self, TextResult):
+                raise RuntimeError('Result member name has changed')
+            result = ValidationResult.BYPASS
+
+        return f'''
+            <img 
+                src="{get_result_image_path(result)}"
+                style="width: 20px; height: 20px;"
+            >
+        '''
+
 
 @dataclass
 class TextResult(BaseResult):
     field: TextField
+    validation_result: ValidationResult
     text: str
 
     def get_text(self) -> str:

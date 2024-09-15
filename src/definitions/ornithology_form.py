@@ -20,13 +20,13 @@ TOP_HALF_FIELDS = [
 
     TextField(name='Locality', visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=False),
 
-    TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31)),  # TODO: Allow copy?
-    TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33)),  # TODO: Allow copy?
-    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34)),  # TODO: Allow copy?
-    TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33)),  # TODO: Allow copy?
+    TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31)),
+    TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33)),
+    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=False),
+    TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33)),
 
     TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=False),
-    TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33)),  # TODO: Allow copy?
+    TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=False),
 
     TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=False),
     TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=False),
@@ -55,10 +55,11 @@ TOP_HALF_FIELDS = [
         text_region=BoxBounds(x=287, y=411, width=247, height=32),
         checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
         checkbox_text='dark brown',
+        # TODO: Allow this to be copied
     ),
-    TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31)),  # TODO: Allow copy?
+    TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=False),
 
-    TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30)),  # TODO: Allow copy?
+    TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=False),
     TextField(name='Weight (g)', visual_region=BoxBounds(x=1035, y=447, width=190, height=33)),
 
     MultiCheckboxField(
@@ -69,7 +70,7 @@ TOP_HALF_FIELDS = [
             CheckboxOptionField(name='Preparation', region=BoxBounds(x=360, y=498, width=13, height=13)),
         ],
     ),
-    TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33)),  # TODO: Allow copy?
+    TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33)),
     TextFieldOrCheckbox(
         name='Time of Tissue Preservation',
         visual_region=BoxBounds(x=797, y=485, width=423, height=40),
@@ -78,8 +79,8 @@ TOP_HALF_FIELDS = [
         checkbox_text='unknown',
     ),
 
-    TextField(name='Tissues', visual_region=BoxBounds(x=251, y=520, width=147, height=35)),  # TODO: Allow copy?
-    TextField(name='No. Tubes', visual_region=BoxBounds(x=509, y=523, width=56, height=32)),  # TODO: Allow copy?
+    TextField(name='Tissues', visual_region=BoxBounds(x=251, y=520, width=147, height=35)),
+    TextField(name='No. Tubes', visual_region=BoxBounds(x=509, y=523, width=56, height=32)),
     MultiCheckboxField(
         name='Tissue Preservation',
         visual_region=BoxBounds(x=569, y=527, width=669, height=33),
@@ -96,8 +97,8 @@ TOP_HALF_FIELDS = [
         ],
     ),
 
-    TextField(name='Prep Date', visual_region=BoxBounds(x=279, y=560, width=378, height=32)),  # TODO: Allow copy?
-    TextField(name='Preparator', visual_region=BoxBounds(x=776, y=562, width=451, height=30)),  # TODO: Allow copy?
+    TextField(name='Prep Date', visual_region=BoxBounds(x=279, y=560, width=378, height=32)),
+    TextField(name='Preparator', visual_region=BoxBounds(x=776, y=562, width=451, height=30)),
 
     MultiCheckboxField(
         name='Preps',
@@ -116,11 +117,11 @@ TOP_HALF_FIELDS = [
         ],
     ),
 
-    TextField(name='Molt', visual_region=BoxBounds(x=220, y=634, width=1004, height=32)),  # TODO: Allow copy?
+    TextField(name='Molt', visual_region=BoxBounds(x=220, y=634, width=1004, height=32)),
 
-    TextField(name='Gonads', visual_region=BoxBounds(x=255, y=671, width=967, height=31)),  # TODO: Allow copy?
+    TextField(name='Gonads', visual_region=BoxBounds(x=255, y=671, width=967, height=31)),
 
-    TextField(name='Skull', visual_region=BoxBounds(x=222, y=706, width=257, height=34)),  # TODO: Allow copy?
+    TextField(name='Skull', visual_region=BoxBounds(x=222, y=706, width=257, height=34)),
     MultiCheckboxField(
         name='Fat',
         visual_region=BoxBounds(x=479, y=706, width=384, height=41),
@@ -132,9 +133,9 @@ TOP_HALF_FIELDS = [
             CheckboxOptionField(name='Very Heavy', region=BoxBounds(x=787, y=721, width=13, height=13)),
         ],
     ),
-    TextField(name='Bursa', visual_region=BoxBounds(x=980, y=709, width=243, height=31)),  # TODO: Allow copy?
+    TextField(name='Bursa', visual_region=BoxBounds(x=980, y=709, width=243, height=31)),
 
-    TextField(name='Stomach', visual_region=BoxBounds(x=232, y=745, width=992, height=32)),  # TODO: Allow copy?
+    TextField(name='Stomach', visual_region=BoxBounds(x=232, y=745, width=992, height=32)),
 
     MultiCheckboxField(
         name='Sex',
@@ -145,7 +146,7 @@ TOP_HALF_FIELDS = [
             CheckboxOptionField(name='Unknown', region=BoxBounds(x=418, y=795, width=13, height=13)),
         ],
     ),
-    TextField(name='Age', visual_region=BoxBounds(x=579, y=783, width=315, height=31)),  # TODO: Allow copy?
+    TextField(name='Age', visual_region=BoxBounds(x=579, y=783, width=315, height=31)),
     MultiCheckboxField(
         name='Parasites Collected',
         visual_region=BoxBounds(x=895, y=787, width=333, height=29),

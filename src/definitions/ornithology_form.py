@@ -18,17 +18,17 @@ TOP_HALF_FIELDS = [
     # Body
     #
 
-    TextField(name='Locality', visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=False),
+    TextField(name='Locality', visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=False, validator=val.Locality),
 
-    TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31)),
-    TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33)),
+    TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31), validator=val.GpsPoint),
+    TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=val.GpsPoint),
     TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=False),
     TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33)),
 
     TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=False),
     TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=False),
 
-    TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=False),
+    TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=False, validator=val.Date),
     TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=False),
 
     TextField(name='Habitat', visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=False),
@@ -97,7 +97,7 @@ TOP_HALF_FIELDS = [
         ],
     ),
 
-    TextField(name='Prep Date', visual_region=BoxBounds(x=279, y=560, width=378, height=32)),
+    TextField(name='Prep Date', visual_region=BoxBounds(x=279, y=560, width=378, height=32), validator=val.Date),
     TextField(name='Preparator', visual_region=BoxBounds(x=776, y=562, width=451, height=30)),
 
     MultiCheckboxField(

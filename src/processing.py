@@ -142,7 +142,7 @@ def process_text_field(
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
         ocr_result = ''
 
-    result, new_text = field.validator.validate(ocr_result)
+    result, new_text = field.validator.validate(ocr_result, allow_correction=True)
     logger.info(f'Validation: result={result.name}, new_text="{new_text}"')
 
     return TextResult(

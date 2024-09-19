@@ -1,3 +1,5 @@
+import calendar
+import datetime
 import re
 from abc import ABC, abstractmethod
 from enum import Enum, auto
@@ -32,7 +34,7 @@ def get_result_image_path(result: ValidationResult) -> str:
 class Validator(ABC):
     @staticmethod
     @abstractmethod
-    def validate(text: str) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
         ...
 
     @staticmethod
@@ -45,7 +47,7 @@ class Validator(ABC):
 
 class NoValidation(Validator):
     @staticmethod
-    def validate(text: str) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
         return ValidationResult.BYPASS, text
 
     @staticmethod
@@ -55,7 +57,7 @@ class NoValidation(Validator):
 
 class KtNumber(Validator):
     @staticmethod
-    def validate(text: str) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -73,16 +75,95 @@ class KtNumber(Validator):
 
 class PrepNumber(Validator):
     @staticmethod
-    def validate(text: str) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
         if not text:
             return ValidationResult.NO_INPUT, text
 
-        # Format: 3 capital letters followed by number
-        if re.compile(r'^[A-Z]{3} [0-9]+$').match(text) is not None:
+        # Format: 2-4 capital letters followed by number with unlimited digits
+        if re.compile(r'^[A-Z]{2,4} [0-9]{3,}$').match(text) is not None:
             return ValidationResult.PASSED, text
         else:
             # TODO: Should we just upper() here?
-            #  Capital I might OCR as lowercase l ?
+            #  Capital I might OCR as lowercase l?
+            return ValidationResult.MALFORMED, text
+
+    @staticmethod
+    def export(text: str) -> str:
+        # TODO: Export format?
+        return text
+
+
+class Locality(Validator):
+    @staticmethod
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+        if not text:
+            return ValidationResult.NO_INPUT, text
+
+        # Pre-processing
+        cleaned_text = text.replace(';', ':').strip()
+        pattern = re.compile(
+            r"^(?P<state>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
+            r" ?: ?(?P<county>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
+            r" ?: ?(?P<location>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)$"
+        )
+
+        # Format: <STATE> : <COUNTY> : <PLACE>
+        if (match := pattern.match(cleaned_text)) is not None:
+            formatted_text = f'{match.group("state")} : {match.group("county")} : {match.group("location")}'
+            return ValidationResult.PASSED, formatted_text
+        else:
+            return ValidationResult.MALFORMED, text
+
+    @staticmethod
+    def export(text: str) -> str:
+        # TODO: Export format?
+        return text
+
+
+class GpsPoint(Validator):
+    @staticmethod
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+        if not text:
+            return ValidationResult.NO_INPUT, text
+
+        # Pre-processing
+        cleaned_text = text.strip()
+        pattern = re.compile(r'^[+-]?\d{1,3}.\d{1,8}$')
+
+        # Format: <STATE> : <COUNTY> : <PLACE>
+        if pattern.match(cleaned_text) is not None:
+            return ValidationResult.PASSED, cleaned_text
+        else:
+            return ValidationResult.MALFORMED, text
+
+    @staticmethod
+    def export(text: str) -> str:
+        # TODO: Export format?
+        return text
+
+
+class Date(Validator):
+    @staticmethod
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+        if not text:
+            return ValidationResult.NO_INPUT, text
+
+        # Pre-processing
+        cleaned_text = text.strip()
+
+        # Format: <DAY> <MONTH_STRING> <YEAR>
+        pattern = re.compile(r'^(?P<day>\d{1,2}) (?P<month>[a-zA-Z]{3,9}) (?P<year>\d{4})$')
+        if (match := pattern.match(cleaned_text)) is None:
+            return ValidationResult.MALFORMED, text
+
+        # Enforce constraints on values
+        day_match = 1 <= int(match.group('day')) <= 31
+        month_match = match.group('month').capitalize() in calendar.month_name
+        year_match = 2024 <= int(match.group('year')) <= datetime.datetime.now().year
+
+        if day_match and month_match and year_match:
+            return ValidationResult.PASSED, cleaned_text
+        else:
             return ValidationResult.MALFORMED, text
 
     @staticmethod

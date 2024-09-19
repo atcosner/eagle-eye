@@ -46,6 +46,10 @@ class TextResult(BaseResult):
     def set_correction(self, correction: str) -> None:
         self.text = correction
 
+        # Re-validate but don't allow corrections
+        result, _ = self.field.validator.validate(self.text, allow_correction=False)
+        self.validation_result = result
+
     def get_html_input(self) -> str:
         html_elements = []
         if self.field.allow_copy:

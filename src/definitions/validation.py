@@ -170,3 +170,32 @@ class Date(Validator):
     def export(text: str) -> str:
         # TODO: Export format?
         return text
+
+
+class Time(Validator):
+    @staticmethod
+    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+        if not text:
+            return ValidationResult.NO_INPUT, text
+
+        # Pre-processing
+        cleaned_text = text.strip()
+
+        # Format: <HOUR> : <MINUTE>
+        pattern = re.compile(r'^(?P<hour>\d{1,2}) ?: ?(?P<minute>\d{2})$')
+        if (match := pattern.match(cleaned_text)) is None:
+            return ValidationResult.MALFORMED, text
+
+        # Enforce constraints on values
+        hour_match = 0 <= int(match.group('hour')) <= 23
+        minute_match = 0 <= int(match.group('minute')) <= 59
+
+        if hour_match and minute_match:
+            return ValidationResult.PASSED, f'{match.group("hour")}:{match.group("minute")}'
+        else:
+            return ValidationResult.MALFORMED, text
+
+    @staticmethod
+    def export(text: str) -> str:
+        # TODO: Export format?
+        return text

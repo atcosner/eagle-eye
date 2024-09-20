@@ -70,7 +70,7 @@ TOP_HALF_FIELDS = [
             CheckboxOptionField(name='Preparation', region=BoxBounds(x=360, y=498, width=13, height=13)),
         ],
     ),
-    TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33)),
+    TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33), validator=val.Time),
     TextFieldOrCheckbox(
         name='Time of Tissue Preservation',
         visual_region=BoxBounds(x=797, y=485, width=423, height=40),

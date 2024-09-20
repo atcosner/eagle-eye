@@ -10,8 +10,7 @@ td {
 .corrections-box {
     width: 100%;
     min-width: 350px;
-    #margin-left: 10px;
-    margin-right: 10px;
+    box-sizing: border-box;
 }
 
 .copy-button {

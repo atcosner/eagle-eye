@@ -68,8 +68,9 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
         if isinstance(value, FormField):
             # Recurse to replace the entire object
             replacements[key] = create_field_with_offset(value, y_offset)
-        elif isinstance(value, list) and isinstance(value[0], FormField):
-            # Recuse for collections of form fields
+        elif isinstance(value, list) and isinstance(value[0], CheckboxOptionField):
+            # Recurse for collections of checkbox options
+            # TODO: Handle this automatically for potentially more things that are not FormField
             replacements[key] = [create_field_with_offset(part, y_offset) for part in value]
         else:
             # Replacements that do not require recursion

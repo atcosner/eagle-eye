@@ -2,8 +2,7 @@ import copy
 from dataclasses import dataclass
 from typing import Type
 
-from src.definitions.util import BoxBounds
-
+from .util import BoxBounds
 from .validation import Validator, NoValidation
 
 
@@ -11,11 +10,11 @@ from .validation import Validator, NoValidation
 class FormField:
     name: str
     visual_region: BoxBounds
+    validator: Type[Validator]
 
 
 @dataclass
 class TextField(FormField):
-    validator: Type[Validator] = NoValidation
     allow_copy: bool | None = None
 
 

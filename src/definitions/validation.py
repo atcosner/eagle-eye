@@ -2,62 +2,27 @@ import calendar
 import datetime
 import re
 from abc import ABC, abstractmethod
-from enum import Enum, auto
+from typing import Any
 
-
-class ValidationResult(Enum):
-    # Success States
-    PASSED = auto()
-    CORRECTED = auto()  # Initially malformed but would pass after corrections
-
-    # Failure States
-    MALFORMED = auto()  # Uncorrectable text
-
-    # Neutral States
-    NO_INPUT = auto()  # No input to validate
-    BYPASS = auto()  # No validator specified
-
-
-RESULT_IMAGE_PATHS = {
-    ValidationResult.PASSED: '/static/images/passed.png',
-    ValidationResult.CORRECTED: '/static/images/corrected.png',
-    ValidationResult.MALFORMED: '/static/images/malformed.png',
-    ValidationResult.NO_INPUT: '/static/images/bypass.png',  # TODO: Separate image for this?
-    ValidationResult.BYPASS: '/static/images/bypass.png',
-}
-
-
-def get_result_image_path(result: ValidationResult) -> str:
-    return RESULT_IMAGE_PATHS.get(result, '')
+from .util import ValidationResult
 
 
 class Validator(ABC):
     @staticmethod
     @abstractmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
-        ...
-
-    @staticmethod
-    @abstractmethod
-    def export(text: str) -> str:
-        # TODO: Should this re-validate the string?
-        #  It could pass from OCR and then fail if the user edits it or vice versa
+    def validate(result, allow_correction: bool) -> ValidationResult:
         ...
 
 
 class NoValidation(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
-        return ValidationResult.BYPASS, text
-
-    @staticmethod
-    def export(text: str) -> str:
-        return text
+    def validate(result, allow_correction: bool) -> ValidationResult:
+        return ValidationResult.BYPASS
 
 
 class KtNumber(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+    def validate(result, allow_correction: bool) -> ValidationResult:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -68,14 +33,10 @@ class KtNumber(Validator):
             # TODO: Is there a way to correct bad input?
             return ValidationResult.MALFORMED, text
 
-    @staticmethod
-    def export(text: str) -> str:
-        return f'KT_{text}'
-
 
 class PrepNumber(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> ValidationResult:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -87,15 +48,10 @@ class PrepNumber(Validator):
             #  Capital I might OCR as lowercase l?
             return ValidationResult.MALFORMED, text
 
-    @staticmethod
-    def export(text: str) -> str:
-        # TODO: Export format?
-        return text
-
 
 class Locality(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> ValidationResult:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -114,15 +70,10 @@ class Locality(Validator):
         else:
             return ValidationResult.MALFORMED, text
 
-    @staticmethod
-    def export(text: str) -> str:
-        # TODO: Export format?
-        return text
-
 
 class GpsPoint(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> ValidationResult:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -136,15 +87,10 @@ class GpsPoint(Validator):
         else:
             return ValidationResult.MALFORMED, text
 
-    @staticmethod
-    def export(text: str) -> str:
-        # TODO: Export format?
-        return text
-
 
 class Date(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> ValidationResult:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -166,15 +112,10 @@ class Date(Validator):
         else:
             return ValidationResult.MALFORMED, text
 
-    @staticmethod
-    def export(text: str) -> str:
-        # TODO: Export format?
-        return text
-
 
 class Time(Validator):
     @staticmethod
-    def validate(text: str, allow_correction: bool) -> tuple[ValidationResult, str]:
+    def validate(text: str, allow_correction: bool) -> ValidationResult:
         if not text:
             return ValidationResult.NO_INPUT, text
 
@@ -194,8 +135,3 @@ class Time(Validator):
             return ValidationResult.PASSED, f'{match.group("hour")}:{match.group("minute")}'
         else:
             return ValidationResult.MALFORMED, text
-
-    @staticmethod
-    def export(text: str) -> str:
-        # TODO: Export format?
-        return text

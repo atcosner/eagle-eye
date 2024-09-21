@@ -13,7 +13,7 @@ def set_up_root_logger(verbose: bool) -> None:
     )
 
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG if verbose else logging.WARNING)
+    root_logger.setLevel(logging.DEBUG if verbose else logging.INFO)
     root_logger.addHandler(handler)
 
 

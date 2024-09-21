@@ -1,30 +1,26 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.definitions.fields import TextField, MultiCheckboxField, CheckboxField, TextFieldOrCheckbox, MultilineTextField
-from src.definitions.validation import ValidationResult, get_result_image_path
+from . import fields as fields
+from . import util as util
 
 
 @dataclass
 class BaseResult:
-    field_name: str
     page_region: str
+    field: fields.FormField
     roi_image_path: Path
 
+    def validate(self) -> util.ValidationResult:
+        return self.field.validator.validate(self, allow_correction=True)
+
     def get_html_form_name(self) -> str:
-        return f'{self.page_region}-{self.field_name}'
+        return f'{self.page_region}-{self.field.name}'
 
     def get_validation_image_html(self) -> str:
-        try:
-            result = getattr(self, 'validation_result')
-        except AttributeError:
-            if isinstance(self, TextResult):
-                raise RuntimeError('Result member name has changed')
-            result = ValidationResult.BYPASS
-
         return f'''
             <img 
-                src="{get_result_image_path(result)}"
+                src="{util.get_result_image_path(self.validate())}"
                 style="width: 20px; height: 20px;"
             >
         '''
@@ -32,8 +28,6 @@ class BaseResult:
 
 @dataclass
 class TextResult(BaseResult):
-    field: TextField
-    validation_result: ValidationResult
     text: str
 
     def get_text(self) -> str:
@@ -45,10 +39,6 @@ class TextResult(BaseResult):
 
     def set_correction(self, correction: str) -> None:
         self.text = correction
-
-        # Re-validate but don't allow corrections
-        result, _ = self.field.validator.validate(self.text, allow_correction=False)
-        self.validation_result = result
 
     def get_html_input(self) -> str:
         html_elements = []
@@ -72,39 +62,48 @@ class TextResult(BaseResult):
 
 
 @dataclass
+class CheckboxOptionResult:
+    checked: bool
+    text: str | None
+
+
+@dataclass
 class CheckboxMultiResult(BaseResult):
-    field: MultiCheckboxField
-    selected_options: list[str]
+    option_results: dict[str, CheckboxOptionResult]
 
     def get_text(self) -> str:
-        return ','.join(self.selected_options)
+        # TODO: How does this need to be exported?
+        return ''
 
     def handle_no_correction(self) -> None:
         # If no checkboxes are checked the form element is missing
-        self.selected_options = []
+        for option_result in self.option_results.values():
+            option_result.selected = False
+            option_result.optional_text = '' if isinstance(option_result.text, str) else None
 
     def set_correction(self, correction: list[str]) -> None:
-        self.selected_options = correction
+        for option_name, result in self.option_results.items():
+            result.selected = option_name in correction
+            # TODO: Handle correcting checkboxes with text
 
     def get_html_input(self) -> str:
-        checkboxes = []
-        for option in self.field.options:
-            checkboxes.append(f'''
-                <input
-                    type="checkbox"
-                    name="{self.get_html_form_name()}"
-                    value="{option.name}"
-                     {"checked" if option.name in self.selected_options else ""}
-                />
-            ''')
-            checkboxes.append(f'<label>{option.name},</label>')
+        form_name = self.get_html_form_name()
+        table_rows = []
 
-        return '\n'.join(checkboxes)
+        for option_name, result in self.option_results.items():
+            table_rows.append('<tr>')
+            table_rows.append(f'<td>{util.get_checkbox_html(form_name, option_name, result.checked)}</td>')
+            table_rows.append(f'<td><label>{option_name}</label></td>')
+            if result.text is not None:
+                table_rows.append(f'<td><input type="text" value="{result.text}"/></td>')
+            table_rows.append('</td>')
+
+        rows = "\n".join(table_rows)
+        return f'<table>{rows}</table>'
 
 
 @dataclass
 class CheckboxResult(BaseResult):
-    field: CheckboxField
     checked: bool
 
     def get_text(self) -> str:
@@ -130,7 +129,6 @@ class CheckboxResult(BaseResult):
 
 @dataclass
 class TextOrCheckboxResult(BaseResult):
-    field: TextFieldOrCheckbox
     text: str
 
     def get_text(self) -> str:
@@ -151,7 +149,6 @@ class TextOrCheckboxResult(BaseResult):
 
 @dataclass
 class MultilineTextResult(BaseResult):
-    field: MultilineTextField
     text: str
 
     def get_text(self) -> str:
@@ -168,6 +165,3 @@ class MultilineTextResult(BaseResult):
         return f'''
             <input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>
         '''
-
-
-FieldResult = TextResult | CheckboxMultiResult | CheckboxResult | TextOrCheckboxResult | MultilineTextResult

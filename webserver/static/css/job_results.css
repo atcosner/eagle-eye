@@ -1,10 +1,18 @@
-table {
+.image-table {
     border: 2px solid black;
     border-collapse: collapse;
 }
 
-td {
+.form-field-row {
     border-bottom: 2px solid black;
+}
+
+.field-name-cell {
+    border-right: 2px solid black;
+}
+
+.validation-cell {
+    text-align: center;
 }
 
 .corrections-box {

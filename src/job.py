@@ -14,11 +14,11 @@ from werkzeug.datastructures import FileStorage
 from .definitions.ornithology_form import ALL_FIELDS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
-from .definitions.results import FieldResult
+from .definitions.results import BaseResult
 
 logger = logging.getLogger(__name__)
 
-RegionResults = dict[str, list[FieldResult]]
+RegionResults = dict[str, list[BaseResult]]
 
 
 class JobState(Enum):

@@ -1,30 +1,26 @@
 import copy
 from dataclasses import dataclass
-from typing import Type
 
 from .util import BoxBounds
-from .validation import Validator, NoValidation
 
 
 @dataclass
-class FormField:
-    name: str
+class Field:
     visual_region: BoxBounds
-    validator: Type[Validator]
 
 
 @dataclass
-class TextField(FormField):
+class TextField(Field):
     allow_copy: bool | None = None
 
 
 @dataclass
-class MultilineTextField(FormField):
+class MultilineTextField(Field):
     line_regions: list[BoxBounds]
 
 
 @dataclass
-class TextFieldOrCheckbox(FormField):
+class TextFieldOrCheckbox(Field):
     text_region: BoxBounds
     checkbox_region: BoxBounds
     checkbox_text: str
@@ -39,12 +35,12 @@ class CheckboxOptionField:
 
 
 @dataclass
-class MultiCheckboxField(FormField):
+class MultiCheckboxField(Field):
     options: list[CheckboxOptionField]
 
 
 @dataclass
-class CheckboxField(FormField):
+class CheckboxField(Field):
     checkbox_region: BoxBounds
 
 
@@ -57,14 +53,14 @@ def offset_object(item: object, y_offset: int) -> object | None:
         return None
 
 
-def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
+def create_field_with_offset(field: Field, y_offset: int) -> Field:
     replacements = {}
     for key, value in vars(field).items():
         # Throw out callables and dunder functions
         if callable(value) or key.startswith('__'):
             continue
 
-        if isinstance(value, FormField):
+        if isinstance(value, Field):
             # Recurse to replace the entire object
             replacements[key] = create_field_with_offset(value, y_offset)
         elif isinstance(value, list) and isinstance(value[0], CheckboxOptionField):

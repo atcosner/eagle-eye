@@ -8,8 +8,10 @@ from pathlib import Path
 
 from src.definitions.util import BoxBounds, ValidationResult
 
-from .definitions.fields import TextField, TextFieldOrCheckbox, MultiCheckboxField, CheckboxField, MultilineTextField, FormField
-from .definitions.results import TextResult, CheckboxMultiResult, CheckboxResult, TextOrCheckboxResult, MultilineTextResult, CheckboxOptionResult, BaseResult
+from .definitions.fields import TextField, TextFieldOrCheckbox, MultiCheckboxField, CheckboxField, MultilineTextField, Field
+from .definitions.parse import ParsedField, ParsedTextField
+from .definitions.results import BaseResult, TextResult  #, CheckboxMultiResult, CheckboxResult, TextOrCheckboxResult, MultilineTextResult, CheckboxOptionResult, BaseResult
+from .definitions.validation import Validator
 from .definitions.util import ValidationResult
 from .util import sanitize_filename
 
@@ -130,9 +132,11 @@ def process_text_field(
         working_dir: Path,
         aligned_image: np.ndarray,
         page_region: str,
+        field_name: str,
         field: TextField,
+        validator_type: type[Validator],
 ) -> TextResult:
-    roi_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+    roi_image_path = working_dir / f'{sanitize_filename(field_name)}.png'
     snip_roi_image(aligned_image, field.visual_region, save_path=roi_image_path)
 
     if should_ocr_region(aligned_image, field.visual_region):
@@ -141,139 +145,140 @@ def process_text_field(
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
         ocr_result = ''
 
+    parsed_result = ParsedTextField(name=field_name, roi_image_path=roi_image_path, field=field, text=ocr_result)
+
     return TextResult(
         page_region=page_region,
-        field=field,
-        roi_image_path=roi_image_path,
-        text=ocr_result,
+        validator=validator_type,
+        field=parsed_result,
     )
 
 
-def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
-    option_roi = snip_roi_image(aligned_image, region)
-    roi_pixels = region.height * region.width
-
-    # Threshold and count the number of white pixels
-    _, threshold = cv2.threshold(option_roi, 200, 255, cv2.THRESH_BINARY)
-    white_pixels = cv2.countNonZero(threshold)
-    logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
-
-    # Check if there are enough black pixels to confirm a selection
-    return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
-
-
-def process_checkbox_multi_field(
-        session: requests.Session,
-        working_dir: Path,
-        aligned_image: np.ndarray,
-        page_region: str,
-        field: MultiCheckboxField,
-) -> CheckboxMultiResult:
-    # Snip the visual region for debugging
-    visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
-
-    # Check each option in the field
-    option_results: dict[str, CheckboxOptionResult] = {}
-    for option in field.options:
-        checked = get_checked(aligned_image, option.region)
-        optional_text: str | None = None
-
-        if option.text_region is not None and should_ocr_region(aligned_image, option.text_region):
-            optional_text = ocr_text_region(session, aligned_image, option.text_region, add_border=True)
-
-        option_results[option.name] = CheckboxOptionResult(checked=checked, text=optional_text)
-
-    return CheckboxMultiResult(
-        field_name=field.name,
-        page_region=page_region,
-        roi_image_path=visual_region_image_path,
-        validation_result=ValidationResult.BYPASS,  # TODO
-        field=field,
-        option_results=option_results,
-    )
-
-
-def process_checkbox_field(
-        working_dir: Path,
-        aligned_image: np.ndarray,
-        page_region: str,
-        field: CheckboxField,
-) -> CheckboxResult:
-    # Snip the visual region for debugging
-    visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
-
-    return CheckboxResult(
-        field_name=field.name,
-        page_region=page_region,
-        roi_image_path=visual_region_image_path,
-        validation_result=ValidationResult.BYPASS,  # TODO
-        field=field,
-        checked=get_checked(aligned_image, field.checkbox_region),
-    )
-
-
-def process_text_or_checkbox(
-        session: requests.Session,
-        working_dir: Path,
-        aligned_image: np.ndarray,
-        page_region: str,
-        field: TextFieldOrCheckbox,
-) -> TextOrCheckboxResult:
-    # Snip the visual region for debugging
-    visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
-
-    # See if the checkbox is checked first
-    checked = get_checked(aligned_image, field.checkbox_region)
-    if checked:
-        text = field.checkbox_text
-    else:
-        text = ocr_text_region(session, aligned_image, field.text_region)
-
-    return TextOrCheckboxResult(
-        field_name=field.name,
-        page_region=page_region,
-        roi_image_path=visual_region_image_path,
-        validation_result=ValidationResult.BYPASS,  # TODO
-        field=field,
-        text=text,
-    )
-
-
-def process_multiline_text_field(
-        session: requests.Session,
-        working_dir: Path,
-        aligned_image: np.ndarray,
-        page_region: str,
-        field: MultilineTextField,
-) -> MultilineTextResult:
-    roi_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
-    snip_roi_image(aligned_image, field.visual_region, save_path=roi_image_path)
-
-    # Multiline images need to be stitched together for OCR
-    stitched_image = stitch_images(aligned_image, field.line_regions)
-
-    # Check if any of our regions need to be OCR'd
-    ocr_checks = [should_ocr_region(aligned_image, region) for region in field.line_regions]
-
-    if any(ocr_checks):
-        ocr_result = ocr_text_region(session, roi=stitched_image, add_border=True)
-
-        # TODO: Result verification and correction here
-    else:
-        logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
-        ocr_result = ''
-
-    return MultilineTextResult(
-        field_name=field.name,
-        page_region=page_region,
-        roi_image_path=roi_image_path,
-        validation_result=ValidationResult.BYPASS,  # TODO
-        field=field,
-        text=ocr_result,
-    )
+# def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
+#     option_roi = snip_roi_image(aligned_image, region)
+#     roi_pixels = region.height * region.width
+#
+#     # Threshold and count the number of white pixels
+#     _, threshold = cv2.threshold(option_roi, 200, 255, cv2.THRESH_BINARY)
+#     white_pixels = cv2.countNonZero(threshold)
+#     logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
+#
+#     # Check if there are enough black pixels to confirm a selection
+#     return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
+#
+#
+# def process_checkbox_multi_field(
+#         session: requests.Session,
+#         working_dir: Path,
+#         aligned_image: np.ndarray,
+#         page_region: str,
+#         field: MultiCheckboxField,
+# ) -> CheckboxMultiResult:
+#     # Snip the visual region for debugging
+#     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+#     snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
+#
+#     # Check each option in the field
+#     option_results: dict[str, CheckboxOptionResult] = {}
+#     for option in field.options:
+#         checked = get_checked(aligned_image, option.region)
+#         optional_text: str | None = None
+#
+#         if option.text_region is not None and should_ocr_region(aligned_image, option.text_region):
+#             optional_text = ocr_text_region(session, aligned_image, option.text_region, add_border=True)
+#
+#         option_results[option.name] = CheckboxOptionResult(checked=checked, text=optional_text)
+#
+#     return CheckboxMultiResult(
+#         field_name=field.name,
+#         page_region=page_region,
+#         roi_image_path=visual_region_image_path,
+#         validation_result=ValidationResult.BYPASS,  # TODO
+#         field=field,
+#         option_results=option_results,
+#     )
+#
+#
+# def process_checkbox_field(
+#         working_dir: Path,
+#         aligned_image: np.ndarray,
+#         page_region: str,
+#         field: CheckboxField,
+# ) -> CheckboxResult:
+#     # Snip the visual region for debugging
+#     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+#     snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
+#
+#     return CheckboxResult(
+#         field_name=field.name,
+#         page_region=page_region,
+#         roi_image_path=visual_region_image_path,
+#         validation_result=ValidationResult.BYPASS,  # TODO
+#         field=field,
+#         checked=get_checked(aligned_image, field.checkbox_region),
+#     )
+#
+#
+# def process_text_or_checkbox(
+#         session: requests.Session,
+#         working_dir: Path,
+#         aligned_image: np.ndarray,
+#         page_region: str,
+#         field: TextFieldOrCheckbox,
+# ) -> TextOrCheckboxResult:
+#     # Snip the visual region for debugging
+#     visual_region_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+#     snip_roi_image(aligned_image, field.visual_region, save_path=visual_region_image_path)
+#
+#     # See if the checkbox is checked first
+#     checked = get_checked(aligned_image, field.checkbox_region)
+#     if checked:
+#         text = field.checkbox_text
+#     else:
+#         text = ocr_text_region(session, aligned_image, field.text_region)
+#
+#     return TextOrCheckboxResult(
+#         field_name=field.name,
+#         page_region=page_region,
+#         roi_image_path=visual_region_image_path,
+#         validation_result=ValidationResult.BYPASS,  # TODO
+#         field=field,
+#         text=text,
+#     )
+#
+#
+# def process_multiline_text_field(
+#         session: requests.Session,
+#         working_dir: Path,
+#         aligned_image: np.ndarray,
+#         page_region: str,
+#         field: MultilineTextField,
+# ) -> MultilineTextResult:
+#     roi_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
+#     snip_roi_image(aligned_image, field.visual_region, save_path=roi_image_path)
+#
+#     # Multiline images need to be stitched together for OCR
+#     stitched_image = stitch_images(aligned_image, field.line_regions)
+#
+#     # Check if any of our regions need to be OCR'd
+#     ocr_checks = [should_ocr_region(aligned_image, region) for region in field.line_regions]
+#
+#     if any(ocr_checks):
+#         ocr_result = ocr_text_region(session, roi=stitched_image, add_border=True)
+#
+#         # TODO: Result verification and correction here
+#     else:
+#         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
+#         ocr_result = ''
+#
+#     return MultilineTextResult(
+#         field_name=field.name,
+#         page_region=page_region,
+#         roi_image_path=roi_image_path,
+#         validation_result=ValidationResult.BYPASS,  # TODO
+#         field=field,
+#         text=ocr_result,
+#     )
 
 
 def process_fields(
@@ -281,18 +286,18 @@ def process_fields(
         working_dir: Path,
         aligned_image_path: Path,
         page_region: str,
-        fields: list[FormField],
+        fields: dict[str, tuple[Field, type[Validator]]],
 ) -> list[BaseResult]:
     # Load the aligned image
     aligned_image = cv2.imread(str(aligned_image_path), flags=cv2.IMREAD_GRAYSCALE)
 
     # Process each field depending on its type
     results = []
-    for field in fields:
-        logger.info(f'Processing field: {field.name}')
+    for field_name, (field, validator_type) in fields.items():
+        logger.info(f'Processing field: {field_name}')
 
         if isinstance(field, TextField):
-            result = process_text_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
+            result = process_text_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field_name=field_name, field=field, validator_type=validator_type)
         # elif isinstance(field, MultiCheckboxField):
         #     result = process_checkbox_multi_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         # elif isinstance(field, CheckboxField):

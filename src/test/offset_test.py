@@ -2,7 +2,7 @@ import cv2
 import imutils
 from pathlib import Path
 
-from src.definitions.ornithology_form import TOP_HALF_FIELDS, BOTTOM_HALF_FIELDS, BOTTOM_HALF_Y_OFFSET
+from src.definitions.ornithology_form import TOP_REGION, BOTTOM_HALF_FIELDS, BOTTOM_HALF_Y_OFFSET
 
 
 if __name__ == '__main__':
@@ -11,7 +11,7 @@ if __name__ == '__main__':
     reference_img = cv2.imread(str(resource_path / 'production' / 'kt_field_form_v8.png'))
 
     # Draw bounding boxes on the fields
-    for field in TOP_HALF_FIELDS + BOTTOM_HALF_FIELDS:
+    for field in TOP_REGION + BOTTOM_HALF_FIELDS:
         regions = []
         if 'region' in field._fields:
             regions.append(field.region)

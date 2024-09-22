@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.ornithology_form import ALL_FIELDS
+from .definitions.ornithology_form import ALL_REGIONS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
 from .definitions.results import BaseResult
@@ -220,7 +220,8 @@ class Job:
         for image_id, result in self.alignment_results.items():
             logger.info(f'Processing: {result.aligned_image_path}')
 
-            for page_region, fields in ALL_FIELDS.items():
+            previous_region_fields = None
+            for page_region, region_fields in ALL_REGIONS.items():
                 # Create a directory to store the snipped roi pictures
                 working_dir = result.aligned_image_path.parent / page_region
                 working_dir.mkdir()
@@ -232,9 +233,11 @@ class Job:
                         working_dir=working_dir,
                         aligned_image_path=result.aligned_image_path,
                         page_region=page_region,
-                        fields=fields,
+                        region_fields=region_fields,
+                        prev_region_fields=previous_region_fields,
                     )
                     self.ocr_results[image_id][page_region].extend(results)
+                    previous_region_fields = results
                 except Exception as e:
                     self._record_exception(e)
                     break

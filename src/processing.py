@@ -6,13 +6,12 @@ import requests
 from google.cloud import vision
 from pathlib import Path
 
-from src.definitions.util import BoxBounds, ValidationResult
+from src.definitions.util import BoxBounds
 
-from .definitions.fields import TextField, TextFieldOrCheckbox, MultiCheckboxField, CheckboxField, MultilineTextField, Field
+from .definitions.fields import BaseField, TextField, TextFieldOrCheckbox, MultiCheckboxField, CheckboxField, MultilineTextField
 from .definitions.parse import ParsedField, ParsedTextField
 from .definitions.results import BaseResult, TextResult  #, CheckboxMultiResult, CheckboxResult, TextOrCheckboxResult, MultilineTextResult, CheckboxOptionResult, BaseResult
-from .definitions.validation import Validator
-from .definitions.util import ValidationResult
+from .definitions.validation import ValidationState, Validator
 from .util import sanitize_filename
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
@@ -127,16 +126,21 @@ def ocr_text_region(
     return ocr_string if ocr_string is not None else ''
 
 
+def should_copy_from_previous(prev_text: str) -> bool:
+    # TODO: Be smarter about this
+    return '11' in prev_text
+
+
 def process_text_field(
         session: requests.Session,
         working_dir: Path,
         aligned_image: np.ndarray,
         page_region: str,
-        field_name: str,
         field: TextField,
         validator_type: type[Validator],
+        prev_field: ParsedTextField | None,
 ) -> TextResult:
-    roi_image_path = working_dir / f'{sanitize_filename(field_name)}.png'
+    roi_image_path = working_dir / f'{sanitize_filename(field.name)}.png'
     snip_roi_image(aligned_image, field.visual_region, save_path=roi_image_path)
 
     if should_ocr_region(aligned_image, field.visual_region):
@@ -145,12 +149,20 @@ def process_text_field(
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
         ocr_result = ''
 
-    parsed_result = ParsedTextField(name=field_name, roi_image_path=roi_image_path, field=field, text=ocr_result)
+    parsed_result = ParsedTextField(roi_image_path=roi_image_path, raw_field=field, text=ocr_result)
+
+    # Check if this field could be copied from above
+    copied_from_previous = False
+    if prev_field is not None and should_copy_from_previous(prev_field.text):
+        parsed_result.text = prev_field.text
+        copied_from_previous = True
 
     return TextResult(
         page_region=page_region,
         validator=validator_type,
-        field=parsed_result,
+        validation_result=validator_type.validate(parsed_result, allow_correction=True),
+        parsed_field=parsed_result,
+        copied_from_previous=copied_from_previous,
     )
 
 
@@ -286,18 +298,34 @@ def process_fields(
         working_dir: Path,
         aligned_image_path: Path,
         page_region: str,
-        fields: dict[str, tuple[Field, type[Validator]]],
+        region_fields: list[tuple[BaseField, type[Validator]]],
+        prev_region_fields: list[ParsedField] | None,
 ) -> list[BaseResult]:
     # Load the aligned image
     aligned_image = cv2.imread(str(aligned_image_path), flags=cv2.IMREAD_GRAYSCALE)
 
     # Process each field depending on its type
     results = []
-    for field_name, (field, validator_type) in fields.items():
-        logger.info(f'Processing field: {field_name}')
+    for raw_field, validator_type in region_fields:
+        logger.info(f'Processing field: {raw_field.name}')
 
-        if isinstance(field, TextField):
-            result = process_text_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field_name=field_name, field=field, validator_type=validator_type)
+        # Find the instance of this field in the previous region
+        prev_region_field = None
+        if prev_region_fields is not None:
+            for field in prev_region_fields:
+                if field.raw_field.name == raw_field.name:
+                    prev_region_field = field
+
+        if isinstance(raw_field, TextField):
+            result = process_text_field(
+                session=session,
+                working_dir=working_dir,
+                aligned_image=aligned_image,
+                page_region=page_region,
+                field=raw_field,
+                validator_type=validator_type,
+                prev_field=prev_region_field,
+            )
         # elif isinstance(field, MultiCheckboxField):
         #     result = process_checkbox_multi_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         # elif isinstance(field, CheckboxField):
@@ -307,7 +335,7 @@ def process_fields(
         # elif isinstance(field, MultilineTextField):
         #     result = process_multiline_text_field(session=session, working_dir=working_dir, aligned_image=aligned_image, page_region=page_region, field=field)
         else:
-            logger.warning(f'Unknown field type: {type(field)}')
+            logger.warning(f'Unknown field type: {type(raw_field)}')
             continue
 
         results.append(result)

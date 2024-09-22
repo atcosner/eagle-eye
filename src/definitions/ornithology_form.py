@@ -4,21 +4,13 @@ from .util import BoxBounds
 from . import validation as val
 
 
-TOP_REGION = {
-    #
-    # Header
-    #
-
-    'KT Number': (TextField(visual_region=BoxBounds(x=248, y=120, width=120, height=44)), val.KtNumber),
-    'Prep Number': (TextField(visual_region=BoxBounds(x=441, y=120, width=207, height=46)), val.PrepNumber),
+TOP_REGION = [
+    (TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44)), val.KtNumber),
+    # (TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46)), val.PrepNumber),
     # TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46), validator=val.NoValidation),
     # TextField(name='OT Number', visual_region=BoxBounds(x=972, y=120, width=215, height=46), validator=val.NoValidation),
-
     #
-    # Body
-    #
-
-    'Locality': (TextField(visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=False), val.Locality),
+    # (TextField(name='Locality', visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=True), val.Locality),
 
     # TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31), validator=val.GpsPoint),
     # TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=val.GpsPoint),
@@ -212,9 +204,9 @@ TOP_REGION = {
     #     validator=val.NoValidation,
     #     checkbox_region=BoxBounds(x=1076, y=907, width=13, height=13)
     # ),
-}
+]
 
 # BOTTOM_HALF_Y_OFFSET = 842
 # BOTTOM_HALF_FIELDS = [create_field_with_offset(field, BOTTOM_HALF_Y_OFFSET) for field in TOP_REGION]
 
-ALL_FIELDS = {'top': TOP_REGION}  # , 'bottom': BOTTOM_HALF_FIELDS}
+ALL_REGIONS = {'top': TOP_REGION}  # , 'bottom': BOTTOM_HALF_FIELDS}

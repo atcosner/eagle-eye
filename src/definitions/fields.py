@@ -5,22 +5,23 @@ from .util import BoxBounds
 
 
 @dataclass
-class Field:
+class BaseField:
+    name: str
     visual_region: BoxBounds
 
 
 @dataclass
-class TextField(Field):
-    allow_copy: bool | None = None
+class TextField(BaseField):
+    allow_copy: bool = False
 
 
 @dataclass
-class MultilineTextField(Field):
+class MultilineTextField(BaseField):
     line_regions: list[BoxBounds]
 
 
 @dataclass
-class TextFieldOrCheckbox(Field):
+class TextFieldOrCheckbox(BaseField):
     text_region: BoxBounds
     checkbox_region: BoxBounds
     checkbox_text: str
@@ -35,12 +36,12 @@ class CheckboxOptionField:
 
 
 @dataclass
-class MultiCheckboxField(Field):
+class MultiCheckboxField(BaseField):
     options: list[CheckboxOptionField]
 
 
 @dataclass
-class CheckboxField(Field):
+class CheckboxField(BaseField):
     checkbox_region: BoxBounds
 
 
@@ -53,14 +54,14 @@ def offset_object(item: object, y_offset: int) -> object | None:
         return None
 
 
-def create_field_with_offset(field: Field, y_offset: int) -> Field:
+def create_field_with_offset(field: BaseField, y_offset: int) -> BaseField:
     replacements = {}
     for key, value in vars(field).items():
         # Throw out callables and dunder functions
         if callable(value) or key.startswith('__'):
             continue
 
-        if isinstance(value, Field):
+        if isinstance(value, BaseField):
             # Recurse to replace the entire object
             replacements[key] = create_field_with_offset(value, y_offset)
         elif isinstance(value, list) and isinstance(value[0], CheckboxOptionField):

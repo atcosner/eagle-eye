@@ -10,14 +10,15 @@ from . import util
 class BaseResult:
     page_region: str
     validator: type[validation.Validator]
+    validation_result: validation.ValidationResult
 
     def get_html_form_name(self) -> str:
-        return f'{self.page_region}-{self.field.name}'
+        return f'{self.page_region}-{self.parsed_field.raw_field.name}'
 
     def get_validation_image_html(self) -> str:
         return f'''
             <img 
-                src="{util.get_result_image_path('')}"
+                src="{validation.get_result_image_path(self.validation_result.state)}"
                 style="width: 20px; height: 20px;"
             >
         '''
@@ -25,21 +26,22 @@ class BaseResult:
 
 @dataclass
 class TextResult(BaseResult):
-    field: fields.ParsedTextField
+    parsed_field: fields.ParsedTextField
+    copied_from_previous: bool
 
     def get_text(self) -> str:
-        return self.field.text
+        return self.parsed_field.text
 
     def handle_no_correction(self) -> None:
         # Text fields always come back on HTML forms
         pass
 
     def set_correction(self, correction: str) -> None:
-        self.field.text = correction
+        self.parsed_field.text = correction
 
     def get_html_input(self) -> str:
         html_elements = []
-        if self.field.allow_copy:
+        if self.parsed_field.raw_field.allow_copy:
             source_name = self.get_html_form_name().replace('bottom', 'top')
             html_elements.append(
                 f'''<button
@@ -53,7 +55,7 @@ class TextResult(BaseResult):
             )
 
         html_elements.append(
-            f'<input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.text}"/>'
+            f'<input type="text" name="{self.get_html_form_name()}" class="corrections-box" value="{self.parsed_field.text}"/>'
         )
         return f'<div style="display: flex;">{"".join(html_elements)}</div>'
 

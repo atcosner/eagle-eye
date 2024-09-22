@@ -2,10 +2,35 @@ import calendar
 import datetime
 import re
 from abc import ABC, abstractmethod
-from typing import Any
+from enum import Enum, auto
+from typing import Any, NamedTuple
 
 from .parse import ParsedField, ParsedTextField
-from .util import ValidationResult
+
+
+class ValidationState(Enum):
+    # Success States
+    PASSED = auto()
+    CORRECTED = auto()  # Initially malformed but passed after corrections
+
+    # Failure States
+    MALFORMED = auto()  # Uncorrectable text
+
+
+RESULT_IMAGE_PATHS = {
+    ValidationState.PASSED: '/static/images/passed.png',
+    ValidationState.CORRECTED: '/static/images/corrected.png',
+    ValidationState.MALFORMED: '/static/images/malformed.png',
+}
+
+
+class ValidationResult(NamedTuple):
+    state: ValidationState
+    reasoning: str | None
+
+
+def get_result_image_path(result: ValidationState) -> str:
+    return RESULT_IMAGE_PATHS.get(result, '')
 
 
 class Validator(ABC):
@@ -18,59 +43,61 @@ class Validator(ABC):
 class NoValidation(Validator):
     @staticmethod
     def validate(result: ParsedField, allow_correction: bool) -> ValidationResult:
-        return ValidationResult.BYPASS
+        return ValidationResult(ValidationState.PASSED, None)
 
 
 class KtNumber(Validator):
     @staticmethod
     def validate(result: ParsedTextField, allow_correction: bool) -> ValidationResult:
-        if not result.text:
-            return ValidationResult.NO_INPUT
+        cleaned_text = result.text.strip()
+
+        if not cleaned_text:
+            return ValidationResult(ValidationState.MALFORMED, 'KT Number cannot be blank')
 
         # KT Numbers are expected to be exactly 5 numbers
-        if re.compile(r'^[0-9]{5}$').match(result.text) is not None:
-            return ValidationResult.PASSED
+        if re.compile(r'^[0-9]{5}$').match(cleaned_text) is not None:
+            return ValidationResult(ValidationState.PASSED, None)
         else:
             # TODO: Is there a way to correct bad input?
-            return ValidationResult.MALFORMED
+            return ValidationResult(ValidationState.MALFORMED, 'KT Number muse be exactly 5 digits')
 
 
-class PrepNumber(Validator):
-    @staticmethod
-    def validate(result: ParsedTextField, allow_correction: bool) -> ValidationResult:
-        if not result.text:
-            return ValidationResult.NO_INPUT
-
-        # Format: 2-4 capital letters followed by number with unlimited digits
-        if re.compile(r'^[A-Z]{2,4} [0-9]{3,}$').match(result.text) is not None:
-            return ValidationResult.PASSED
-        else:
-            # TODO: Should we just upper() here?
-            #  Capital I might OCR as lowercase l?
-            return ValidationResult.MALFORMED
-
-
-class Locality(Validator):
-    @staticmethod
-    def validate(result: ParsedTextField, allow_correction: bool) -> ValidationResult:
-        if not result.text:
-            return ValidationResult.NO_INPUT
-
-        # Pre-processing
-        cleaned_text = result.text.replace(';', ':').strip()
-        pattern = re.compile(
-            r"^(?P<state>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
-            r" ?: ?(?P<county>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
-            r" ?: ?(?P<location>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)$"
-        )
-
-        # Format: <STATE> : <COUNTY> : <PLACE>
-        if (match := pattern.match(cleaned_text)) is not None:
-            formatted_text = f'{match.group("state")} : {match.group("county")} : {match.group("location")}'
-            result.text = formatted_text
-            return ValidationResult.PASSED
-        else:
-            return ValidationResult.MALFORMED
+# class PrepNumber(Validator):
+#     @staticmethod
+#     def validate(result: ParsedTextField, allow_correction: bool) -> ValidationResult:
+#         if not result.text:
+#             return ValidationState.NO_INPUT
+#
+#         # Format: 2-4 capital letters followed by number with unlimited digits
+#         if re.compile(r'^[A-Z]{2,4} [0-9]{3,}$').match(result.text) is not None:
+#             return ValidationState.PASSED
+#         else:
+#             # TODO: Should we just upper() here?
+#             #  Capital I might OCR as lowercase l?
+#             return ValidationState.MALFORMED
+#
+#
+# class Locality(Validator):
+#     @staticmethod
+#     def validate(result: ParsedTextField, allow_correction: bool) -> ValidationResult:
+#         if not result.text:
+#             return ValidationState.NO_INPUT
+#
+#         # Pre-processing
+#         cleaned_text = result.text.replace(';', ':').strip()
+#         pattern = re.compile(
+#             r"^(?P<state>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
+#             r" ?: ?(?P<county>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
+#             r" ?: ?(?P<location>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)$"
+#         )
+#
+#         # Format: <STATE> : <COUNTY> : <PLACE>
+#         if (match := pattern.match(cleaned_text)) is not None:
+#             formatted_text = f'{match.group("state")} : {match.group("county")} : {match.group("location")}'
+#             result.text = formatted_text
+#             return ValidationState.PASSED
+#         else:
+#             return ValidationState.MALFORMED
 
 
 # class GpsPoint(Validator):

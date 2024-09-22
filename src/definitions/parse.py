@@ -1,16 +1,15 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from .fields import TextField
+from .fields import BaseField
 
 
 @dataclass
 class ParsedField:
-    name: str
+    raw_field: BaseField
     roi_image_path: Path
 
 
 @dataclass
 class ParsedTextField(ParsedField):
-    field: TextField
     text: str

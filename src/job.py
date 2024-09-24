@@ -188,9 +188,14 @@ class Job:
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)
         for image_id, image_results in self.processed_results.items():
-            for _, results in image_results.items():
-                for result in results:
-                    fields_dict[result.field_name].append(result.get_text())
+            logger.info(f'Exporting results for image: {image_id}')
+
+            for page_region, region_results in image_results.items():
+                logger.info(f'Exporting results for region: {page_region}')
+
+                for result in region_results:
+                    for column_name, column_value in result.export().items():
+                        fields_dict[column_name].append(column_value)
 
         return pd.DataFrame(fields_dict)
 

@@ -139,7 +139,6 @@ def update_job_results(job_id: uuid.UUID, image_id: int):
 
 @app.route('/export-jobs', methods=['POST'])
 def export_jobs():
-    # Filter to requested exports
     jobs_to_export = [uuid.UUID(key) for key, value in request.form.items() if value == 'on']
     excel_path = manager.export_jobs(jobs_to_export)
     return send_file(excel_path)

@@ -11,7 +11,7 @@ import src.definitions.processed_fields as processed_fields
 import src.validation.util as validation_util
 from src.definitions.util import BoxBounds
 
-from .util import sanitize_filename, processed_checkbox_to_validate_checkbox
+from .util import sanitize_filename
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than X% white
@@ -148,8 +148,9 @@ def process_text_field(
         ocr_result = ''
 
     # Check if this field could be copied from above
+    allow_linking = prev_field is not None and field.allow_copy
     copied_from_previous = False
-    if prev_field is not None and should_copy_from_previous(ocr_result):
+    if allow_linking and should_copy_from_previous(ocr_result):
         copied_from_previous = True
         ocr_result = prev_field.text
 
@@ -160,7 +161,7 @@ def process_text_field(
         validation_result=field.validator.validate(ocr_result),
         base_field=field,
         text=ocr_result,
-        had_previous_field=prev_field is not None,
+        allow_linking=allow_linking,
         copied_from_previous=copied_from_previous,
     )
 
@@ -205,15 +206,13 @@ def process_multi_checkbox_field(
             text=optional_text,
         )
 
-    # Convert these to the validation checkbox
-    # TODO: Can this be better? Trying to avoid circular imports
-    validation_checkboxes = [processed_checkbox_to_validate_checkbox(checkbox) for checkbox in checkboxes.values()]
+    validation_format = [(checkbox.checked, checkbox.text) for checkbox in checkboxes.values()]
 
     return processed_fields.MultiCheckboxProcessedField(
         name=field.name,
         page_region=page_region,
         roi_image_path=roi_dest_path,
-        validation_result=field.validator.validate(validation_checkboxes),
+        validation_result=field.validator.validate(validation_format),
         base_field=field,
         checkboxes=checkboxes,
     )

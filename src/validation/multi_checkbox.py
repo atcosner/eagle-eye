@@ -4,31 +4,26 @@ from .base import Validator
 from .util import ValidationState, ValidationResult
 
 
-class CheckboxOption(NamedTuple):
-    checked: bool
-    text: str | None
-
-
 class MultiCheckboxValidator(Validator):
     @staticmethod
-    def validate(checkboxes: list[CheckboxOption]) -> ValidationResult:
+    def validate(checkboxes: list[tuple[bool, str | None]]) -> ValidationResult:
         raise NotImplementedError('MultiCheckboxValidator.validate must be overwritten')
 
 
 class OptionalCheckboxes(MultiCheckboxValidator):
     @staticmethod
-    def validate(checkboxes: list[CheckboxOption]) -> ValidationResult:
+    def validate(checkboxes: list[tuple[bool, str | None]]) -> ValidationResult:
         return ValidationResult(state=ValidationState.PASSED, reasoning=None)
 
 
 class RequireOneCheckboxes(MultiCheckboxValidator):
     @staticmethod
-    def validate(checkboxes: list[CheckboxOption]) -> ValidationResult:
-        valid_checked = any([option.checked for option in checkboxes])
+    def validate(checkboxes: list[tuple[bool, str | None]]) -> ValidationResult:
+        valid_checked = any([option[0] for option in checkboxes])
         valid_text = True
         for option in checkboxes:
-            if option.checked and option.text is not None:
-                cleaned_text = option.text.strip()
+            if option[0] and option[1] is not None:
+                cleaned_text = option[1].strip()
                 if cleaned_text == '':
                     valid_text = False
 

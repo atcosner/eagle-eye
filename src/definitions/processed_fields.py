@@ -36,6 +36,12 @@ class BaseProcessedField:
             >
         '''
 
+    def export(self) -> dict[str, str]:
+        raise NotImplementedError('BaseProcessedField.export() must be overridden')
+
+    def validate(self) -> None:
+        raise NotImplementedError('BaseProcessedField.validate() must be overridden')
+
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
         raise NotImplementedError('BaseProcessedField.handle_form_update() must be overridden')
 
@@ -47,24 +53,26 @@ class BaseProcessedField:
 class TextProcessedField(BaseProcessedField):
     base_field: fields.TextField
     text: str
-    had_previous_field: bool
+    allow_linking: bool
     copied_from_previous: bool
 
-    # def get_text(self) -> str:
-    #     return self.text
+    def export(self) -> dict[str, str]:
+        return {self.name: self.text}
+
+    def validate(self) -> None:
+        self.validation_result = self.base_field.validator.validate(self.text)
 
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
-        logger.info(form_dict)
-        self.text = form_dict[self.get_form_name()]
+        self.text = util.safe_form_get(form_dict, self.get_form_name())
 
     def get_html_input(self) -> str:
         form_name = self.get_form_name()
-        input_editable_str = 'readonly' if self.had_previous_field and self.copied_from_previous else ''
+        input_editable_str = 'readonly' if self.allow_linking and self.copied_from_previous else ''
 
         html_elements = [
             f'<input type="text" name="{form_name}" class="corrections-box" value="{self.text}" {input_editable_str}/>'
         ]
-        if self.had_previous_field:
+        if self.allow_linking:
             checked_str = 'checked' if self.copied_from_previous else ''
             html_elements.append(f'<input type="checkbox" id="{form_name}-link" class="link-checkbox" {checked_str}>')
             html_elements.append('<label>Link</label>')
@@ -84,9 +92,13 @@ class MultiCheckboxProcessedField(BaseProcessedField):
     base_field: fields.MultiCheckboxField
     checkboxes: dict[str, MultiCheckboxProcessedOption]
 
-    # def get_text(self) -> str:
-    #     # TODO: How does this need to be exported?
-    #     return ''
+    def export(self) -> dict[str, str]:
+        # TODO: How should this be exported
+        return {self.name: ''}
+
+    def validate(self) -> None:
+        validation_format = [(checkbox.checked, checkbox.text) for checkbox in self.checkboxes.values()]
+        self.validation_result = self.base_field.validator.validate(validation_format)
 
     def handle_no_form_update(self) -> None:
         # If no checkboxes are checked the form element is missing
@@ -95,13 +107,16 @@ class MultiCheckboxProcessedField(BaseProcessedField):
             checkbox.text = '' if checkbox.text is not None else None
 
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
-        logger.info(form_dict)
+        if self.get_form_name() not in form_dict:
+            logger.warning(f'Missing expected key in dict: {self.get_form_name()}')
+            return
+
         selected_options = form_dict[self.get_form_name()]
         for checkbox_name, checkbox in self.checkboxes.items():
-            checkbox.selected = checkbox_name in selected_options
-            if checkbox.selected and checkbox.text is not None:
+            checkbox.checked = checkbox_name in selected_options
+            if checkbox.checked and checkbox.text is not None:
                 # Attempt to grab the text from the form
-                checkbox.text = form_dict[f'{self.get_form_name()}-{checkbox_name}-text']
+                checkbox.text = util.safe_form_get(form_dict, f'{self.get_form_name()}-{checkbox_name}-text')
 
     def get_html_input(self) -> str:
         form_name = self.get_form_name()
@@ -127,15 +142,17 @@ class CheckboxProcessedField(BaseProcessedField):
     base_field: fields.CheckboxField
     checked: bool
 
-    # def get_text(self) -> str:
-    #     return str(self.checked)
+    def export(self) -> dict[str, str]:
+        return {self.name: str(self.checked)}
+
+    def validate(self) -> None:
+        self.validation_result = self.base_field.validator.validate(self.checked)
 
     def handle_no_form_update(self) -> None:
         self.checked = False
 
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
-        logger.info(form_dict)
-        self.checked = (form_dict[self.get_form_name()] == 'True')
+        self.checked = (util.safe_form_get(form_dict, self.get_form_name()) == 'True')
 
     def get_html_input(self) -> str:
         return util.get_checkbox_html(self.get_form_name(), 'True', self.checked)
@@ -146,12 +163,14 @@ class TextOrCheckboxProcessedField(BaseProcessedField):
     base_field: fields.TextOrCheckboxField
     text: str
 
-    # def get_text(self) -> str:
-    #     return self.text
+    def export(self) -> dict[str, str]:
+        return {self.name: self.text}
+
+    def validate(self) -> None:
+        self.validation_result = self.base_field.validator.validate(self.text)
 
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
-        logger.info(form_dict)
-        self.text = form_dict[self.get_form_name()]
+        self.text = util.safe_form_get(form_dict, self.get_form_name())
 
     def get_html_input(self) -> str:
         return f'''
@@ -164,12 +183,15 @@ class MultilineTextProcessedField(BaseProcessedField):
     base_field: fields.MultilineTextField
     text: str
 
-    # def get_text(self) -> str:
-    #     return self.text
+    def export(self) -> dict[str, str]:
+        return {self.name: self.text}
+
+    def validate(self) -> None:
+        self.validation_result = self.base_field.validator.validate(self.text)
 
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
         logger.info(form_dict)
-        self.text = form_dict[self.get_form_name()]
+        self.text = util.safe_form_get(form_dict, self.get_form_name())
 
     def get_html_input(self) -> str:
         return f'''

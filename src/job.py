@@ -159,22 +159,25 @@ class Job:
     def update_fields(self, image_id: int, web_form_dict: dict[str, str | list[str]]) -> None:
         web_form_keys = list(web_form_dict.keys())
 
-        for page_region, region_results in self.ocr_results[image_id].items():
+        for page_region, region_fields in self.ocr_results[image_id].items():
             logger.info(f'Updating region: {page_region}')
-            for result in region_results:
-                logger.info(f'Updating field: {result.name}')
+            for field in region_fields:
+                logger.info(f'Updating field: {field.name}')
 
                 # Collect all keys that start with our prefix
-                matched_keys = [key for key in web_form_keys if key.startswith(result.get_form_name())]
+                matched_keys = [key for key in web_form_keys if key.startswith(field.get_form_name())]
                 matched_dict = {
                     key: web_form_dict[key] if len(web_form_dict.getlist(key)) == 1 else web_form_dict.getlist(key)
                     for key in matched_keys
                 }
 
                 if matched_keys:
-                    result.handle_form_update(matched_dict)
+                    logger.info(f'Matched keys: {matched_dict}')
+                    field.handle_form_update(matched_dict)
                 else:
-                    result.handle_no_form_update()
+                    field.handle_no_form_update()
+
+                field.validate()
 
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)

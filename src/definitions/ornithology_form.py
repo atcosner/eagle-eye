@@ -18,16 +18,16 @@ TOP_REGION = [
 
     TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31), validator=GpsPoint),
     TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=GpsPoint),
-    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=False, validator=TextOptional),
+    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True, validator=TextOptional),
     TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33), validator=TextOptional),
 
-    TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=False, validator=NoValidation),
-    TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=False, validator=TextOptional),
+    TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True, validator=NoValidation),
+    TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True, validator=TextOptional),
 
-    TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=False, validator=Date),
-    TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=False, validator=Initials),
+    TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True, validator=Date),
+    TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=True, validator=Initials),
 
-    TextField(name='Habitat', visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=False, validator=TextRequired),
+    TextField(name='Habitat', visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=True, validator=TextRequired),
 
     MultiCheckboxField(
         name='Collection Method',
@@ -55,9 +55,9 @@ TOP_REGION = [
         checkbox_text='dark brown',
         # TODO: Allow this to be copied
     ),
-    TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=False, validator=TextOptional),
+    TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=True, validator=TextOptional),
 
-    TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=False, validator=TextOptional),
+    TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=True, validator=TextOptional),
     TextField(name='Weight (g)', visual_region=BoxBounds(x=1035, y=447, width=190, height=33), validator=Number),
 
     MultiCheckboxField(

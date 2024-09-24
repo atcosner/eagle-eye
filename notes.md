@@ -12,11 +12,11 @@
 * Remove the 'From Above' button from the tab order
 
 ## Things To Do
-1. Handle 'Copy from previous' on certain fields (Only bottom of sheet)
-2. Date validation (Fix/parse dates in different formats)
-3. Break dates into 3 columns in the export
-4. Whole-form mode (See whole image on the left)
-5. Custom validation and format for certain fields
+- [ ] Handle 'Copy from previous' on certain fields (Only bottom of sheet)
+- [ ] Date validation (Fix/parse dates in different formats)
+- [ ] Break dates into 3 columns in the export
+- [ ] Whole-form mode (See whole image on the left)
+- [ ] Custom validation and format for certain fields
 
 ## Icons Attribution
 * <a href="https://www.flaticon.com/authors/alfredo-hernandez">Icons created by Alfredo Hernandez - Flaticon</a>

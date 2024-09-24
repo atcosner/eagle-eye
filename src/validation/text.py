@@ -92,7 +92,7 @@ class OtNumber(TextValidator):
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='OT Number must be in the format: "<YEAR>-<NUMBER>"',
+                reasoning='OT Number must be in the format: <YEAR>-<NUMBER>',
             )
 
 
@@ -117,7 +117,7 @@ class Locality(TextValidator):
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='Locality must be in the format: "<STATE> : <COUNTY> : <PLACE>"',
+                reasoning='Locality must be in the format: [STATE] : [COUNTY] : [PLACE]',
             )
 
 
@@ -152,7 +152,7 @@ class Date(TextValidator):
         if (match := pattern.match(cleaned_text)) is None:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='Dates must be in the format: "<Day> <Month Name> <Year>"',
+                reasoning='Dates must be in the format: [Day] [Month Name] [Year]',
             )
 
         # Match groups
@@ -187,7 +187,7 @@ class Time(TextValidator):
         if (match := pattern.match(cleaned_text)) is None:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='Times must be in the format: "<Hour>:<Minute>"',
+                reasoning='Times must be in the format: [Hour]:[Minute]',
             )
 
         # Match groups

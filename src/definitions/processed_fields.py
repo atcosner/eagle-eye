@@ -114,8 +114,9 @@ class MultiCheckboxProcessedField(BaseProcessedField):
         selected_options = form_dict[self.get_form_name()]
         for checkbox_name, checkbox in self.checkboxes.items():
             checkbox.checked = checkbox_name in selected_options
+
+            # Expect text if this checkbox supports it and was checked
             if checkbox.checked and checkbox.text is not None:
-                # Attempt to grab the text from the form
                 checkbox.text = util.safe_form_get(form_dict, f'{self.get_form_name()}-{checkbox_name}-text')
 
     def get_html_input(self) -> str:
@@ -123,13 +124,15 @@ class MultiCheckboxProcessedField(BaseProcessedField):
         table_rows = []
 
         for checkbox_name, checkbox in self.checkboxes.items():
+            checkbox_id = f'{form_name}-{checkbox_name}'
+
             table_rows.append('<tr>')
-            table_rows.append(f'<td>{util.get_checkbox_html(form_name, checkbox_name, checkbox.checked)}</td>')
+            table_rows.append(f'<td>{util.get_checkbox_html(form_name, checkbox_name, checkbox.checked, checkbox_id=checkbox_id)}</td>')
             table_rows.append(f'<td><label>{checkbox_name}</label></td>')
             if checkbox.text is not None:
                 disabled_str = 'disabled' if not checkbox.checked else ''
                 table_rows.append(
-                    f'<td><input type="text" name="{form_name}-{checkbox_name}-text" value="{checkbox.text}" {disabled_str}/></td>'
+                    f'<td><input type="text" id="{checkbox_id}-text" name="{checkbox_id}-text" class="multi-checkbox-optional-text" value="{checkbox.text}" {disabled_str}/></td>'
                 )
             table_rows.append('</td>')
 

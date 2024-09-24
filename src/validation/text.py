@@ -170,7 +170,7 @@ class Date(TextValidator):
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning=f'Value outside acceptable values (Day: {day}, Month: "{month}", Year: {year})',
+                reasoning=f'Value outside acceptable values (Day: {day}, Month: {month}, Year: {year})',
             )
 
 

@@ -32,20 +32,25 @@ function updateViewport(forward, force_id) {
     CURRENT_INDEX = temp_index;
 }
 
-function copyFromTopRegion(sourceElementName, targetElementName) {
-    const source_elements = document.getElementsByName(sourceElementName);
-    if (source_elements.length !== 1) {
-        throw Error('Source name matched multiple elements! ' + sourceElementName);
-    }
+function installMultiCheckboxListeners() {
+    const optional_text_fields = document.getElementsByClassName("multi-checkbox-optional-text");
+    for (let i = 0; i < optional_text_fields.length; i++) {
+         var field = optional_text_fields[i];
 
-    const target_elements = document.getElementsByName(targetElementName);
-    if (target_elements.length !== 1) {
-        throw Error('Target name matched multiple elements! ' + targetElementName);
-    }
+         // Find the matching checkbox
+         var checkbox_name = field.name.replace("-text", "");
+         var matched_checkbox = document.getElementById(checkbox_name);
+         if (matched_checkbox === null) {
+            throw Error("Did not find matching checkbox with name: " + checkbox_name);
+         }
 
-    // Get the text from the element
-    var source_text = source_elements[0].value;
-    target_elements[0].value = source_text;
+        matched_checkbox.onchange = function() {
+            document.getElementById(this.id + "-text").disabled = !this.checked;
+        };
+    }
+}
+
+function installLinkCheckboxListeners() {
 }
 
 window.onload = () => {
@@ -59,4 +64,8 @@ window.onload = () => {
         focus_id = parseInt(focus_id);
     }
     updateViewport(true, focus_id);
+
+    // Install all the event listeners we are using
+    installMultiCheckboxListeners();
+    installLinkCheckboxListeners();
 };

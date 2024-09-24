@@ -62,7 +62,7 @@ class Job:
         self.reference_path: Path = reference_image_path
         self.submitted_images: dict[int, Path] = {}
         self.alignment_results: dict[int, AlignmentResult] = {}
-        self.ocr_results: dict[int, RegionResults] = defaultdict(lambda: defaultdict(list))
+        self.processed_results: dict[int, RegionResults] = defaultdict(lambda: defaultdict(list))
 
         # Create a working directory for ourselves
         self.working_dir: Path = parent_directory / str(job_id)
@@ -71,6 +71,12 @@ class Job:
             self.working_dir.mkdir()
         except Exception as e:
             self._record_exception(e)
+
+    def get_processed_results_count(self) -> int:
+        return len(self.processed_results)
+
+    def get_processed_results(self) -> dict[int, RegionResults]:
+        return self.processed_results
 
     def _change_state(self, state: JobState) -> None:
         if not self.pending_work():
@@ -159,7 +165,7 @@ class Job:
     def update_fields(self, image_id: int, web_form_dict: dict[str, str | list[str]]) -> None:
         web_form_keys = list(web_form_dict.keys())
 
-        for page_region, region_fields in self.ocr_results[image_id].items():
+        for page_region, region_fields in self.processed_results[image_id].items():
             logger.info(f'Updating region: {page_region}')
             for field in region_fields:
                 logger.info(f'Updating field: {field.name}')
@@ -181,7 +187,7 @@ class Job:
 
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)
-        for image_id, image_results in self.ocr_results.items():
+        for image_id, image_results in self.processed_results.items():
             for _, results in image_results.items():
                 for result in results:
                     fields_dict[result.field_name].append(result.get_text())
@@ -250,7 +256,7 @@ class Job:
                     )
 
                     previous_region_fields = results
-                    self.ocr_results[image_id][page_region].extend(results)
+                    self.processed_results[image_id][page_region].extend(results)
                 except Exception as e:
                     self._record_exception(e)
                     break

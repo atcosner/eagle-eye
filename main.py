@@ -111,8 +111,8 @@ def job_status_results(job_id: uuid.UUID):
             'job_results.html',
             job_id=job_id,
             job_name=job.job_name,
-            image_count=len(job.ocr_results),
-            results=job.ocr_results,
+            image_count=job.get_processed_results_count(),
+            results=job.get_processed_results(),
         )
     else:
         return render_template('unknown_job.html', job_id=job_id)

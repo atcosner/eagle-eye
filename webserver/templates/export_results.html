@@ -14,13 +14,13 @@
                 <tr>
                     <th></th>
                     <th>Job Name</th>
-                    <th>Results Count</th>
+                    <th>Processed Images</th>
                 </tr>
                 {% for job in jobs %}
                     <tr>
                         <td><input type="checkbox" name="{{ job.job_id }}"/></td>
                         <td><a href="/job-status/{{ job.job_id }}">{{ job.job_name }}</a></td>
-                        <td>{{ job.num_results() }}</td>
+                        <td>{{ job.get_processed_results_count() }}</td>
                     </tr>
                 {% endfor %}
             </table>

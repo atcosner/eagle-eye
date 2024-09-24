@@ -11,9 +11,10 @@ class BoxBounds(NamedTuple):
     height: int
 
 
-def get_checkbox_html(form_name: str, checkbox_name: str, checked: bool) -> str:
+def get_checkbox_html(form_name: str, checkbox_name: str, checked: bool, checkbox_id: str | None = None) -> str:
     checked_str = 'checked' if checked else ''
-    return f'<input type="checkbox" name="{form_name}" value="{checkbox_name}" {checked_str}/>'
+    id_str = f'id="{checkbox_id}"' if checkbox_id is not None else ''
+    return f'<input type="checkbox" {id_str} name="{form_name}" value="{checkbox_name}" {checked_str}/>'
 
 
 def safe_form_get(form_dict: dict[str, Any], key: str, default: str = '') -> Any:

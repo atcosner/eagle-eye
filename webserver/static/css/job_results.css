@@ -31,7 +31,7 @@
     margin-left: 5px;
 }
 
-/* https://stackoverflow.com/questions/7617689 */
+/* https://stackoverflow.com/questions/7617689
 .multi-checkbox-table {
     width: 100%;
 }
@@ -41,4 +41,8 @@
 }
 .multi-checkbox-table td:last-child {
     flex: 1;
+}
+*/
+
+.multi-checkbox-optional-text {
 }

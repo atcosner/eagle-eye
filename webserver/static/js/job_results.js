@@ -32,6 +32,8 @@ function updateViewport(forward, force_id) {
     CURRENT_INDEX = temp_index;
 }
 
+// TODO: Fix these functions to work when multiple images are being viewed
+
 function installMultiCheckboxListeners() {
     const optional_text_fields = document.getElementsByClassName("multi-checkbox-optional-text");
     for (let i = 0; i < optional_text_fields.length; i++) {

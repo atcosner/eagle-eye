@@ -33,18 +33,17 @@ def rotate_image(image: np.array, degrees: int) -> np.array:
     return cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
 
 
-def detect_alignment_marks(image) -> tuple[np.array, list[AlignmentMark]]:
-    # Work through the allowed rotations until we find all 8 marks
-    found_marks = []
-    used_rotation = 0
+def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMark]]:
+    found_marks: tuple[int, list[AlignmentMark]] | None = None
     for attempt_degrees in ROTATION_ATTEMPTS:
-        print(f'Rotating {attempt_degrees} degrees')
-        working_image = image.copy()
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        print(f'Trying {attempt_degrees} degree rotation')
 
+        # Grayscale and rotate if required
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         if attempt_degrees != 0:
             gray = rotate_image(gray, attempt_degrees)
 
+        # Threshold to eliminate noise
         _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         # Find all possible contours in the image
@@ -61,39 +60,26 @@ def detect_alignment_marks(image) -> tuple[np.array, list[AlignmentMark]]:
             # Check that the mark is mostly square and contains almost all black pixels
             if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
                 marks.append(AlignmentMark(x, y, height, width))
-                cv2.rectangle(working_image, (x, y), (x + width, y + height), (36, 255, 12), 3)
 
-        if len(marks) == 8:
-            found_marks = marks
-            used_rotation = attempt_degrees
+        print(f'Found {len(marks)} marks')
+        if len(marks) == 16:
+            found_marks = (attempt_degrees, marks)
             break
-            # test1 = sorted(marks, key=lambda m: m.x)
-            # test2 = sorted(test1[:4], key=lambda m: m.y) + sorted(test1[4:], key=lambda m: m.y)
-            # for mark in test2:
-            #     print(mark)
-        else:
-            print(f'Found {len(marks)} marks')
-            continue
 
-    # Order the marks in left-to-right and top-to-bottom
-    marks_x_sort = sorted(found_marks, key=lambda m: m.x)
-    sorted_marks = sorted(marks_x_sort[:4], key=lambda m: m.y) + sorted(marks_x_sort[4:], key=lambda m: m.y)
-    for mark in sorted_marks:
-        print(mark)
+    # TODO: Require at least X marks to continue
+    if found_marks is None:
+        raise RuntimeError('Failed to detect alignment marks')
 
-    # Rotate the image
-    rotated_image = rotate_image(image, used_rotation)
-    # cv2.imshow('Rotate', imutils.resize(rotated_image, width=500))
-    # cv2.waitKey(0)
+    best_rotation, marks = found_marks
+    print(f'Using a rotation of {best_rotation} degrees found {len(marks)} alignment marks')
 
-    # # Crop the image
-    # top_left = sorted_marks[0]
-    # bottom_right = sorted_marks[-1]
-    # crop_img = rotated_image[top_left.y:bottom_right.y+bottom_right.height, top_left.x:bottom_right.x+bottom_right.width]
-    # # cv2.imshow('Cropped', imutils.resize(crop_img, width=500))
-    # # cv2.waitKey(0)
+    # Order the marks in left-to-right and top-to-bottom order
+    marks_x_sort = sorted(marks, key=lambda m: m.x)
+    sorted_marks = sorted(marks_x_sort[:len(marks)//2], key=lambda m: m.y) + sorted(marks_x_sort[len(marks)//2:], key=lambda m: m.y)
 
-    return rotated_image, sorted_marks  # {value: sorted_marks[idx] for idx, value in enumerate(MarkLocation)}
+    # Rotate the image and return the alignment marks
+    rotated_image = rotate_image(image, best_rotation)
+    return rotated_image, sorted_marks
 
 
 def align_images(
@@ -188,8 +174,8 @@ if __name__ == '__main__':
     resource_path = Path.cwd() / '..' / '..' / 'forms'
 
     # Load the dev and production images
-    test_img = cv2.imread(str(resource_path / 'production' / 'form1__filled_skew2.png'))
-    reference_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_template.png'))
+    test_img = cv2.imread(str(resource_path / 'dev' / 'test_form__filled_errors.jpg'))
+    reference_img = cv2.imread(str(resource_path / 'production' / 'kt_field_form_v8.png'))
 
     test_img, test_marks = detect_alignment_marks(test_img)
     reference_img, reference_marks = detect_alignment_marks(reference_img)

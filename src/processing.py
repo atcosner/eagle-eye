@@ -14,7 +14,7 @@ from src.definitions.util import BoxBounds
 from .util import sanitize_filename
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
-CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.5  # Checked checkboxes should have less than X% white
+CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.6  # Checked checkboxes should have less than X% white
 
 logger = logging.getLogger(__name__)
 client = vision.ImageAnnotatorClient()

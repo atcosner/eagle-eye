@@ -69,7 +69,7 @@ class PrepNumber(TextValidator):
         if not cleaned_text:
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Prep Number cannot be blank')
 
-        # Format: 2-4 capital letters followed by number with unlimited digits
+        # Format: 2-4 capital letters followed by number with 3+ digits
         if re.compile(r'^[A-Z]{2,4} [0-9]{3,}$').match(cleaned_text) is not None:
             return ValidationResult(state=ValidationState.PASSED, reasoning=None)
         else:
@@ -77,7 +77,7 @@ class PrepNumber(TextValidator):
             #  Capital I might OCR as lowercase l?
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='Prep Number must be 2-4 capital letters followed by a number',
+                reasoning='Prep Number must be 2-4 capital letters followed by a number with 3+ digits',
             )
 
 

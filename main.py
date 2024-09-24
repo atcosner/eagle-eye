@@ -145,7 +145,7 @@ def export_jobs():
 
 
 if __name__ == '__main__':
-    set_up_root_logger(verbose=False)
+    set_up_root_logger(verbose=True)
     manager = JobManager(reference_image=REFERENCE_IMAGE)
 
     app.jinja_env.auto_reload = True

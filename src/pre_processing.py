@@ -82,8 +82,9 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
     logger.info(f'Using a rotation of {best_rotation} degrees found {len(marks)} alignment marks')
 
     # Order the marks in left-to-right and top-to-bottom order
+    # TODO: Remove magic number of marks
     marks_x_sort = sorted(marks, key=lambda m: m.x)
-    sorted_marks = sorted(marks_x_sort[:4], key=lambda m: m.y) + sorted(marks_x_sort[4:], key=lambda m: m.y)
+    sorted_marks = sorted(marks_x_sort[:8], key=lambda m: m.y) + sorted(marks_x_sort[8:], key=lambda m: m.y)
 
     # Rotate the image and return the alignment marks
     rotated_image = rotate_image(image, best_rotation)

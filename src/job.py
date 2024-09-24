@@ -156,18 +156,25 @@ class Job:
 
         self._change_state(JobState.FILES_SUBMITTED)
 
-    def update_results(self, image_id: int, web_form_dict: dict[str, str | list[str]]) -> None:
-        for page_region, region_results in self.ocr_results[image_id].items():
-            for result in region_results:
-                if result.get_html_form_name() in web_form_dict:
-                    # Try to see if this key is a list
-                    value = web_form_dict.getlist(result.get_html_form_name())
-                    if len(value) == 1:
-                        value = value[0]
+    def update_fields(self, image_id: int, web_form_dict: dict[str, str | list[str]]) -> None:
+        web_form_keys = list(web_form_dict.keys())
 
-                    result.set_correction(value)
+        for page_region, region_results in self.ocr_results[image_id].items():
+            logger.info(f'Updating region: {page_region}')
+            for result in region_results:
+                logger.info(f'Updating field: {result.name}')
+
+                # Collect all keys that start with our prefix
+                matched_keys = [key for key in web_form_keys if key.startswith(result.get_form_name())]
+                matched_dict = {
+                    key: web_form_dict[key] if len(web_form_dict.getlist(key)) == 1 else web_form_dict.getlist(key)
+                    for key in matched_keys
+                }
+
+                if matched_keys:
+                    result.handle_form_update(matched_dict)
                 else:
-                    result.handle_no_correction()
+                    result.handle_no_form_update()
 
     def export_results(self) -> pd.DataFrame:
         fields_dict = defaultdict(list)

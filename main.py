@@ -133,7 +133,7 @@ def update_job_results(job_id: uuid.UUID, image_id: int):
     if job is None:
         return render_template('unknown_job.html', job_id=job_id)
 
-    job.update_results(image_id, request.form)
+    job.update_fields(image_id, request.form)
     return redirect(url_for('job_status_results', job_id=job_id, focus_id=image_id))
 
 

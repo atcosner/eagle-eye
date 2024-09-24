@@ -193,8 +193,11 @@ def process_multi_checkbox_field(
         checked = get_checked(aligned_image, checkbox.region)
         optional_text: str | None = None
 
-        if checkbox.text_region is not None and should_ocr_region(aligned_image, checkbox.text_region):
-            optional_text = ocr_text_region(session, aligned_image, checkbox.text_region, add_border=True)
+        if checkbox.text_region is not None:
+            if should_ocr_region(aligned_image, checkbox.text_region):
+                optional_text = ocr_text_region(session, aligned_image, checkbox.text_region, add_border=True)
+            else:
+                optional_text = ''
 
         checkboxes[checkbox.name] = processed_fields.MultiCheckboxProcessedOption(
             name=checkbox.name,

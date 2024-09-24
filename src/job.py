@@ -171,7 +171,7 @@ class Job:
                 logger.info(f'Updating field: {field.name}')
 
                 # Collect all keys that start with our prefix
-                matched_keys = [key for key in web_form_keys if key.startswith(field.get_form_name())]
+                matched_keys = [key for key in web_form_keys if key.startswith(field.form_name())]
                 matched_dict = {
                     key: web_form_dict[key] if len(web_form_dict.getlist(key)) == 1 else web_form_dict.getlist(key)
                     for key in matched_keys

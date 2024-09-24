@@ -27,11 +27,15 @@
     box-sizing: border-box;
 }
 
+.corrections-box:read-only {
+    background-color: LightGray;
+}
+
 .link-checkbox {
     margin-left: 5px;
 }
 
-/* https://stackoverflow.com/questions/7617689
+/* https://stackoverflow.com/questions/7617689 */
 .multi-checkbox-table {
     width: 100%;
 }
@@ -42,7 +46,7 @@
 .multi-checkbox-table td:last-child {
     flex: 1;
 }
-*/
+
 
 .multi-checkbox-optional-text {
 }

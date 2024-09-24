@@ -16,7 +16,7 @@
 - [ ] Date validation (Fix/parse dates in different formats)
 - [ ] Break dates into 3 columns in the export
 - [ ] Whole-form mode (See whole image on the left)
-- [ ] Custom validation and format for certain fields
+- [X] Custom validation and format for certain fields
 
 ## Icons Attribution
 * <a href="https://www.flaticon.com/authors/alfredo-hernandez">Icons created by Alfredo Hernandez - Flaticon</a>

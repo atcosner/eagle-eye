@@ -35,14 +35,14 @@ function updateViewport(forward, force_id) {
 function installMultiCheckboxListeners() {
     const optional_text_fields = document.getElementsByClassName("multi-checkbox-optional-text");
     for (let i = 0; i < optional_text_fields.length; i++) {
-         var field = optional_text_fields[i];
+        var field = optional_text_fields[i];
 
-         // Find the matching checkbox
-         var checkbox_name = field.name.replace("-text", "");
-         var matched_checkbox = document.getElementById(checkbox_name);
-         if (matched_checkbox === null) {
+        // Find the matching checkbox
+        var checkbox_name = field.name.replace("-text", "");
+        var matched_checkbox = document.getElementById(checkbox_name);
+        if (matched_checkbox === null) {
             throw Error("Did not find matching checkbox with name: " + checkbox_name);
-         }
+        }
 
         matched_checkbox.onchange = function() {
             document.getElementById(this.id + "-text").disabled = !this.checked;
@@ -51,6 +51,67 @@ function installMultiCheckboxListeners() {
 }
 
 function installLinkCheckboxListeners() {
+    const link_checkboxes = document.getElementsByClassName("link-checkbox");
+    for (let i = 0; i < link_checkboxes.length; i++) {
+        var checkbox = link_checkboxes[i];
+
+        checkbox.onchange = function() {
+            // Get the matching input box
+            var id_parts = this.id.split("-");
+            var text_input_id = id_parts[0] + "-" + id_parts[1];
+
+            var text_input = document.getElementById(text_input_id);
+            if (text_input === null) {
+                throw Error("Did not find matching input with id: " + text_input_id);
+            }
+
+            // Return to manual entry if we are not checked
+            if (!this.checked) {
+                text_input.readOnly = false;
+                text_input.tabIndex = 0;
+                return;
+            }
+
+            // Disable manual editing and remove from the tab order
+            text_input.readOnly = true;
+            text_input.tabIndex = -1;
+
+            // Find the linked element
+            var linked_input_id = text_input.id.replace("bottom", "top");
+            var linked_text_input = document.getElementById(linked_input_id);
+            if (linked_text_input === null) {
+                throw Error("Did not find matching linked input with id: " + linked_input_id);
+            }
+
+            // Set our text to the linked elements value
+            text_input.value = linked_text_input.value;
+        };
+    }
+}
+
+function installLinkInputListeners() {
+    const correction_boxes = document.getElementsByClassName("corrections-box");
+    for (let i = 0; i < correction_boxes.length; i++) {
+        var correction_box = correction_boxes[i];
+
+        // Only install these on boxes in the "top" region
+        if (!correction_box.id.includes("top")) {
+            continue;
+        }
+
+        correction_box.oninput = function() {
+            // Find the linked element
+            var linked_input_id = this.id.replace("top", "bottom");
+            var linked_text_input = document.getElementById(linked_input_id);
+            if (linked_text_input === null) {
+                throw Error("Did not find matching linked input with id: " + linked_input_id);
+            }
+
+            if (linked_text_input.readOnly) {
+                linked_text_input.value = this.value;
+            }
+        }
+    }
 }
 
 window.onload = () => {
@@ -68,4 +129,5 @@ window.onload = () => {
     // Install all the event listeners we are using
     installMultiCheckboxListeners();
     installLinkCheckboxListeners();
+    installLinkInputListeners();
 };

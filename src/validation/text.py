@@ -31,6 +31,9 @@ class Number(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
         cleaned_text = text.strip()
+        if not cleaned_text:
+            return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field cannot be blank')
+
         try:
             int(cleaned_text)
             return ValidationResult(state=ValidationState.PASSED, reasoning=None)
@@ -39,7 +42,7 @@ class Number(TextValidator):
                 float(cleaned_text)
                 return ValidationResult(state=ValidationState.PASSED, reasoning=None)
             except ValueError:
-                return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field muse be a number')
+                return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field must be a number')
 
 
 class KtNumber(TextValidator):

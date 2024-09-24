@@ -1,6 +1,10 @@
 import copy
 from dataclasses import dataclass
 
+from src.validation.multi_checkbox import MultiCheckboxValidator
+from src.validation.single_checkbox import SingleCheckboxValidator
+from src.validation.text import TextValidator
+
 from .util import BoxBounds
 
 
@@ -12,24 +16,27 @@ class BaseField:
 
 @dataclass
 class TextField(BaseField):
+    validator: type[TextValidator]
     allow_copy: bool = False
 
 
 @dataclass
 class MultilineTextField(BaseField):
+    validator: type[TextValidator]
     line_regions: list[BoxBounds]
 
 
 @dataclass
-class TextFieldOrCheckbox(BaseField):
+class TextOrCheckboxField(BaseField):
+    validator: type[TextValidator]
     text_region: BoxBounds
     checkbox_region: BoxBounds
     checkbox_text: str
 
 
 @dataclass
-# Explicitly not a 'FormField' since it cannot stand alone
-class CheckboxOptionField:
+# Not a BaseField as it cannot stand on its own
+class MultiCheckboxOption:
     name: str
     region: BoxBounds
     text_region: BoxBounds | None = None
@@ -37,11 +44,13 @@ class CheckboxOptionField:
 
 @dataclass
 class MultiCheckboxField(BaseField):
-    options: list[CheckboxOptionField]
+    validator: type[MultiCheckboxValidator]
+    checkboxes: list[MultiCheckboxOption]
 
 
 @dataclass
 class CheckboxField(BaseField):
+    validator: type[SingleCheckboxValidator]
     checkbox_region: BoxBounds
 
 
@@ -64,22 +73,14 @@ def create_field_with_offset(field: BaseField, y_offset: int) -> BaseField:
         if isinstance(value, BaseField):
             # Recurse to replace the entire object
             replacements[key] = create_field_with_offset(value, y_offset)
-        elif isinstance(value, list) and isinstance(value[0], CheckboxOptionField):
+        elif isinstance(value, list) and isinstance(value[0], MultiCheckboxOption):
             # Recurse for collections of checkbox options
-            # TODO: Handle this automatically for potentially more things that are not FormField
+            # TODO: Handle this automatically for potentially more things that are not lists of MultiCheckboxOption
             replacements[key] = [create_field_with_offset(part, y_offset) for part in value]
         else:
             # Replacements that do not require recursion
-
-            # Edge Case: 'allow_copy'
-            if key == 'allow_copy':
-                # This can either be a bool or None. If this is set to a bool, replace it with 'True' in the new object
-                # i.e. Locality has allow_copy=False in the top section, so we need to override it to True for the bottom
-                if value is not None:
-                    replacements[key] = True
-            else:
-                if (new_value := offset_object(value, y_offset)) is not None:
-                    replacements[key] = new_value
+            if (new_value := offset_object(value, y_offset)) is not None:
+                replacements[key] = new_value
 
     # Deep copy the object and then perform replacements
     new_field = copy.deepcopy(field)

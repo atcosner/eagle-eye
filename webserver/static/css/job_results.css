@@ -1,18 +1,24 @@
 .image-table {
-    border: 2px solid black;
     border-collapse: collapse;
 }
 
 .form-field-row {
-    border-bottom: 2px solid black;
+    border: 2px solid black;
 }
 
 .field-name-cell {
-    border-right: 2px solid black;
+    border: 2px solid black;
 }
 
 .validation-cell {
+    border: 2px solid black;
     text-align: center;
+}
+
+.correction-cell {
+    border: 2px solid black;
+    padding-right: 5px;
+    padding-left: 5px;
 }
 
 .corrections-box {
@@ -21,6 +27,18 @@
     box-sizing: border-box;
 }
 
-.copy-button {
-    white-space: nowrap;
+.link-checkbox {
+    margin-left: 5px;
+}
+
+/* https://stackoverflow.com/questions/7617689 */
+.multi-checkbox-table {
+    width: 100%;
+}
+.multi-checkbox-table tr {
+    display: flex;
+    align-items: stretch;
+}
+.multi-checkbox-table td:last-child {
+    flex: 1;
 }

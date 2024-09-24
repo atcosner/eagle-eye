@@ -22,7 +22,7 @@
     </div>
 
     {% for image_index, region_results in results.items() %}
-        <div id="results-viewport-{{ image_index }}"  style="display: none;">
+        <div id="results-viewport-{{ image_index }}"  style="display: none; min-width: 1600px;">
             <form
                     id="job-results-corrections"
                     action="/job-status/{{ job_id }}/{{ image_index }}/update"
@@ -33,7 +33,7 @@
                     <h3>Page Region: {{ page_region.capitalize() }}</h3>
 
                     <table class="image-table">
-                        <tr class="form-field-row">
+                        <tr>
                             <th>Data Field</th>
                             <th>Validation</th>
                             <th>Extracted Text</th>
@@ -41,13 +41,12 @@
                         </tr>
                             {% for result in results %}
                                 <tr class="form-field-row">
-                                    <td class="field-name-cell">{{ result.parsed_field.raw_field.name }}</td>
+                                    <td class="field-name-cell">{{ result.name }}</td>
                                     <td class="validation-cell">{{ result.get_validation_image_html() | safe }}</td>
-                                    <td>{{ result.get_html_input() | safe }}</td>
+                                    <td class="correction-cell">{{ result.get_html_input() | safe }}</td>
                                     <td>
                                         <img
-                                                src="/job-file/{{ job_id }}/{{ image_index }}/{{ page_region }}/{{ result.parsed_field.roi_image_path.name }}"
-                                                style="border: 2px solid black;"
+                                                src="/job-file/{{ job_id }}/{{ image_index }}/{{ page_region }}/{{ result.roi_image_path.name }}"
                                         />
                                     </td>
                                 </tr>

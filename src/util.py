@@ -1,5 +1,8 @@
 import logging
 
+from src.definitions.processed_fields import MultiCheckboxProcessedOption
+from src.validation.multi_checkbox import CheckboxOption
+
 UNSAFE_CHARACTERS = ['/', '.', ' ', '%']
 
 
@@ -22,3 +25,10 @@ def sanitize_filename(name: str) -> str:
     for character in UNSAFE_CHARACTERS:
         clean_name = clean_name.replace(character, '_')
     return clean_name
+
+
+def processed_checkbox_to_validate_checkbox(checkbox: MultiCheckboxProcessedOption) -> CheckboxOption:
+    return CheckboxOption(
+        checked=checkbox.checked,
+        text=checkbox.text,
+    )

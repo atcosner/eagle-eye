@@ -12,13 +12,15 @@ from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
 from .definitions.ornithology_form import ALL_REGIONS
+from .definitions.processed_fields import BaseProcessedField
+
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
-from .definitions.results import BaseResult
+
 
 logger = logging.getLogger(__name__)
 
-RegionResults = dict[str, list[BaseResult]]
+RegionResults = dict[str, list[BaseProcessedField]]
 
 
 class JobState(Enum):
@@ -222,7 +224,7 @@ class Job:
 
             previous_region_fields = None
             for page_region, region_fields in ALL_REGIONS.items():
-                # Create a directory to store the snipped roi pictures
+                # Create a directory to store the snipped roi pictures for this region
                 working_dir = result.aligned_image_path.parent / page_region
                 working_dir.mkdir()
                 logger.info(f'Processing "{page_region}": {working_dir}')
@@ -236,8 +238,9 @@ class Job:
                         region_fields=region_fields,
                         prev_region_fields=previous_region_fields,
                     )
-                    self.ocr_results[image_id][page_region].extend(results)
+
                     previous_region_fields = results
+                    self.ocr_results[image_id][page_region].extend(results)
                 except Exception as e:
                     self._record_exception(e)
                     break

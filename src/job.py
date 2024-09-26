@@ -78,8 +78,8 @@ class Job:
     def get_processed_results(self) -> dict[int, RegionResults]:
         return self.processed_results
 
-    def _change_state(self, state: JobState) -> None:
-        if not self.pending_work():
+    def _change_state(self, state: JobState, force: bool = False) -> None:
+        if not self.pending_work() and not force:
             logger.warning('Attempting to change state when we are in a terminal state.')
             return
 
@@ -109,15 +109,10 @@ class Job:
     def pending_work(self) -> bool:
         return self.get_current_state().state not in [JobState.ERROR, JobState.COMPLETED]
 
-    def success(self) -> bool | None:
-        if self.pending_work():
-            return None
-        elif self.get_current_state().state is JobState.COMPLETED:
-            return True
-        else:
-            return False
+    def succeeded(self) -> bool:
+        return self.get_current_state().state is JobState.COMPLETED
 
-    def continue_processing(self) -> None:
+    def progress_processing(self) -> None:
         if not self.pending_work():
             return
 
@@ -127,6 +122,20 @@ class Job:
                 self._pre_process()
             case JobState.PRE_PROCESSED:
                 self._process()
+            case _:
+                logger.warning(f'Unknown state: {current_state}')
+
+    def regress_processing(self) -> None:
+        current_state = self.get_current_state().state
+        match current_state:
+            case JobState.ERROR | JobState.FILES_SUBMITTED | JobState.CREATED:
+                return
+            case JobState.COMPLETED:
+                self.processed_results.clear()
+                self._change_state(JobState.PRE_PROCESSED, force=True)
+            case JobState.PRE_PROCESSED:
+                self.alignment_results.clear()
+                self._change_state(JobState.FILES_SUBMITTED, force=True)
             case _:
                 logger.warning(f'Unknown state: {current_state}')
 

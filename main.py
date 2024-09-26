@@ -118,10 +118,19 @@ def job_status_results(job_id: uuid.UUID):
         return render_template('unknown_job.html', job_id=job_id)
 
 
-@app.route('/continue-job/<uuid:job_id>', methods=['POST'])
-def continue_job(job_id: uuid.UUID):
+@app.route('/progress-job/<uuid:job_id>', methods=['POST'])
+def progress_job(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
-        job.continue_processing()
+        job.progress_processing()
+        return redirect(url_for('job_status', job_id=job.job_id))
+    else:
+        return render_template('unknown_job.html', job_id=job_id)
+
+
+@app.route('/regress-job/<uuid:job_id>', methods=['POST'])
+def regress_job(job_id: uuid.UUID):
+    if job := manager.get_job(job_id):
+        job.regress_processing()
         return redirect(url_for('job_status', job_id=job.job_id))
     else:
         return render_template('unknown_job.html', job_id=job_id)

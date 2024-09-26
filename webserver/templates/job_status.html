@@ -10,8 +10,11 @@
         <h2>Job: {{ job_name }}</h2>
         <h4>State: {{ job_state.state.name }}</h4>
 
-        <form id="continue-job" action="/continue-job/{{ job_id }}" method="post">
-            <input type="submit" value="Continue"/>
+        <form id="progress-job" action="/progress-job/{{ job_id }}" method="post">
+            <input type="submit" value="Progress"/>
+        </form>
+        <form id="regress-job" action="/regress-job/{{ job_id }}" method="post">
+            <input type="submit" value="Regress"/>
         </form>
 
         <br>

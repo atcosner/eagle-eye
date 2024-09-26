@@ -15,12 +15,13 @@ FormUpdateDict = dict[str, str | list[str]]
 @dataclass
 class BaseProcessedField:
     name: str
+    image_index: int
     page_region: str
     roi_image_path: Path
     validation_result: validation_util.ValidationResult
 
     def form_name(self) -> str:
-        return f'{self.page_region}-{self.name}'
+        return f'{self.image_index}-{self.page_region}-{self.name}'
 
     def get_validation_image_html(self) -> str:
         if self.validation_result.reasoning is None:

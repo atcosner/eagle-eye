@@ -147,6 +147,7 @@ def process_text_field(
         session: requests.Session,
         roi_dest_path: Path,
         aligned_image: np.ndarray,
+        image_index: int,
         page_region: str,
         field: base_fields.TextField,
         prev_field: processed_fields.TextProcessedField | None,
@@ -175,6 +176,7 @@ def process_text_field(
 
     return processed_fields.TextProcessedField(
         name=field.name,
+        image_index=image_index,
         page_region=page_region,
         roi_image_path=roi_dest_path,
         validation_result=field.validator.validate(ocr_result),
@@ -189,6 +191,7 @@ def process_multi_checkbox_field(
         session: requests.Session,
         roi_dest_path: Path,
         aligned_image: np.ndarray,
+        image_index: int,
         page_region: str,
         field: base_fields.MultiCheckboxField,
 ) -> processed_fields.MultiCheckboxProcessedField:
@@ -216,6 +219,7 @@ def process_multi_checkbox_field(
 
     return processed_fields.MultiCheckboxProcessedField(
         name=field.name,
+        image_index=image_index,
         page_region=page_region,
         roi_image_path=roi_dest_path,
         validation_result=field.validator.validate(validation_format),
@@ -227,6 +231,7 @@ def process_multi_checkbox_field(
 def process_checkbox_field(
         roi_dest_path: Path,
         aligned_image: np.ndarray,
+        image_index: int,
         page_region: str,
         field: base_fields.CheckboxField,
 ) -> processed_fields.CheckboxProcessedField:
@@ -235,6 +240,7 @@ def process_checkbox_field(
     checked = get_checked(aligned_image, field.checkbox_region)
     return processed_fields.CheckboxProcessedField(
         name=field.name,
+        image_index=image_index,
         page_region=page_region,
         roi_image_path=roi_dest_path,
         validation_result=field.validator.validate(checked),
@@ -247,6 +253,7 @@ def process_multiline_text_field(
         session: requests.Session,
         roi_dest_path: Path,
         aligned_image: np.ndarray,
+        image_index: int,
         page_region: str,
         field: base_fields.MultilineTextField,
 ) -> processed_fields.MultilineTextProcessedField:
@@ -266,6 +273,7 @@ def process_multiline_text_field(
 
     return processed_fields.MultilineTextProcessedField(
         name=field.name,
+        image_index=image_index,
         page_region=page_region,
         roi_image_path=roi_dest_path,
         validation_result=field.validator.validate(ocr_result),
@@ -278,6 +286,7 @@ def process_fields(
         session: requests.Session,
         working_dir: Path,
         aligned_image_path: Path,
+        image_index: int,
         page_region: str,
         region_fields: list[base_fields.BaseField],
         prev_region_fields: list[processed_fields.BaseProcessedField] | None,
@@ -303,6 +312,7 @@ def process_fields(
                 session=session,
                 roi_dest_path=roi_dest_path,
                 aligned_image=aligned_image,
+                image_index=image_index,
                 page_region=page_region,
                 field=base_field,
                 prev_field=prev_region_field,
@@ -312,6 +322,7 @@ def process_fields(
                 session=session,
                 roi_dest_path=roi_dest_path,
                 aligned_image=aligned_image,
+                image_index=image_index,
                 page_region=page_region,
                 field=base_field,
             )
@@ -319,6 +330,7 @@ def process_fields(
             result = process_checkbox_field(
                 roi_dest_path=roi_dest_path,
                 aligned_image=aligned_image,
+                image_index=image_index,
                 page_region=page_region,
                 field=base_field,
             )
@@ -327,6 +339,7 @@ def process_fields(
                 session=session,
                 roi_dest_path=roi_dest_path,
                 aligned_image=aligned_image,
+                image_index=image_index,
                 page_region=page_region,
                 field=base_field,
             )

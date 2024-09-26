@@ -32,8 +32,6 @@ function updateViewport(forward, force_id) {
     CURRENT_INDEX = temp_index;
 }
 
-// TODO: Fix these functions to work when multiple images are being viewed
-
 function installMultiCheckboxListeners() {
     const optional_text_fields = document.getElementsByClassName("multi-checkbox-optional-text");
     for (let i = 0; i < optional_text_fields.length; i++) {
@@ -58,9 +56,8 @@ function installLinkCheckboxListeners() {
         var checkbox = link_checkboxes[i];
 
         checkbox.onchange = function() {
-            // Get the matching input box
-            var id_parts = this.id.split("-");
-            var text_input_id = id_parts[0] + "-" + id_parts[1];
+            // Get the matching input box (Drop the last "-XXXX" from the ID)
+            var text_input_id = this.id.split("-").slice(0, -1).join("-");
 
             var text_input = document.getElementById(text_input_id);
             if (text_input === null) {

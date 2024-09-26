@@ -240,7 +240,7 @@ class Job:
             }
         )
 
-        for image_id, result in self.alignment_results.items():
+        for image_index, result in self.alignment_results.items():
             logger.info(f'Processing: {result.aligned_image_path}')
 
             previous_region_fields = None
@@ -255,13 +255,14 @@ class Job:
                         session=session,
                         working_dir=working_dir,
                         aligned_image_path=result.aligned_image_path,
+                        image_index=image_index,
                         page_region=page_region,
                         region_fields=region_fields,
                         prev_region_fields=previous_region_fields,
                     )
 
                     previous_region_fields = results
-                    self.processed_results[image_id][page_region].extend(results)
+                    self.processed_results[image_index][page_region].extend(results)
                 except Exception as e:
                     self._record_exception(e)
                     break

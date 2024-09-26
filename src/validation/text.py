@@ -12,6 +12,12 @@ class TextValidator(Validator):
         raise NotImplementedError('TextValidator.validate must be overwritten')
 
 
+class TextValidationBypass(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        return ValidationResult(state=ValidationState.BYPASS, reasoning=None)
+
+
 class TextOptional(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:

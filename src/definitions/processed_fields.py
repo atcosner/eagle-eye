@@ -167,26 +167,6 @@ class CheckboxProcessedField(BaseProcessedField):
 
 
 @dataclass
-class TextOrCheckboxProcessedField(BaseProcessedField):
-    base_field: fields.TextOrCheckboxField
-    text: str
-
-    def export(self) -> dict[str, str]:
-        return {self.name: self.text}
-
-    def validate(self) -> None:
-        self.validation_result = self.base_field.validator.validate(self.text)
-
-    def handle_form_update(self, form_dict: FormUpdateDict) -> None:
-        self.text = util.safe_form_get(form_dict, self.form_name())
-
-    def get_html_input(self) -> str:
-        return f'''
-            <input type="text" name="{self.form_name()}" class="corrections-box" value="{self.text}"/>
-        '''
-
-
-@dataclass
 class MultilineTextProcessedField(BaseProcessedField):
     base_field: fields.MultilineTextField
     text: str

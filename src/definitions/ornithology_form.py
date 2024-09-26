@@ -1,10 +1,9 @@
-from src.validation.base import NoValidation
 from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckboxes
 from src.validation.single_checkbox import OptionalCheckbox
 from src.validation.text import TextOptional, TextRequired, KtNumber, PrepNumber, Locality, GpsPoint, Date, Time, \
-    Number, OtNumber, Initials, Tissues
+    Number, OtNumber, Initials, Tissues, TextValidationBypass
 
-from .base_fields import TextField, MultilineTextField, TextOrCheckboxField, MultiCheckboxOption, MultiCheckboxField, \
+from .base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
     CheckboxField, create_field_with_offset
 from .util import BoxBounds
 
@@ -18,11 +17,11 @@ TOP_REGION = [
 
     TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31), validator=GpsPoint),
     TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=GpsPoint),
-    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True, validator=TextOptional),
-    TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33), validator=TextOptional),
+    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True, validator=TextValidationBypass),
+    TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33), validator=TextValidationBypass),
 
-    TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True, validator=NoValidation),
-    TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True, validator=TextOptional),
+    TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True, validator=TextValidationBypass),
+    TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True, validator=TextValidationBypass),
 
     TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True, validator=Date),
     TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=True, validator=Initials),
@@ -46,18 +45,18 @@ TOP_REGION = [
         ],
     ),
 
-    TextOrCheckboxField(
+    TextField(
         name='Iris',
         visual_region=BoxBounds(x=157, y=413, width=379, height=40),
+        allow_copy=True,
         validator=TextRequired,
         text_region=BoxBounds(x=287, y=411, width=247, height=32),
         checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
         checkbox_text='dark brown',
-        # TODO: Allow this to be copied
     ),
-    TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=True, validator=TextOptional),
+    TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=True, validator=TextValidationBypass),
 
-    TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=True, validator=TextOptional),
+    TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=True, validator=TextValidationBypass),
     TextField(name='Weight (g)', visual_region=BoxBounds(x=1035, y=447, width=190, height=33), validator=Number),
 
     MultiCheckboxField(
@@ -70,7 +69,7 @@ TOP_REGION = [
         ],
     ),
     TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33), validator=Time),
-    TextOrCheckboxField(
+    TextField(
         name='Time of Tissue Preservation',
         visual_region=BoxBounds(x=797, y=485, width=423, height=40),
         validator=Time,
@@ -164,7 +163,7 @@ TOP_REGION = [
     MultilineTextField(
         name='Remarks',
         visual_region=BoxBounds(x=160, y=824, width=1067, height=73),
-        validator=TextOptional,
+        validator=TextValidationBypass,
         line_regions=[
             BoxBounds(x=265, y=816, width=962, height=35),
             BoxBounds(x=162, y=856, width=937, height=32)

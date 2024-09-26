@@ -18,20 +18,16 @@ class BaseField:
 class TextField(BaseField):
     validator: type[TextValidator]
     allow_copy: bool = False
+    # Fields for if this text field has a checkbox with default language
+    text_region: BoxBounds | None = None
+    checkbox_region: BoxBounds | None = None
+    checkbox_text: str | None = None
 
 
 @dataclass
 class MultilineTextField(BaseField):
     validator: type[TextValidator]
     line_regions: list[BoxBounds]
-
-
-@dataclass
-class TextOrCheckboxField(BaseField):
-    validator: type[TextValidator]
-    text_region: BoxBounds
-    checkbox_region: BoxBounds
-    checkbox_text: str
 
 
 @dataclass

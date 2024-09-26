@@ -8,7 +8,6 @@ from pathlib import Path
 
 import src.definitions.base_fields as base_fields
 import src.definitions.processed_fields as processed_fields
-import src.validation.util as validation_util
 from src.definitions.util import BoxBounds
 
 from .util import sanitize_filename
@@ -64,6 +63,19 @@ def stitch_images(image: np.ndarray, regions: list[BoxBounds]) -> np.ndarray:
         cursor_x = cursor_x + region.width
 
     return stitch_canvas
+
+
+def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
+    option_roi = snip_roi_image(aligned_image, region)
+    roi_pixels = region.height * region.width
+
+    # Threshold and count the number of white pixels
+    _, threshold = cv2.threshold(option_roi, 200, 255, cv2.THRESH_BINARY)
+    white_pixels = cv2.countNonZero(threshold)
+    logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
+
+    # Check if there are enough black pixels to confirm a selection
+    return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
 
 
 def ocr_text_region(
@@ -141,8 +153,15 @@ def process_text_field(
 ) -> processed_fields.TextProcessedField:
     snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
-    if should_ocr_region(aligned_image, field.visual_region):
-        ocr_result = ocr_text_region(session, aligned_image, field.visual_region, add_border=True)
+    # Use the text_region if we have one
+    text_region = field.text_region if field.text_region is not None else field.visual_region
+
+    if field.checkbox_region is not None and get_checked(aligned_image, field.checkbox_region):
+        assert field.checkbox_text is not None
+        logger.info(f'Detected checked default option, using: {field.checkbox_text}')
+        ocr_result = field.checkbox_text
+    elif should_ocr_region(aligned_image, text_region):
+        ocr_result = ocr_text_region(session, aligned_image, text_region, add_border=True)
     else:
         logger.info(f'Detected white image (>= {OCR_WHITE_PIXEL_THRESHOLD:.2%}), skipping OCR')
         ocr_result = ''
@@ -164,19 +183,6 @@ def process_text_field(
         allow_linking=allow_linking,
         copied_from_previous=copied_from_previous,
     )
-
-
-def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
-    option_roi = snip_roi_image(aligned_image, region)
-    roi_pixels = region.height * region.width
-
-    # Threshold and count the number of white pixels
-    _, threshold = cv2.threshold(option_roi, 200, 255, cv2.THRESH_BINARY)
-    white_pixels = cv2.countNonZero(threshold)
-    logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
-
-    # Check if there are enough black pixels to confirm a selection
-    return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
 
 
 def process_multi_checkbox_field(
@@ -234,44 +240,6 @@ def process_checkbox_field(
         validation_result=field.validator.validate(checked),
         base_field=field,
         checked=checked,
-    )
-
-
-def process_text_or_checkbox_field(
-        session: requests.Session,
-        roi_dest_path: Path,
-        aligned_image: np.ndarray,
-        page_region: str,
-        field: base_fields.TextOrCheckboxField,
-) -> processed_fields.TextOrCheckboxProcessedField:
-    snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
-
-    checked = get_checked(aligned_image, field.checkbox_region)
-    has_text = should_ocr_region(aligned_image, field.text_region)
-    if checked:
-        text = field.checkbox_text
-    elif has_text:
-        text = ocr_text_region(session, aligned_image, field.text_region)
-    else:
-        logger.warning('Text or Checkbox was not checked but also did not have text?')
-        text = ''
-
-    # Handle an empty field
-    if not checked and not has_text:
-        validation_result = validation_util.ValidationResult(
-            state=validation_util.ValidationState.MALFORMED,
-            reasoning='Checkbox or text required',
-        )
-    else:
-        validation_result = field.validator.validate(text)
-
-    return processed_fields.TextOrCheckboxProcessedField(
-        name=field.name,
-        page_region=page_region,
-        roi_image_path=roi_dest_path,
-        validation_result=validation_result,
-        base_field=field,
-        text=text,
     )
 
 
@@ -349,14 +317,6 @@ def process_fields(
             )
         elif isinstance(base_field, base_fields.CheckboxField):
             result = process_checkbox_field(
-                roi_dest_path=roi_dest_path,
-                aligned_image=aligned_image,
-                page_region=page_region,
-                field=base_field,
-            )
-        elif isinstance(base_field, base_fields.TextOrCheckboxField):
-            result = process_text_or_checkbox_field(
-                session=session,
                 roi_dest_path=roi_dest_path,
                 aligned_image=aligned_image,
                 page_region=page_region,

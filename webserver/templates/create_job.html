@@ -17,7 +17,7 @@
              <label id="file-selection-count-label">0</label>
          </div>
 
-         <div id="file-selection-div">
+         <div id="file-selection-div" class="rounded-selection-box">
              <form id="job-config" action="/submit-job" method="post" enctype="multipart/form-data">
                  <input type="file" id="file-selector-input" multiple required name="job-files" accept="image/*" style="display:none"/>
                  <input type="hidden" id="job-id" name="job-id" value="{{ job_id }}">
@@ -26,12 +26,22 @@
              <div id="file-selection-list">
                  <h5>Drag and drop files or click to browse</h5>
              </div>
+         </div>
 
-             <div style="margin-top: 10px;">
-                 <label for="job-name">Job Name:</label>
-                 <input type="text" form="job-config" name="job-name" id="job-name" value="{{ job_id }}" style="width: 300px"/>
-                 <input type="submit" form="job-config" value="Submit"/>
-             </div>
+         <div id="reference-form-selection">
+             <h4>Reference Form:</h4>
+             {% for form in reference_forms %}
+                <div>
+                    <input type="radio" form="job-config" id="ref-{{ form.name }}" name="reference-form" value="{{ form.name }}">
+                    <label for="ref-{{ form.name }}">{{ form.name }}</label>
+                </div>
+             {% endfor %}
+         </div>
+
+         <div style="margin-top: 10px;">
+             <label for="job-name">Job Name:</label>
+             <input type="text" form="job-config" name="job-name" id="job-name" value="{{ job_id }}" style="width: 300px"/>
+             <input type="submit" form="job-config" value="Submit"/>
          </div>
      </div>
 {% endblock %}

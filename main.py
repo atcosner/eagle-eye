@@ -1,13 +1,10 @@
 import logging
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, send_file
-from pathlib import Path
 
 from src.job_manager import JobManager
 from src.util import set_up_root_logger
 
-FORMS_PATH = Path(__file__).parent / 'forms' / 'production'
-REFERENCE_IMAGE = FORMS_PATH / 'kt_field_form_v8.png'
 
 app = Flask(
     __name__,
@@ -24,28 +21,33 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/reference-image')
-def reference_image():
-    return send_from_directory(
-        FORMS_PATH,
-        REFERENCE_IMAGE.name
-    )
-
-
 @app.route('/create-job')
 def create_job():
-    return render_template('create_job.html', job_id=uuid.uuid4())
+    return render_template(
+        'create_job.html',
+        job_id=uuid.uuid4(),
+        reference_forms=manager.get_supported_forms(),
+    )
 
 
 @app.route('/submit-job', methods=['POST'])
 def submit_job():
-    if 'job-files' not in request.files or 'job-id' not in request.form:
-        logger.error('Missing job parameters')
+    required_params = ['job-id', 'job-name', 'reference-form']
+    if not all([param in request.form for param in required_params]) or 'job-files' not in request.files:
+        logger.error(f'Missing job parameters: {request.form.keys()}')
         return redirect(url_for('submit_job'))
 
-    job = manager.create_job(request.form['job-id'], request.form['job-name'])
-    job.save_files(request.files.getlist('job-files'))
+    try:
+        job = manager.create_job(
+            request.form['job-id'],
+            request.form['job-name'],
+            request.form['reference-form'],
+        )
+    except RuntimeError:
+        logger.exception('Failed to create job')
+        return redirect(url_for('submit_job'))
 
+    job.save_files(request.files.getlist('job-files'))
     return redirect(url_for('job_status', job_id=job.job_id))
 
 
@@ -57,6 +59,14 @@ def list_jobs():
 @app.route('/export-results')
 def export_results():
     return render_template('export_results.html', jobs=manager.get_exportable_jobs())
+
+
+@app.route('/job-reference-image/<uuid:job_id>')
+def job_reference_image(job_id: uuid.UUID):
+    if job := manager.get_job(job_id):
+        return send_file(job.reference_path)
+    else:
+        abort(404)
 
 
 @app.route('/job-file/<uuid:job_id>/<int:image_id>/<part_name>')
@@ -155,7 +165,7 @@ def export_jobs():
 
 if __name__ == '__main__':
     set_up_root_logger(verbose=True)
-    manager = JobManager(reference_image=REFERENCE_IMAGE)
+    manager = JobManager()
 
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True

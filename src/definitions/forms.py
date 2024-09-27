@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import ornithology_form_v8
+from . import test_form_v1
 from .base_fields import BaseField
 
 
 # TODO: Is there a better way to get this path?
-FORMS_DIRECTORY = Path(__file__).parent / '..' / 'forms'
+FORMS_DIRECTORY = Path(__file__).parent.parent.parent / 'forms'
 PRODUCTION_PATH = FORMS_DIRECTORY / 'production'
 DEVELOPMENT_PATH = FORMS_DIRECTORY / 'dev'
 
@@ -27,7 +28,7 @@ SUPPORTED_FORMS = [
         name='Test Form v1',
         path=DEVELOPMENT_PATH / 'test_form_v1.png',
         reference_marks=8,
-        regions=ALL_REGIONS,
+        regions=test_form_v1.ALL_REGIONS,
     ),
     ReferenceForm(
         name='Ornithology Field Form v8',

@@ -1,11 +1,25 @@
+.rounded-selection-box {
+    background: #e6eceb;
+    border-radius: 25px;
+    border: 2px solid #809994;
+}
+
+#reference-form-selection {
+    background: #e6eceb;
+    border-radius: 25px;
+    border: 2px solid #809994;
+
+    padding: 10px;
+}
+
+#reference-form-selection h4 {
+    margin: 0px;
+}
+
+
 #file-selection-div {
     width: 100%;
     height: 400px;
-
-    background: #e6eceb;
-
-    border-radius: 25px;
-    border: 2px solid #809994;
 }
 
 #file-selection-list {

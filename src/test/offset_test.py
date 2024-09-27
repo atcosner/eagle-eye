@@ -2,7 +2,7 @@ import cv2
 import imutils
 from pathlib import Path
 
-from src.definitions.ornithology_form import TOP_REGION, BOTTOM_HALF_FIELDS, BOTTOM_HALF_Y_OFFSET
+from src.definitions.ornithology_form_v8 import TOP_REGION, BOTTOM_HALF_FIELDS, BOTTOM_HALF_Y_OFFSET
 
 
 if __name__ == '__main__':

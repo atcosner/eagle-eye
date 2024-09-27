@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.ornithology_form import ALL_REGIONS
+from .definitions.ornithology_form_v8 import ALL_REGIONS
 from .definitions.processed_fields import BaseProcessedField
 
 from .pre_processing import AlignmentResult, grayscale_image, align_images

@@ -41,5 +41,5 @@ def locate_alignment_marks(test_image) -> None:
 if __name__ == '__main__':
     resource_path = Path.cwd() / '..' / '..' / 'forms'
 
-    test_img = cv2.imread(str(resource_path / 'dev' / 'test_form__blank_big.jpg'))
+    test_img = cv2.imread(str(resource_path / 'dev' / 'test_kt_form__blank_big.jpg'))
     locate_alignment_marks(test_img)

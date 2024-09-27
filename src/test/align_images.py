@@ -174,7 +174,7 @@ if __name__ == '__main__':
     resource_path = Path.cwd() / '..' / '..' / 'forms'
 
     # Load the dev and production images
-    test_img = cv2.imread(str(resource_path / 'dev' / 'test_form__filled_errors.jpg'))
+    test_img = cv2.imread(str(resource_path / 'dev' / 'test_kt_form__filled_errors.jpg'))
     reference_img = cv2.imread(str(resource_path / 'production' / 'kt_field_form_v8.png'))
 
     test_img, test_marks = detect_alignment_marks(test_img)

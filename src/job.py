@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.ornithology_form_v8 import ALL_REGIONS
+from .definitions.forms import ReferenceForm
 from .definitions.processed_fields import BaseProcessedField
 
 from .pre_processing import AlignmentResult, grayscale_image, align_images
@@ -51,7 +51,7 @@ class Job:
             self,
             parent_directory: Path,
             job_id: uuid.UUID,
-            reference_image_path: Path,
+            reference_form: ReferenceForm,
             job_name: str,
     ) -> None:
         self.job_name: str = job_name
@@ -59,7 +59,7 @@ class Job:
         self.states: list[StateChange] = [StateChange(JobState.CREATED, datetime.now())]
         self.exception: Exception | None = None
 
-        self.reference_path: Path = reference_image_path
+        self.reference_form: ReferenceForm = reference_form
         self.submitted_images: dict[int, Path] = {}
         self.alignment_results: dict[int, AlignmentResult] = {}
         self.processed_results: dict[int, RegionResults] = defaultdict(lambda: defaultdict(list))
@@ -218,7 +218,7 @@ class Job:
                 logger.info(f'Converted image to grayscale: {gray_path}')
 
                 # Align this image to the reference
-                alignment_result = align_images(gray_path, self.reference_path)
+                alignment_result = align_images(gray_path, self.reference_form)
 
                 self.alignment_results[image_id] = alignment_result
                 logger.info(f'Matched features image: {alignment_result.matched_features_image_path}')
@@ -245,6 +245,7 @@ class Job:
         session.headers.update(
             {
                 'Authorization': f'Bearer {access_token}',
+                # TODO: Allow the project to be configured
                 'x-goog-user-project': 'vision-api-test-434415',
             }
         )
@@ -253,7 +254,7 @@ class Job:
             logger.info(f'Processing: {result.aligned_image_path}')
 
             previous_region_fields = None
-            for page_region, region_fields in ALL_REGIONS.items():
+            for page_region, region_fields in self.reference_form.regions.items():
                 # Create a directory to store the snipped roi pictures for this region
                 working_dir = result.aligned_image_path.parent / page_region
                 working_dir.mkdir()

@@ -64,7 +64,7 @@ def export_results():
 @app.route('/job-reference-image/<uuid:job_id>')
 def job_reference_image(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
-        return send_file(job.reference_path)
+        return send_file(job.reference_form.path)
     else:
         abort(404)
 

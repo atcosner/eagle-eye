@@ -16,7 +16,7 @@ DEVELOPMENT_PATH = FORMS_DIRECTORY / 'dev'
 class ReferenceForm:
     name: str
     path: Path
-    reference_marks: int
+    reference_marks_count: int
     regions: dict[str, list[BaseField]]
 
     def __post_init__(self):
@@ -27,13 +27,13 @@ SUPPORTED_FORMS = [
     ReferenceForm(
         name='Test Form v1',
         path=DEVELOPMENT_PATH / 'test_form_v1.png',
-        reference_marks=8,
+        reference_marks_count=8,
         regions=test_form_v1.ALL_REGIONS,
     ),
     ReferenceForm(
         name='Ornithology Field Form v8',
         path=PRODUCTION_PATH / 'kt_field_form_v8.png',
-        reference_marks=16,
+        reference_marks_count=16,
         regions=ornithology_form_v8.ALL_REGIONS,
     ),
 ]

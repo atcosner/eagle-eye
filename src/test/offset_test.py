@@ -1,41 +1,44 @@
 import cv2
 import imutils
-from pathlib import Path
 
-from src.definitions.ornithology_form_v8 import TOP_REGION, BOTTOM_HALF_FIELDS, BOTTOM_HALF_Y_OFFSET
+from src.definitions.forms import SUPPORTED_FORMS
+from src.definitions.util import BoxBounds
+
+
+def get_box_bounds(bounds: list[BoxBounds], obj) -> None:
+    if not hasattr(obj, '__dict__'):
+        return
+
+    for key, value in vars(obj).items():
+        # Throw out callables and dunder functions
+        if callable(value) or key.startswith('__'):
+            continue
+
+        if isinstance(value, BoxBounds):
+            bounds.append(value)
+        else:
+            get_box_bounds(box_bounds, value)
 
 
 if __name__ == '__main__':
-    resource_path = Path.cwd() / '..' / '..' / 'forms'
+    for form in SUPPORTED_FORMS:
+        box_bounds = []
+        reference_img = cv2.imread(str(form.path))
+        height = reference_img.shape[0]
 
-    reference_img = cv2.imread(str(resource_path / 'production' / 'kt_field_form_v8.png'))
+        for fields in form.regions.values():
+            for field in fields:
+                get_box_bounds(box_bounds, field)
 
-    # Draw bounding boxes on the fields
-    for field in TOP_REGION + BOTTOM_HALF_FIELDS:
-        regions = []
-        if 'region' in field._fields:
-            regions.append(field.region)
-        if 'regions' in field._fields:
-            regions.extend(field.regions)
-        if 'options' in field._fields:
-            for option in field.options:
-                regions.append(option.region)
-                if option.text_region is not None:
-                    regions.append(option.text_region)
-        if 'text_region' in field._fields:
-            regions.append(field.text_region)
-        if 'checkbox_region' in field._fields:
-            regions.append(field.checkbox_region)
-
-        for region in regions:
-            color = (232, 235, 52) if region.y > 944 else (36, 255, 12)
+        for bounds in box_bounds:
+            color = (232, 235, 52) if bounds.y > (height/2) else (36, 255, 12)
             cv2.rectangle(
                 reference_img,
-                (region.x, region.y),
-                (region.x + region.width, region.y + region.height),
+                (bounds.x, bounds.y),
+                (bounds.x + bounds.width, bounds.y + bounds.height),
                 color,
                 2,
             )
 
-    cv2.imshow("Image Alignment Overlay", imutils.resize(reference_img, width=900))
-    cv2.waitKey(0)
+        cv2.imshow(form.name, imutils.resize(reference_img, width=900))
+        cv2.waitKey(0)

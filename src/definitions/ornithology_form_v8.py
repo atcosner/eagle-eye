@@ -166,7 +166,7 @@ TOP_REGION = [
         validator=TextValidationBypass,
         line_regions=[
             BoxBounds(x=265, y=816, width=962, height=35),
-            BoxBounds(x=162, y=856, width=937, height=32)
+            BoxBounds(x=162, y=856, width=937, height=32),
         ],
     ),
     CheckboxField(

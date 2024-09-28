@@ -32,62 +32,62 @@ TOP_REGION = [
         ],
     ),
 
-    # TextField(
-    #     name='Iris',
-    #     visual_region=BoxBounds(x=157, y=413, width=379, height=40),
-    #     allow_copy=True,
-    #     validator=TextRequired,
-    #     text_region=BoxBounds(x=287, y=411, width=247, height=32),
-    #     checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
-    #     checkbox_text='dark brown',
-    # ),
-    # TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33), validator=Time),
-    # TextField(
-    #     name='Time of Tissue Preservation',
-    #     visual_region=BoxBounds(x=797, y=485, width=423, height=40),
-    #     validator=Time,
-    #     text_region=BoxBounds(x=988, y=486, width=154, height=31),
-    #     checkbox_region=BoxBounds(x=1150, y=498, width=13, height=13),
-    #     checkbox_text='unknown',
-    # ),
-    #
-    # TextField(name='Tissues', visual_region=BoxBounds(x=251, y=520, width=147, height=35), validator=Tissues),
-    # TextField(name='No. Tubes', visual_region=BoxBounds(x=509, y=523, width=56, height=32), validator=Number),
-    # MultiCheckboxField(
-    #     name='Tissue Preservation',
-    #     visual_region=BoxBounds(x=569, y=527, width=669, height=33),
-    #     validator=RequireOneCheckboxes,
-    #     checkboxes=[
-    #         MultiCheckboxOption(name='-20 C', region=BoxBounds(x=693, y=536, width=13, height=13)),
-    #         MultiCheckboxOption(name='-80 C', region=BoxBounds(x=791, y=536, width=13, height=13)),
-    #         MultiCheckboxOption(name='LN2', region=BoxBounds(x=889, y=536, width=13, height=13)),
-    #         MultiCheckboxOption(name='Ethanol', region=BoxBounds(x=970, y=536, width=13, height=13)),
-    #         MultiCheckboxOption(
-    #             name='Other',
-    #             region=BoxBounds(x=1065, y=536, width=13, height=13),
-    #             text_region=BoxBounds(x=1145, y=526, width=84, height=29),
-    #         ),
-    #     ],
-    # ),
-    #
-    # MultilineTextField(
-    #     name='Remarks',
-    #     visual_region=BoxBounds(x=160, y=824, width=1067, height=73),
-    #     validator=TextValidationBypass,
-    #     line_regions=[
-    #         BoxBounds(x=265, y=816, width=962, height=35),
-    #         BoxBounds(x=162, y=856, width=937, height=32)
-    #     ],
-    # ),
-    # CheckboxField(
-    #     name='See Back',
-    #     visual_region=BoxBounds(x=1095, y=855, width=133, height=40),
-    #     validator=OptionalCheckbox,
-    #     checkbox_region=BoxBounds(x=1104, y=869, width=13, height=13),
-    # ),
+    TextField(
+        name='Iris',
+        visual_region=BoxBounds(x=112, y=198, width=336, height=50),
+        allow_copy=True,
+        validator=TextRequired,
+        text_region=BoxBounds(x=241, y=202, width=208, height=32),
+        checkbox_region=BoxBounds(x=166, y=216, width=13, height=13),
+        checkbox_text='dark brown',
+    ),
+    TextField(name='Time of Death', visual_region=BoxBounds(x=591, y=198, width=163, height=36), validator=Time),
+    TextField(
+        name='Time of Tissue Preservation',
+        visual_region=BoxBounds(x=755, y=202, width=427, height=43),
+        validator=Time,
+        text_region=BoxBounds(x=940, y=201, width=159, height=33),
+        checkbox_region=BoxBounds(x=1105, y=216, width=13, height=13),
+        checkbox_text='unknown',
+    ),
+
+    TextField(name='Tissues', visual_region=BoxBounds(x=201, y=238, width=154, height=34), validator=Tissues),
+    TextField(name='No. Tubes', visual_region=BoxBounds(x=459, y=236, width=64, height=36), validator=Number),
+    MultiCheckboxField(
+        name='Tissue Preservation',
+        visual_region=BoxBounds(x=525, y=240, width=660, height=40),
+        validator=RequireOneCheckboxes,
+        checkboxes=[
+            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=646, y=254, width=12, height=12)),
+            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=744, y=254, width=12, height=12)),
+            MultiCheckboxOption(name='LN2', region=BoxBounds(x=842, y=254, width=12, height=12)),
+            MultiCheckboxOption(name='Ethanol', region=BoxBounds(x=923, y=254, width=13, height=12)),
+            MultiCheckboxOption(
+                name='Other',
+                region=BoxBounds(x=1018, y=254, width=13, height=12),
+                text_region=BoxBounds(x=1098, y=238, width=82, height=34),
+            ),
+        ],
+    ),
+
+    MultilineTextField(
+        name='Remarks',
+        visual_region=BoxBounds(x=111, y=279, width=1067, height=82),
+        validator=TextValidationBypass,
+        line_regions=[
+            BoxBounds(x=217, y=276, width=960, height=33),
+            BoxBounds(x=116, y=312, width=932, height=34),
+        ],
+    ),
+    CheckboxField(
+        name='See Back',
+        visual_region=BoxBounds(x=1047, y=316, width=131, height=36),
+        validator=OptionalCheckbox,
+        checkbox_region=BoxBounds(x=1057, y=328, width=13, height=13),
+    ),
 ]
 
-BOTTOM_HALF_Y_OFFSET = 842
+BOTTOM_HALF_Y_OFFSET = 354
 BOTTOM_HALF_FIELDS = [create_field_with_offset(field, BOTTOM_HALF_Y_OFFSET) for field in TOP_REGION]
 
 ALL_REGIONS = {'top': TOP_REGION, 'bottom': BOTTOM_HALF_FIELDS}

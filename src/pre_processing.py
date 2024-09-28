@@ -4,6 +4,8 @@ import numpy as np
 from pathlib import Path
 from typing import NamedTuple
 
+from .definitions.forms import ReferenceForm
+
 # Allow for an image to be +/- 6 degrees rotated
 ROTATION_ATTEMPTS = [0] + list(range(1, 6, 1)) + list(range(-1, -6, -1))
 
@@ -41,7 +43,7 @@ def rotate_image(image: np.array, degrees: int) -> np.array:
     return cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
 
 
-def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMark]]:
+def detect_alignment_marks(image: np.array, expected_marks: int) -> tuple[np.array, list[AlignmentMark]]:
     found_marks: tuple[int, list[AlignmentMark]] | None = None
     for attempt_degrees in ROTATION_ATTEMPTS:
         logger.info(f'Trying {attempt_degrees} degree rotation')
@@ -70,11 +72,10 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
                 marks.append(AlignmentMark(x, y, height, width))
 
         logger.info(f'Found {len(marks)} marks')
-        if len(marks) == 16:
+        if len(marks) == expected_marks:
             found_marks = (attempt_degrees, marks)
             break
 
-    # TODO: Require at least X marks to continue
     if found_marks is None:
         raise RuntimeError('Failed to detect alignment marks')
 
@@ -82,13 +83,13 @@ def detect_alignment_marks(image: np.array) -> tuple[np.array, list[AlignmentMar
     logger.info(f'Using a rotation of {best_rotation} degrees found {len(marks)} alignment marks')
 
     # Order the marks in left-to-right and top-to-bottom order
-    # TODO: Remove magic number of marks
     marks_x_sort = sorted(marks, key=lambda m: m.x)
-    sorted_marks = sorted(marks_x_sort[:8], key=lambda m: m.y) + sorted(marks_x_sort[8:], key=lambda m: m.y)
+    left_marks = sorted(marks_x_sort[:len(marks_x_sort)//2], key=lambda m: m.y)
+    right_marks = sorted(marks_x_sort[len(marks_x_sort)//2:], key=lambda m: m.y)
 
     # Rotate the image and return the alignment marks
     rotated_image = rotate_image(image, best_rotation)
-    return rotated_image, sorted_marks
+    return rotated_image, left_marks + right_marks
 
 
 def alignment_marks_to_points(marks: list[AlignmentMark]) -> np.array:
@@ -104,21 +105,21 @@ def alignment_marks_to_points(marks: list[AlignmentMark]) -> np.array:
 
 def align_images(
         test_image_path: Path,
-        reference_image_path: Path,
+        reference_form: ReferenceForm,
 ) -> AlignmentResult:
     assert test_image_path.exists(), f'Test image did not exist: {test_image_path}'
-    assert reference_image_path.exists(), f'Ref image did not exist: {reference_image_path}'
+    assert reference_form.path.exists(), f'Ref image did not exist: {reference_form.path}'
 
     matched_image_path = test_image_path.parent / f'matched_image{test_image_path.suffix}'
     aligned_image_path = test_image_path.parent / f'aligned_image{test_image_path.suffix}'
     overlaid_image_path = test_image_path.parent / f'overlaid_image{test_image_path.suffix}'
 
     test_image = cv2.imread(str(test_image_path))
-    reference_image = cv2.imread(str(reference_image_path))
+    reference_image = cv2.imread(str(reference_form.path))
 
     # Detect alignment marks in both images
-    test_image_rotate, test_marks = detect_alignment_marks(test_image)
-    _, reference_marks = detect_alignment_marks(reference_image)
+    test_image_rotate, test_marks = detect_alignment_marks(test_image, reference_form.reference_marks_count)
+    _, reference_marks = detect_alignment_marks(reference_image, reference_form.reference_marks_count)
 
     # Convert the alignment marks to matchpoints
     test_matchpoints = alignment_marks_to_points(test_marks)
@@ -152,4 +153,3 @@ def align_images(
         overlaid_image_path=overlaid_image_path,
         aligned_image_path=aligned_image_path,
     )
-

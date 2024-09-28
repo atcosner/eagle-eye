@@ -33,19 +33,19 @@ class JobManager:
 
     def create_job(self, job_id: str, job_name: str, reference_form_name: str) -> Job:
         # Find the reference form
-        reference_image_path: Path | None = None
+        reference_form: ReferenceForm | None = None
         for form in SUPPORTED_FORMS:
             if form.name == reference_form_name:
-                reference_image_path = form.path
+                reference_form = form
 
-        if reference_image_path is None:
+        if reference_form is None:
             raise RuntimeError(f'Failed to find a reference form with name: "{reference_form_name}"')
 
         job_uuid = uuid.UUID(job_id)
         self.job_map[job_uuid] = Job(
             parent_directory=self.working_dir,
             job_id=job_uuid,
-            reference_image_path=reference_image_path,
+            reference_form=reference_form,
             job_name=job_name,
         )
         return self.job_map[job_uuid]

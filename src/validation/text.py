@@ -1,15 +1,23 @@
 import calendar
 import datetime
+import logging
 import re
+from rapidfuzz import process, fuzz, utils
 
 from .base import Validator
 from .util import ValidationState, ValidationResult
+
+logger = logging.getLogger(__name__)
 
 
 class TextValidator(Validator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
         raise NotImplementedError('TextValidator.validate must be overwritten')
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        return {base_column_name: text}
 
 
 class TextValidationBypass(TextValidator):
@@ -66,6 +74,10 @@ class KtNumber(TextValidator):
             # TODO: Is there a way to correct bad input?
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='KT Number must be exactly 5 digits')
 
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        return {base_column_name: f'KT_{text}'}
+
 
 class PrepNumber(TextValidator):
     @staticmethod
@@ -121,13 +133,28 @@ class Locality(TextValidator):
 
         # Format: <STATE> : <COUNTY> : <PLACE>
         if (match := pattern.match(cleaned_text)) is not None:
-            # formatted_text = f'{match.group("state")} : {match.group("county")} : {match.group("location")}'
-            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+            formatted_text = f'{match.group("state")} : {match.group("county")} : {match.group("location")}'
+            state = ValidationState.PASSED if formatted_text == cleaned_text else ValidationState.CORRECTED
+            return ValidationResult(
+                state=state,
+                reasoning=None,
+                correction=formatted_text,
+            )
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
                 reasoning='Locality must be in the format: [STATE] : [COUNTY] : [PLACE]',
             )
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        text_parts = [part.strip() for part in text.split(':')]
+        # TODO: Handle < 3 elements in this list
+        return {
+            f'{base_column_name}_state': text_parts[0],
+            f'{base_column_name}_county': text_parts[1],
+            f'{base_column_name}_place':  text_parts[2],
+        }
 
 
 class GpsPoint(TextValidator):
@@ -169,18 +196,46 @@ class Date(TextValidator):
         month = match.group('month').capitalize()
         year = int(match.group('year'))
 
+        # Attempt to correct the month if it did not match
+        made_correction = False
+        if month not in calendar.month_name:
+            match, ratio, edits = process.extractOne(
+                month,
+                calendar.month_name,
+                scorer=fuzz.WRatio,
+                processor=utils.default_process,
+            )
+            logger.info(f'Found match: "{match}", ratio: {ratio}, edits: {edits}')
+            if ratio > 65:
+                made_correction = True
+                month = match.capitalize()
+
         # Enforce constraints on values
         day_match = 1 <= day <= 31
         month_match = month in calendar.month_name
         year_match = 2024 <= year <= datetime.datetime.now().year
 
         if day_match and month_match and year_match:
-            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+            return ValidationResult(
+                state=ValidationState.CORRECTED if made_correction else ValidationState.PASSED,
+                reasoning=None,
+                correction=f'{day} {month} {year}'
+            )
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
                 reasoning=f'Value outside acceptable values (Day: {day}, Month: {month}, Year: {year})',
             )
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        text_parts = [part.strip() for part in text.strip().split(' ')]
+        # TODO: Handle < 3 elements in this list
+        return {
+            f'{base_column_name}_day': text_parts[0],
+            f'{base_column_name}_month': text_parts[1],
+            f'{base_column_name}_year':  text_parts[2],
+        }
 
 
 class Time(TextValidator):

@@ -58,10 +58,13 @@ class TextProcessedField(BaseProcessedField):
     copied_from_previous: bool
 
     def export(self) -> dict[str, str]:
-        return {self.name: self.text}
+        return self.base_field.validator.export(self.base_field.name, self.text)
 
     def validate(self) -> None:
         self.validation_result = self.base_field.validator.validate(self.text)
+        if self.validation_result.state is validation_util.ValidationState.CORRECTED:
+            logger.info(f'Applying correction: "{self.text}" -> "{self.validation_result.correction}"')
+            self.text = self.validation_result.correction
 
     def handle_form_update(self, form_dict: FormUpdateDict) -> None:
         self.text = util.safe_form_get(form_dict, self.form_name())

@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import Any, NamedTuple
 from enum import Enum, auto
 
 
@@ -30,6 +30,7 @@ VALIDATION_STATE_BASE_REASONING = {
 class ValidationResult(NamedTuple):
     state: ValidationState
     reasoning: str | None
+    correction: Any | None = None
 
 
 def get_result_image_path(state: ValidationState) -> str:

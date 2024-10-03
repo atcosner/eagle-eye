@@ -32,6 +32,7 @@
              <h4>Reference Form:</h4>
              {% for form in reference_forms %}
                 <div>
+                    <!-- TODO: Start with one of the radio buttons selected -->
                     <input type="radio" form="job-config" id="ref-{{ form.name }}" name="reference-form" value="{{ form.name }}">
                     <label for="ref-{{ form.name }}">{{ form.name }}</label>
                 </div>

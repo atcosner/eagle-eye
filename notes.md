@@ -10,6 +10,7 @@
   * Each result may want to export itself as N columns
   * Building up DF should ensure column uniqueness
 * Remove the 'From Above' button from the tab order
+* How should data get exported if it would fail validation?
 
 ## Things To Do
 - [X] Handle 'Copy from previous' on certain fields (Only bottom of sheet)

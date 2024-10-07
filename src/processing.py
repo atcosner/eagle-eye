@@ -3,7 +3,6 @@ import cv2
 import logging
 import numpy as np
 import requests
-from google.cloud import vision
 from pathlib import Path
 
 import src.definitions.base_fields as base_fields
@@ -16,7 +15,6 @@ OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.6  # Checked checkboxes should have less than X% white
 
 logger = logging.getLogger(__name__)
-client = vision.ImageAnnotatorClient()
 
 
 def snip_roi_image(image: np.ndarray, bounds: BoxBounds, save_path: Path | None = None) -> np.ndarray:

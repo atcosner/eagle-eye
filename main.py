@@ -2,6 +2,7 @@ import logging
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, send_file
 
+from src.definitions.forms import SUPPORTED_FORMS
 from src.job_manager import JobManager
 from src.util import set_up_root_logger
 
@@ -26,7 +27,7 @@ def create_job():
     return render_template(
         'create_job.html',
         job_id=uuid.uuid4(),
-        reference_forms=manager.get_supported_forms(),
+        reference_forms=SUPPORTED_FORMS,
     )
 
 

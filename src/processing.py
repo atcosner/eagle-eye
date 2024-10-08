@@ -5,10 +5,9 @@ import numpy as np
 import requests
 from pathlib import Path
 
-import src.definitions.base_fields as base_fields
-import src.definitions.processed_fields as processed_fields
-from src.definitions.util import BoxBounds
-
+from .definitions import base_fields as base_fields
+from .definitions import processed_fields as processed_fields
+from .definitions.util import BoxBounds
 from .util import sanitize_filename
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white

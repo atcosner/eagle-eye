@@ -1,6 +1,12 @@
 import logging
+from typing import NamedTuple
 
 UNSAFE_CHARACTERS = ['/', '.', ' ', '%']
+
+
+class ApiSettings(NamedTuple):
+    project_id: str
+    access_token: str
 
 
 def set_up_root_logger(verbose: bool) -> None:

@@ -13,8 +13,10 @@ Requirements
 * [Python 3.12](https://www.python.org/)
 * A Google Cloud project with the Vision API enabled
   * [Quickstart Guide](https://cloud.google.com/vision/docs/setup)
-* An API key for your Google Cloud project
-  * [Create an API key](https://cloud.google.com/docs/authentication/api-keys#create)
+* [gcloud CLI](https://cloud.google.com/sdk/docs/install)
+  * Ensure the following commands return successfully after the installation:
+    1. `gcloud config get-value project`
+    2. `gcloud auth print-access-token`
 
 Installation
 -------------
@@ -33,13 +35,6 @@ Installation
 4. Install the required packages via pip
     ```commandline
     python3 -m pip install -r requirements.txt
-    ```
-5. Create a file called `settings.ini` with your Google Cloud project name and API key
-   * See `template-settings.ini` for reference
-   ```text
-   [google.api.settings]
-   CloudProjectName = <REPLACE WITH PROJECT NAME>
-   ApiKey = <REPLACE WITH API KEY>
     ```
 
 Usage

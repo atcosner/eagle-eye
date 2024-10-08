@@ -4,8 +4,7 @@ import pandas as pd
 import uuid
 from pathlib import Path
 
-from src.definitions.forms import ReferenceForm, SUPPORTED_FORMS
-
+from .definitions.forms import ReferenceForm, SUPPORTED_FORMS
 from .job import Job, HtmlJobInfo
 
 logger = logging.getLogger(__name__)
@@ -18,9 +17,6 @@ class JobManager:
         self.working_dir: Path = Path(os.getenv('APPDATA')) / 'kubi-form-processor'
         self.working_dir.mkdir(exist_ok=True)
         logger.info(f'JobManager working directory: {self.working_dir}')
-
-    def get_supported_forms(self) -> list[ReferenceForm]:
-        return SUPPORTED_FORMS
 
     def get_job(self, job_id: uuid.UUID) -> Job | None:
         return self.job_map.get(job_id, None)

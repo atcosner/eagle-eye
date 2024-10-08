@@ -1,7 +1,6 @@
 import logging
 import pandas as pd
 import requests
-import subprocess
 import uuid
 from collections import defaultdict
 from dataclasses import dataclass
@@ -13,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 
 from .definitions.forms import ReferenceForm
 from .definitions.processed_fields import BaseProcessedField
-
+from .google_api import API_SETTINGS
 from .pre_processing import AlignmentResult, grayscale_image, align_images
 from .processing import process_fields
 
@@ -231,22 +230,12 @@ class Job:
         self._change_state(JobState.PRE_PROCESSED)
 
     def _process(self) -> None:
-        # TODO: Read this in at program start
-        access_token = subprocess.run(
-            'gcloud auth print-access-token',
-            check=True,
-            capture_output=True,
-            shell=True,
-            text=True,
-        ).stdout.strip()
-
         # Establish a session to persist an HTTP connection for back-to-back requests
         session = requests.Session()
         session.headers.update(
             {
-                'Authorization': f'Bearer {access_token}',
-                # TODO: Allow the project to be configured
-                'x-goog-user-project': 'vision-api-test-434415',
+                'Authorization': f'Bearer {API_SETTINGS.access_token}',
+                'x-goog-user-project': API_SETTINGS.project_id,
             }
         )
 

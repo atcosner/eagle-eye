@@ -18,6 +18,7 @@
 - [ ] Break dates into 3 columns in the export
 - [ ] Whole-form mode (See whole image on the left)
 - [X] Custom validation and format for certain fields
+- [ ] Store ROI images in a directory inside the project (Add to .gitignore)
 
 ## Icons Attribution
 * <a href="https://www.flaticon.com/authors/alfredo-hernandez">Icons created by Alfredo Hernandez - Flaticon</a>

@@ -110,5 +110,5 @@ Acknowledgements
 ---------------
 This project would not have been possible without the support of the staff of the [KU Biodiversity Institute](https://biodiversity.ku.edu/)
 with special thanks to the following people:
-* [Abby Perkins - KU Ornithology Graduate Student](https://biodiversity.ku.edu/people/abby-perkins)
+* [Abby Perkins - KU Ornithology Graduate Student](https://github.com/abbycperkins)
 * [Lucas DeCicco - KU Ornithology Collections Manager](https://www.lhdecicco.com/)

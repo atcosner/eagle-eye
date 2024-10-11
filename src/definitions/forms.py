@@ -1,15 +1,14 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+from src import FORMS_PATH
+
 from . import ornithology_form_v8
 from . import test_form_v1
 from .base_fields import BaseField
 
-
-# TODO: Is there a better way to get this path?
-FORMS_DIRECTORY = Path(__file__).parent.parent.parent / 'forms'
-PRODUCTION_PATH = FORMS_DIRECTORY / 'production'
-DEVELOPMENT_PATH = FORMS_DIRECTORY / 'dev'
+PRODUCTION_PATH = FORMS_PATH / 'production'
+DEVELOPMENT_PATH = FORMS_PATH / 'dev'
 
 
 @dataclass(frozen=True)

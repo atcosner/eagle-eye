@@ -1,8 +1,9 @@
 import logging
-import os
 import pandas as pd
 import uuid
 from pathlib import Path
+
+from src import JOB_WORKING_DIR_PATH
 
 from .definitions.forms import ReferenceForm, SUPPORTED_FORMS
 from .job import Job, HtmlJobInfo
@@ -14,8 +15,7 @@ class JobManager:
     def __init__(self):
         self.job_map: dict[uuid.UUID, Job] = {}
 
-        self.working_dir: Path = Path(os.getenv('APPDATA')) / 'kubi-form-processor'
-        self.working_dir.mkdir(exist_ok=True)
+        self.working_dir: Path = JOB_WORKING_DIR_PATH
         logger.info(f'JobManager working directory: {self.working_dir}')
 
     def get_job(self, job_id: uuid.UUID) -> Job | None:

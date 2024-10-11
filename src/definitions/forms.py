@@ -17,6 +17,7 @@ class ReferenceForm:
     path: Path
     reference_marks_count: int
     regions: dict[str, list[BaseField]]
+    default: bool = False
 
     def __post_init__(self):
         assert self.path.exists(), f'Form path does not exist: {self.path}'
@@ -34,5 +35,6 @@ SUPPORTED_FORMS = [
         path=PRODUCTION_PATH / 'kt_field_form_v8.png',
         reference_marks_count=16,
         regions=ornithology_form_v8.ALL_REGIONS,
+        default=True,
     ),
 ]

@@ -1,29 +1,39 @@
-from typing import NamedTuple
-
 from .base import Validator
-from .util import ValidationState, ValidationResult
+from .util import ValidationState, ValidationResult, export_bool_to_string
+
+CheckboxData = tuple[str, bool, str | None]
 
 
 class MultiCheckboxValidator(Validator):
     @staticmethod
-    def validate(checkboxes: list[tuple[bool, str | None]]) -> ValidationResult:
+    def validate(checkboxes: list[CheckboxData]) -> ValidationResult:
         raise NotImplementedError('MultiCheckboxValidator.validate must be overwritten')
+
+    @staticmethod
+    def export(base_column_name: str, checkboxes: list[CheckboxData]) -> dict[str, str]:
+        column_name = base_column_name.lower().replace(' ', '_')
+        columns = {}
+        for checkbox in checkboxes:
+            # TODO: Handle checkboxes with text
+            columns[f'{column_name}_{checkbox[0].lower()}'] = export_bool_to_string(checkbox[1])
+
+        return columns
 
 
 class OptionalCheckboxes(MultiCheckboxValidator):
     @staticmethod
-    def validate(checkboxes: list[tuple[bool, str | None]]) -> ValidationResult:
+    def validate(checkboxes: list[CheckboxData]) -> ValidationResult:
         return ValidationResult(state=ValidationState.PASSED, reasoning=None)
 
 
 class RequireOneCheckboxes(MultiCheckboxValidator):
     @staticmethod
-    def validate(checkboxes: list[tuple[bool, str | None]]) -> ValidationResult:
+    def validate(checkboxes: list[CheckboxData]) -> ValidationResult:
         valid_checked = any([option[0] for option in checkboxes])
         valid_text = True
         for option in checkboxes:
-            if option[0] and option[1] is not None:
-                cleaned_text = option[1].strip()
+            if option[1] and option[2] is not None:
+                cleaned_text = option[2].strip()
                 if cleaned_text == '':
                     valid_text = False
 
@@ -38,5 +48,5 @@ class RequireOneCheckboxes(MultiCheckboxValidator):
 
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning=','.join(error_reasons),
+                reasoning=', '.join(error_reasons),
             )

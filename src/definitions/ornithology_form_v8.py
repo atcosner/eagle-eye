@@ -1,7 +1,7 @@
 from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckboxes
 from src.validation.single_checkbox import OptionalCheckbox
-from src.validation.text import TextOptional, TextRequired, KtNumber, PrepNumber, Locality, GpsPoint, Date, Time, \
-    Number, OtNumber, Initials, Tissues, TextValidationBypass
+from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, GpsCoordinatePoint, Date, Time, \
+    IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass, GpsWaypoint, Habitat, Integer
 
 from .base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
     CheckboxField, create_field_with_offset
@@ -10,15 +10,15 @@ from .util import BoxBounds
 TOP_REGION = [
     TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44), validator=KtNumber),
     TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46), validator=PrepNumber),
-    TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46), validator=Number),
+    TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46), validator=IntegerOrFloat),
     TextField(name='OT Number', visual_region=BoxBounds(x=972, y=120, width=215, height=46), validator=OtNumber),
 
     TextField(name='Locality', visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=True, validator=Locality),
 
-    TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31), validator=GpsPoint),
-    TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=GpsPoint),
-    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True, validator=TextValidationBypass),
-    TextField(name='Error (m)', visual_region=BoxBounds(x=1120, y=225, width=108, height=33), validator=TextValidationBypass),
+    TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True, validator=GpsWaypoint),
+    TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31), validator=GpsCoordinatePoint),
+    TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=GpsCoordinatePoint),
+    TextField(name='Error', visual_region=BoxBounds(x=1120, y=225, width=108, height=33), validator=TextValidationBypass),
 
     TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True, validator=TextValidationBypass),
     TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True, validator=TextValidationBypass),
@@ -26,7 +26,7 @@ TOP_REGION = [
     TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True, validator=Date),
     TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=True, validator=Initials),
 
-    TextField(name='Habitat', visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=True, validator=TextRequired),
+    TextField(name='Habitat', visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=True, validator=Habitat),
 
     MultiCheckboxField(
         name='Collection Method',
@@ -57,7 +57,7 @@ TOP_REGION = [
     TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=True, validator=TextValidationBypass),
 
     TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=True, validator=TextValidationBypass),
-    TextField(name='Weight (g)', visual_region=BoxBounds(x=1035, y=447, width=190, height=33), validator=Number),
+    TextField(name='Weight (g)', visual_region=BoxBounds(x=1035, y=447, width=190, height=33), validator=IntegerOrFloat),
 
     MultiCheckboxField(
         name='Tissue Date',
@@ -79,7 +79,7 @@ TOP_REGION = [
     ),
 
     TextField(name='Tissues', visual_region=BoxBounds(x=251, y=520, width=147, height=35), validator=Tissues),
-    TextField(name='No. Tubes', visual_region=BoxBounds(x=509, y=523, width=56, height=32), validator=Number),
+    TextField(name='No. Tubes', visual_region=BoxBounds(x=509, y=523, width=56, height=32), validator=Integer),
     MultiCheckboxField(
         name='Tissue Preservation',
         visual_region=BoxBounds(x=569, y=527, width=669, height=33),

@@ -1,7 +1,7 @@
 from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckboxes
 from src.validation.single_checkbox import OptionalCheckbox
-from src.validation.text import TextOptional, TextRequired, KtNumber, PrepNumber, Locality, GpsPoint, Date, Time, \
-    Number, OtNumber, Initials, Tissues, TextValidationBypass
+from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, GpsCoordinatePoint, Date, Time, \
+    IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass
 
 from .base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
     CheckboxField, create_field_with_offset
@@ -10,7 +10,7 @@ from .util import BoxBounds
 TOP_REGION = [
     TextField(name='KT Number', visual_region=BoxBounds(x=194, y=55, width=126, height=43), validator=KtNumber),
     TextField(name='Prep Number', visual_region=BoxBounds(x=395, y=55, width=208, height=45), validator=PrepNumber),
-    TextField(name='KU Number', visual_region=BoxBounds(x=661, y=53, width=207, height=47), validator=Number),
+    TextField(name='KU Number', visual_region=BoxBounds(x=661, y=53, width=207, height=47), validator=IntegerOrFloat),
     TextField(name='OT Number', visual_region=BoxBounds(x=928, y=54, width=200, height=46), validator=OtNumber),
 
     TextField(name='Locality', visual_region=BoxBounds(x=204, y=119, width=975, height=40), allow_copy=True, validator=Locality),
@@ -52,7 +52,7 @@ TOP_REGION = [
     ),
 
     TextField(name='Tissues', visual_region=BoxBounds(x=201, y=238, width=154, height=34), validator=Tissues),
-    TextField(name='No. Tubes', visual_region=BoxBounds(x=459, y=236, width=64, height=36), validator=Number),
+    TextField(name='No. Tubes', visual_region=BoxBounds(x=459, y=236, width=64, height=36), validator=IntegerOrFloat),
     MultiCheckboxField(
         name='Tissue Preservation',
         visual_region=BoxBounds(x=525, y=240, width=660, height=40),

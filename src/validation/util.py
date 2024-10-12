@@ -39,3 +39,7 @@ def get_result_image_path(state: ValidationState) -> str:
 
 def get_base_reasoning(state: ValidationState) -> str:
     return VALIDATION_STATE_BASE_REASONING.get(state, 'Unknown')
+
+
+def export_bool_to_string(value: bool) -> str:
+    return 'yes' if value else 'no'

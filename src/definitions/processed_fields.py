@@ -106,7 +106,7 @@ class MultiCheckboxProcessedField(BaseProcessedField):
         return {self.name: ''}
 
     def validate(self) -> None:
-        validation_format = [(checkbox.checked, checkbox.text) for checkbox in self.checkboxes.values()]
+        validation_format = [(checkbox.name, checkbox.checked, checkbox.text) for checkbox in self.checkboxes.values()]
         self.validation_result = self.base_field.validator.validate(validation_format)
 
     def handle_no_form_update(self) -> None:

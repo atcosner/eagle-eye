@@ -17,19 +17,14 @@ class TextValidator(Validator):
 
     @staticmethod
     def export(base_column_name: str, text: str) -> dict[str, str]:
-        return {base_column_name: text}
+        column_name = base_column_name.lower().replace(' ', '_')
+        return {column_name: text}
 
 
 class TextValidationBypass(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
         return ValidationResult(state=ValidationState.BYPASS, reasoning=None)
-
-
-class TextOptional(TextValidator):
-    @staticmethod
-    def validate(text: str) -> ValidationResult:
-        return ValidationResult(state=ValidationState.PASSED, reasoning=None)
 
 
 class TextRequired(TextValidator):
@@ -41,7 +36,7 @@ class TextRequired(TextValidator):
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field cannot be blank')
 
 
-class Number(TextValidator):
+class IntegerOrFloat(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
         cleaned_text = text.strip()
@@ -56,7 +51,24 @@ class Number(TextValidator):
                 float(cleaned_text)
                 return ValidationResult(state=ValidationState.PASSED, reasoning=None)
             except ValueError:
-                return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field must be a number')
+                return ValidationResult(
+                    state=ValidationState.MALFORMED,
+                    reasoning='Field must be an integer or a float',
+                )
+
+
+class Integer(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        cleaned_text = text.strip()
+        if not cleaned_text:
+            return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field cannot be blank')
+
+        try:
+            int(cleaned_text)
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+        except ValueError:
+            return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field must be a number')
 
 
 class KtNumber(TextValidator):
@@ -76,27 +88,30 @@ class KtNumber(TextValidator):
 
     @staticmethod
     def export(base_column_name: str, text: str) -> dict[str, str]:
-        return {base_column_name: f'KT_{text}'}
+        return {'KT_number': f'KT_{text}'}
 
 
 class PrepNumber(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
-        cleaned_text = text.strip()
+        cleaned_text = text.strip().upper()
 
         if not cleaned_text:
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Prep Number cannot be blank')
 
-        # Format: 2-4 capital letters followed by number with 3+ digits
-        if re.compile(r'^[A-Z]{2,4} [0-9]{3,}$').match(cleaned_text) is not None:
+        # Format: 2-4 capital letters followed by number with 3-5 digits
+        if re.compile(r'^[A-Z]{2,4} [0-9]{3,5}$').match(cleaned_text) is not None:
             return ValidationResult(state=ValidationState.PASSED, reasoning=None)
         else:
-            # TODO: Should we just upper() here?
-            #  Capital I might OCR as lowercase l?
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='Prep Number must be 2-4 capital letters followed by a number with 3+ digits',
+                reasoning='Prep Number must be 2-4 capital letters followed by a number with 3-5 digits',
             )
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        formatted_text = text.strip().upper().replace(' ', '_')
+        return {'prep_number': formatted_text}
 
 
 class OtNumber(TextValidator):
@@ -116,6 +131,11 @@ class OtNumber(TextValidator):
                 reasoning='OT Number must be in the format: <YEAR>-<NUMBER>',
             )
 
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        # TODO: Should this be exported?
+        return {}
+
 
 class Locality(TextValidator):
     @staticmethod
@@ -126,17 +146,16 @@ class Locality(TextValidator):
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Locality cannot be blank')
 
         pattern = re.compile(
-            r"^(?P<state>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
-            r" ?: ?(?P<county>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)"
-            r" ?: ?(?P<location>[a-zA-Z-]{2,}(?: [a-zA-Z-]{2,})*)$"
+            r"^(?P<state>[a-zA-Z-]{2,}(?:[ ,-]+[a-zA-Z-]{2,})*)"
+            r" ?: ?(?P<county>[a-zA-Z-]{2,}(?:[ ,-]+[a-zA-Z-]{2,})*)"
+            r" ?: ?(?P<location>[a-zA-Z-]{2,}(?:[ ,-]+[a-zA-Z-]{2,})*)$"
         )
 
         # Format: <STATE> : <COUNTY> : <PLACE>
         if (match := pattern.match(cleaned_text)) is not None:
             formatted_text = f'{match.group("state")} : {match.group("county")} : {match.group("location")}'
-            state = ValidationState.PASSED if formatted_text == cleaned_text else ValidationState.CORRECTED
             return ValidationResult(
-                state=state,
+                state=ValidationState.PASSED if formatted_text == cleaned_text else ValidationState.CORRECTED,
                 reasoning=None,
                 correction=formatted_text,
             )
@@ -148,16 +167,14 @@ class Locality(TextValidator):
 
     @staticmethod
     def export(base_column_name: str, text: str) -> dict[str, str]:
-        text_parts = [part.strip() for part in text.split(':')]
-        # TODO: Handle < 3 elements in this list
+        formatted_text = text.strip()
         return {
-            f'{base_column_name}_state': text_parts[0],
-            f'{base_column_name}_county': text_parts[1],
-            f'{base_column_name}_place':  text_parts[2],
+            'country': 'USA',
+            'locality_string': formatted_text,
         }
 
 
-class GpsPoint(TextValidator):
+class GpsCoordinatePoint(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
         cleaned_text = text.strip()
@@ -173,6 +190,36 @@ class GpsPoint(TextValidator):
                 state=ValidationState.MALFORMED,
                 reasoning='GPS points must be in DD format (Min 4 decimal places)',
             )
+
+
+class GpsWaypoint(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        cleaned_text = text.strip()
+
+        # Waypoint can be blank (form has exact coordinates)
+        if not cleaned_text:
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+
+        if re.compile(r'^[a-zA-Z0-9]{4,}$').match(cleaned_text) is not None:
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+        else:
+            return ValidationResult(
+                state=ValidationState.MALFORMED,
+                reasoning='GPS waypoints must be a string of letters and then numbers',
+            )
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        # Data should be exported as "<LETTERS>_<NUMBERS>"
+        formatted_text = text
+        for idx, char in enumerate(text):
+            # Find the first number and split on that location
+            if char.isnumeric():
+                formatted_text = f'{text[:idx]}_{text[idx:]}'
+                break
+
+        return {'gps_wp': formatted_text}
 
 
 class Date(TextValidator):
@@ -229,12 +276,16 @@ class Date(TextValidator):
 
     @staticmethod
     def export(base_column_name: str, text: str) -> dict[str, str]:
+        column_name = base_column_name.replace('Date', '').strip().lower()
+
         text_parts = [part.strip() for part in text.strip().split(' ')]
-        # TODO: Handle < 3 elements in this list
+        if len(text_parts) != 3:
+            text_parts = [text, text, text]
+
         return {
-            f'{base_column_name}_day': text_parts[0],
-            f'{base_column_name}_month': text_parts[1],
-            f'{base_column_name}_year':  text_parts[2],
+            f'{column_name}_year':  text_parts[2],
+            f'{column_name}_month': text_parts[1],
+            f'{column_name}_day': text_parts[0],
         }
 
 
@@ -263,7 +314,12 @@ class Time(TextValidator):
         minute_match = 0 <= minute <= 59
 
         if hour_match and minute_match:
-            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+            formatted_text = f'{hour:02}:{minute:02}'
+            return ValidationResult(
+                state=ValidationState.PASSED if formatted_text == cleaned_text else ValidationState.CORRECTED,
+                reasoning=None,
+                correction=formatted_text,
+            )
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
@@ -279,13 +335,30 @@ class Initials(TextValidator):
         if not cleaned_text:
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field cannot be blank')
 
-        if re.compile(r'^[A-Z]{3,4}$').match(cleaned_text) is not None:
+        if re.compile(r'^[A-Z]{2,4}$').match(cleaned_text) is not None:
             return ValidationResult(state=ValidationState.PASSED, reasoning=None)
         else:
             return ValidationResult(
                 state=ValidationState.MALFORMED,
-                reasoning='Initials must be 3-4 capital letters',
+                reasoning='Initials must be 2-4 capital letters',
             )
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        return {f'{base_column_name.lower()}_init': text.strip()}
+
+
+class Habitat(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        if text.strip():
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+        else:
+            return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field cannot be blank')
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        return {base_column_name.lower(): text.lower()}
 
 
 class Tissues(TextValidator):

@@ -1,4 +1,4 @@
-from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckboxes
+from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckbox
 from src.validation.single_checkbox import OptionalCheckbox
 from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, GpsCoordinatePoint, Date, Time, \
     IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass
@@ -18,7 +18,7 @@ TOP_REGION = [
     MultiCheckboxField(
         name='Collection Method',
         visual_region=BoxBounds(x=117, y=166, width=1062, height=40),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='Shot', region=BoxBounds(x=261, y=179, width=13, height=12)),
             MultiCheckboxOption(name='Net/Trap', region=BoxBounds(x=344, y=179, width=13, height=12)),
@@ -56,7 +56,7 @@ TOP_REGION = [
     MultiCheckboxField(
         name='Tissue Preservation',
         visual_region=BoxBounds(x=525, y=240, width=660, height=40),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=646, y=254, width=12, height=12)),
             MultiCheckboxOption(name='-80 C', region=BoxBounds(x=744, y=254, width=12, height=12)),

@@ -1,4 +1,4 @@
-from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckboxes
+from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckbox
 from src.validation.single_checkbox import OptionalCheckbox
 from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, GpsCoordinatePoint, Date, Time, \
     IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass, GpsWaypoint, Habitat, Integer
@@ -31,7 +31,7 @@ TOP_REGION = [
     MultiCheckboxField(
         name='Collection Method',
         visual_region=BoxBounds(x=163, y=376, width=1061, height=35),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='Shot', region=BoxBounds(x=308, y=387, width=13, height=13)),
             MultiCheckboxOption(name='Net/Trap', region=BoxBounds(x=391, y=387, width=13, height=13)),
@@ -57,12 +57,12 @@ TOP_REGION = [
     TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=True, validator=TextValidationBypass),
 
     TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=True, validator=TextValidationBypass),
-    TextField(name='Weight (g)', visual_region=BoxBounds(x=1035, y=447, width=190, height=33), validator=IntegerOrFloat),
+    TextField(name='Weight', visual_region=BoxBounds(x=1035, y=447, width=190, height=33), validator=IntegerOrFloat),
 
     MultiCheckboxField(
         name='Tissue Date',
         visual_region=BoxBounds(x=160, y=488, width=283, height=35),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='Collection', region=BoxBounds(x=280, y=498, width=13, height=13)),
             MultiCheckboxOption(name='Preparation', region=BoxBounds(x=360, y=498, width=13, height=13)),
@@ -83,10 +83,10 @@ TOP_REGION = [
     MultiCheckboxField(
         name='Tissue Preservation',
         visual_region=BoxBounds(x=569, y=527, width=669, height=33),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
-            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=693, y=536, width=13, height=13)),
-            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=791, y=536, width=13, height=13)),
+            MultiCheckboxOption(name='-20C', region=BoxBounds(x=693, y=536, width=13, height=13)),
+            MultiCheckboxOption(name='-80C', region=BoxBounds(x=791, y=536, width=13, height=13)),
             MultiCheckboxOption(name='LN2', region=BoxBounds(x=889, y=536, width=13, height=13)),
             MultiCheckboxOption(name='Ethanol', region=BoxBounds(x=970, y=536, width=13, height=13)),
             MultiCheckboxOption(
@@ -101,9 +101,9 @@ TOP_REGION = [
     TextField(name='Preparator', visual_region=BoxBounds(x=776, y=562, width=451, height=30), validator=Initials),
 
     MultiCheckboxField(
-        name='Preps',
+        name='Prep',
         visual_region=BoxBounds(x=158, y=600, width=1077, height=36),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='Round Skin', region=BoxBounds(x=242, y=610, width=13, height=13)),
             MultiCheckboxOption(name='Skeleton', region=BoxBounds(x=385, y=610, width=13, height=13)),
@@ -126,7 +126,7 @@ TOP_REGION = [
     MultiCheckboxField(
         name='Fat',
         visual_region=BoxBounds(x=479, y=706, width=384, height=41),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='None', region=BoxBounds(x=536, y=721, width=13, height=13)),
             MultiCheckboxOption(name='Light', region=BoxBounds(x=599, y=721, width=13, height=13)),
@@ -142,7 +142,7 @@ TOP_REGION = [
     MultiCheckboxField(
         name='Sex',
         visual_region=BoxBounds(x=162, y=786, width=329, height=31),
-        validator=RequireOneCheckboxes,
+        validator=RequireOneCheckbox,
         checkboxes=[
             MultiCheckboxOption(name='Female', region=BoxBounds(x=222, y=795, width=13, height=13)),
             MultiCheckboxOption(name='Male', region=BoxBounds(x=329, y=795, width=13, height=13)),

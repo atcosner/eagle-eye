@@ -18,7 +18,7 @@ class TextValidator(Validator):
     @staticmethod
     def export(base_column_name: str, text: str) -> dict[str, str]:
         column_name = base_column_name.lower().replace(' ', '_')
-        return {column_name: text}
+        return {column_name: text.lower()}
 
 
 class TextValidationBypass(TextValidator):
@@ -171,6 +171,22 @@ class Locality(TextValidator):
         return {
             'country': 'USA',
             'locality_string': formatted_text,
+        }
+
+
+class Species(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        cleaned_text = text.strip()
+
+        # TODO: Check the species against a offline list
+
+    @staticmethod
+    def export(base_column_name: str, text: str) -> dict[str, str]:
+        formatted_text = text.strip()
+        return {
+            'genus': 'USA',
+            'species': formatted_text,
         }
 
 

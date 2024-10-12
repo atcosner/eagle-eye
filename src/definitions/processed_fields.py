@@ -95,19 +95,23 @@ class MultiCheckboxProcessedOption:
     checked: bool
     text: str | None
 
+    def to_tuple(self) -> tuple[str, bool, str | None]:
+        return self.name, self.checked, self.text
+
 
 @dataclass
 class MultiCheckboxProcessedField(BaseProcessedField):
     base_field: fields.MultiCheckboxField
     checkboxes: dict[str, MultiCheckboxProcessedOption]
 
+    def _to_validator_format(self) -> list[tuple[str, bool, str | None]]:
+        return [checkbox.to_tuple() for checkbox in self.checkboxes.values()]
+
     def export(self) -> dict[str, str]:
-        # TODO: How should this be exported
-        return {self.name: ''}
+        return self.base_field.validator.export(self.base_field.name, self._to_validator_format())
 
     def validate(self) -> None:
-        validation_format = [(checkbox.name, checkbox.checked, checkbox.text) for checkbox in self.checkboxes.values()]
-        self.validation_result = self.base_field.validator.validate(validation_format)
+        self.validation_result = self.base_field.validator.validate(self._to_validator_format())
 
     def handle_no_form_update(self) -> None:
         # If no checkboxes are checked the form element is missing
@@ -155,7 +159,7 @@ class CheckboxProcessedField(BaseProcessedField):
     checked: bool
 
     def export(self) -> dict[str, str]:
-        return {self.name: str(self.checked)}
+        return self.base_field.validator.export(self.base_field.name, self.checked)
 
     def validate(self) -> None:
         self.validation_result = self.base_field.validator.validate(self.checked)
@@ -176,7 +180,7 @@ class MultilineTextProcessedField(BaseProcessedField):
     text: str
 
     def export(self) -> dict[str, str]:
-        return {self.name: self.text}
+        return self.base_field.validator.export(self.base_field.name, self.text)
 
     def validate(self) -> None:
         self.validation_result = self.base_field.validator.validate(self.text)

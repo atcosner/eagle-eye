@@ -212,7 +212,7 @@ def process_multi_checkbox_field(
             text=optional_text,
         )
 
-    validation_format = [(checkbox.checked, checkbox.text) for checkbox in checkboxes.values()]
+    validation_format = [checkbox.to_tuple() for checkbox in checkboxes.values()]
 
     return processed_fields.MultiCheckboxProcessedField(
         name=field.name,

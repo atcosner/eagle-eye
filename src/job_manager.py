@@ -56,6 +56,8 @@ class JobManager:
 
         excel_path = self.working_dir / 'export.xlsx'
         merged_df = pd.concat(dataframes).reset_index()
-        merged_df.to_excel(excel_path)
 
+        # Clean up the dataframe before we export
+        export_columns = [column for column in merged_df.columns.values if column != 'index']
+        merged_df.to_excel(excel_path, index=False, columns=export_columns)
         return excel_path

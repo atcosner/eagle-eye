@@ -55,7 +55,7 @@ def export_bool_to_string(value: bool) -> str:
 
 def _read_species_list(file_path: Path) -> list[str]:
     with file_path.open('r') as file:
-        return [line.lower() for line in file.readlines()]
+        return [line.lower().strip() for line in file.readlines()]
 
 
 # Read in the list of species on import

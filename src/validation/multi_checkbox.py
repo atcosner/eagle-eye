@@ -15,9 +15,11 @@ class MultiCheckboxValidator(Validator):
         columns = {}
         for checkbox in checkboxes:
             column_name = f'{base_column_name}_{checkbox[0]}'.lower().replace(' ', '_')
-            # If the checkbox has a text region, use it instead of yes/no
-            row_value = checkbox[2] if checkbox[2] is not None else export_bool_to_string(checkbox[1])
-            columns[column_name] = row_value
+            columns[column_name] = export_bool_to_string(checkbox[1])
+
+            # Add an '_desc' if the checkbox has a text region
+            if checkbox[2] is not None:
+                columns[f'{column_name}_desc'] = checkbox[2]
 
         return columns
 

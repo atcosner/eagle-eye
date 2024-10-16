@@ -2,10 +2,10 @@ import calendar
 import datetime
 import logging
 import re
-from rapidfuzz import process, fuzz, utils
 
 from .base import Validator
-from .util import ValidationState, ValidationResult, ORNITHOLOGY_SPECIES_LIST, find_best_string_match
+from .util import ValidationState, ValidationResult, ORNITHOLOGY_SPECIES_LIST, find_best_string_match, \
+    export_bool_to_string
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class TextValidator(Validator):
         raise NotImplementedError('TextValidator.validate must be overwritten')
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         column_name = base_column_name.lower().replace(' ', '_')
         return {column_name: text.lower()}
 
@@ -25,6 +25,16 @@ class TextValidationBypass(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
         return ValidationResult(state=ValidationState.BYPASS, reasoning=None)
+
+
+class NoExport(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        return ValidationResult(state=ValidationState.BYPASS, reasoning=None)
+
+    @staticmethod
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
+        return {}
 
 
 class TextRequired(TextValidator):
@@ -71,6 +81,20 @@ class Integer(TextValidator):
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field must be a number')
 
 
+class OptionalInteger(TextValidator):
+    @staticmethod
+    def validate(text: str) -> ValidationResult:
+        cleaned_text = text.strip()
+        if not cleaned_text:
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+
+        try:
+            int(cleaned_text)
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
+        except ValueError:
+            return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field must be a number')
+
+
 class KtNumber(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
@@ -87,7 +111,7 @@ class KtNumber(TextValidator):
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='KT Number must be exactly 5 digits')
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         return {'KT_number': f'KT_{text}'}
 
 
@@ -109,32 +133,9 @@ class PrepNumber(TextValidator):
             )
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         formatted_text = text.strip().upper().replace(' ', '_')
         return {'prep_number': formatted_text}
-
-
-class OtNumber(TextValidator):
-    @staticmethod
-    def validate(text: str) -> ValidationResult:
-        cleaned_text = text.strip()
-
-        if not cleaned_text:
-            return ValidationResult(state=ValidationState.MALFORMED, reasoning='OT Number cannot be blank')
-
-        # OT Number: <YEAR>-<NUMBER>
-        if re.compile(r'^\d{4}-\d+$').match(cleaned_text) is not None:
-            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
-        else:
-            return ValidationResult(
-                state=ValidationState.MALFORMED,
-                reasoning='OT Number must be in the format: <YEAR>-<NUMBER>',
-            )
-
-    @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
-        # TODO: Should this be exported?
-        return {}
 
 
 class Locality(TextValidator):
@@ -166,12 +167,8 @@ class Locality(TextValidator):
             )
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
-        formatted_text = text.strip()
-        return {
-            'country': 'USA',
-            'locality_string': formatted_text,
-        }
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
+        return {'locality_string': text.strip()}
 
 
 class Species(TextValidator):
@@ -194,14 +191,15 @@ class Species(TextValidator):
         return ValidationResult(state=state, reasoning=reasoning, correction=correction)
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         cleaned_text = text.strip()
         text_parts = cleaned_text.split(' ')
+        if len(text_parts) < 2:
+            text_parts = ['', cleaned_text]
 
-        genus = '' if not text_parts else text_parts[0]
         return {
-            'genus': genus,
-            'species': cleaned_text,
+            'genus': text_parts[0],
+            'species': text_parts[1],
         }
 
 
@@ -241,7 +239,7 @@ class GpsWaypoint(TextValidator):
             )
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         # Data should be exported as "<LETTERS>_<NUMBERS>"
         formatted_text = text
         for idx, char in enumerate(text):
@@ -298,12 +296,14 @@ class Date(TextValidator):
             )
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         column_name = base_column_name.replace('Date', '').strip().lower()
 
         text_parts = [part.strip() for part in text.strip().split(' ')]
         if len(text_parts) != 3:
             text_parts = [text, text, text]
+        else:
+            text_parts = [f'{int(text_parts[0]):02}', text_parts[1], text_parts[2]]
 
         return {
             f'{column_name}_year':  text_parts[2],
@@ -367,7 +367,7 @@ class Initials(TextValidator):
             )
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         return {f'{base_column_name.lower()}_init': text.strip()}
 
 
@@ -380,7 +380,7 @@ class Habitat(TextValidator):
             return ValidationResult(state=ValidationState.MALFORMED, reasoning='Field cannot be blank')
 
     @staticmethod
-    def export(base_column_name: str, text: str) -> dict[str, str]:
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
         return {base_column_name.lower(): text.lower()}
 
 
@@ -404,3 +404,31 @@ class Tissues(TextValidator):
                 state=ValidationState.MALFORMED,
                 reasoning=f'Tissues must be a CSV of valid characters (Valid: {valid_characters})',
             )
+
+
+class Iris(TextRequired):
+    # Handle the special export format for Iris columns
+    @staticmethod
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
+        assert control_text is not None
+        cleaned_text = text.strip()
+        matched_control_text = cleaned_text == control_text
+
+        return {
+            'iris_db': export_bool_to_string(matched_control_text),
+            'iris': cleaned_text,
+        }
+
+
+class TimeOrUnknown(Time):
+    @staticmethod
+    def export(base_column_name: str, text: str, control_text: str | None = None) -> dict[str, str]:
+        assert control_text is not None
+        column_name = base_column_name.lower().replace(' ', '_')
+        cleaned_text = text.strip()
+        matched_control_text = cleaned_text == control_text
+
+        return {
+            column_name: cleaned_text,
+            f'{column_name}_unknown': export_bool_to_string(matched_control_text),
+        }

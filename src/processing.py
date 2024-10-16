@@ -154,10 +154,12 @@ def process_text_field(
     # Use the text_region if we have one
     text_region = field.text_region if field.text_region is not None else field.visual_region
 
+    from_controlled_language = False
     if field.checkbox_region is not None and get_checked(aligned_image, field.checkbox_region):
         assert field.checkbox_text is not None
         logger.info(f'Detected checked default option, using: {field.checkbox_text}')
         ocr_result = field.checkbox_text
+        from_controlled_language = True
     elif should_ocr_region(aligned_image, text_region):
         ocr_result = ocr_text_region(session, aligned_image, text_region, add_border=True)
     else:
@@ -181,6 +183,7 @@ def process_text_field(
         text=ocr_result,
         allow_linking=allow_linking,
         copied_from_previous=copied_from_previous,
+        from_controlled_language=from_controlled_language,
     )
 
 
@@ -344,6 +347,8 @@ def process_fields(
             logger.warning(f'Unknown field type: {type(base_field)}')
             continue
 
+        # Validate and apply corrections before finishing
+        result.validate()
         results.append(result)
 
     return results

@@ -8,15 +8,15 @@ Description
 This project was created for the [University of Kansas Biodiversity Institute](https://biodiversity.ku.edu/) to allow for the automatic OCR and digitization of paper collection forms.
 While testing and development was done for specific KU collection forms this project was designed to allow for the addition of other form templates.
 
-Optical Character Recognition is supported by the [Google Vision API](https://cloud.google.com/vision?hl=en) but swapping for other handwriting recognition models is possible.
+Optical Character Recognition (OCR) is supported by the [Google Vision API](https://cloud.google.com/vision?hl=en) but swapping for other handwriting recognition models is possible.
 
 
 Features
 --------
-* Batch processing on a list of scanned forms
+* Batch processing on scanned form images
 * Automatic image alignment with support for +/-10 degrees of rotation in the scanned form
 * OCR of text in the form via the Google Vision API
-* Handles user corrections of the OCR results via a simple web interface
+* A simple web interface for correcting the OCR detections
 * Validators to ensure form data complies with pre-specified formats (i.e. times look like HH:MM)
 * Export of data into an Excel workbook for further processing
 
@@ -33,22 +33,31 @@ Requirements
 
 Installation
 -------------
-1. Clone the repo
-    ```commandline
-    git clone https://github.com/atcosner/ku-bi-form-processor.git
-    ```
-2. Open a terminal and change into the `ku-bi-form-processor` directory
-    ```commandline
-    cd ku-bi-form-processor
-    ```
-3. Create a Python virtual environment for the project
-    ```commandline
-    python3 -m venv .venv
-    ```
-4. Install the required packages via pip
-    ```commandline
-    python3 -m pip install -r requirements.txt
-    ```
+* #### PyCharm
+  1. Clone the repo
+      ```commandline
+      git clone https://github.com/atcosner/ku-bi-form-processor.git
+      ```
+  2. Open the folder in PyCharm
+  3. PyCharm should prompt you to create a virtual environment from the `requirements.txt`
+     * Ensure you create the environment in `.venv`
+* #### Manual
+  1. Clone the repo
+      ```commandline
+      git clone https://github.com/atcosner/ku-bi-form-processor.git
+      ```
+  2. Open a terminal and change into the `ku-bi-form-processor` directory
+      ```commandline
+      cd ku-bi-form-processor
+      ```
+  3. Create a Python virtual environment for the project
+      ```commandline
+      python3 -m venv .venv
+      ```
+  4. Install the required packages via pip
+      ```commandline
+      python3 -m pip install -r requirements.txt
+      ```
 
 Usage
 -----

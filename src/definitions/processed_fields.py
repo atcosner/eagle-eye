@@ -57,9 +57,10 @@ class TextProcessedField(BaseProcessedField):
     text: str
     allow_linking: bool
     copied_from_previous: bool
+    from_controlled_language: bool
 
     def export(self) -> dict[str, str]:
-        return self.base_field.validator.export(self.base_field.name, self.text)
+        return self.base_field.validator.export(self.base_field.name, self.text, self.base_field.checkbox_text)
 
     def validate(self) -> None:
         self.validation_result = self.base_field.validator.validate(self.text)
@@ -74,6 +75,9 @@ class TextProcessedField(BaseProcessedField):
         if self.allow_linking:
             # Checkboxes only show up in the form when checked
             self.copied_from_previous = f'{self.form_name()}-link' in form_dict
+
+        # Check for match to the controlled language
+        self.from_controlled_language = self.text == self.base_field.checkbox_text
 
     def get_html_input(self) -> str:
         form_name = self.form_name()

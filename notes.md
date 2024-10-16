@@ -38,3 +38,7 @@
 * Example Costs
   * 18 forms for free per month
   * ~$0.08 per form after that
+
+
+## Questions?
+1. Consistency on if the "other" value in a multi-checkbox uses yes/no or a text string

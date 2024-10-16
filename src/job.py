@@ -111,6 +111,10 @@ class Job:
     def succeeded(self) -> bool:
         return self.get_current_state().state is JobState.COMPLETED
 
+    def progress_to_terminal_state(self) -> None:
+        while self.pending_work():
+            self.progress_processing()
+
     def progress_processing(self) -> None:
         if not self.pending_work():
             return

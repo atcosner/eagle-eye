@@ -38,6 +38,8 @@ def submit_job():
         logger.error(f'Missing job parameters: {request.form.keys()}')
         return redirect(url_for('submit_job'))
 
+    auto_progress = 'auto-progress' in request.form
+
     try:
         job = manager.create_job(
             request.form['job-id'],
@@ -49,7 +51,12 @@ def submit_job():
         return redirect(url_for('submit_job'))
 
     job.save_files(request.files.getlist('job-files'))
-    return redirect(url_for('job_status', job_id=job.job_id))
+
+    if auto_progress:
+        job.progress_to_terminal_state()
+        return redirect(url_for('job_status_results', job_id=job.job_id))
+    else:
+        return redirect(url_for('job_status', job_id=job.job_id))
 
 
 @app.route('/list-jobs')

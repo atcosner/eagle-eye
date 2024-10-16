@@ -33,47 +33,44 @@
 
     {% for image_index, region_results in results.items() %}
         <div id="results-viewport-{{ image_index }}"  style="display: none; min-width: 1600px;">
-            <div style="float: left;">
-                <form
-                        id="job-results-corrections"
-                        action="/job-status/{{ job_id }}/{{ image_index }}/update"
-                        method="post"
-                        enctype="multipart/form-data"
-                >
-                    {% for page_region, results in region_results.items() %}
-                        <h3>Page Region: {{ page_region.capitalize() }}</h3>
+            <form
+                    id="job-results-corrections"
+                    action="/job-status/{{ job_id }}/{{ image_index }}/update"
+                    method="post"
+                    enctype="multipart/form-data"
+                    style="width: fit-content;"
+            >
+                {% for page_region, results in region_results.items() %}
+                    <h3>Page Region: {{ page_region.capitalize() }}</h3>
 
-                        <table class="image-table">
-                            <tr>
-                                <th>Data Field</th>
-                                <th>Validation</th>
-                                <th>Extracted Text</th>
-                                <th class="roi-cell">ROI Image</th>
-                            </tr>
-                                {% for result in results %}
-                                    <tr class="form-field-row">
-                                        <td class="field-name-cell">{{ result.name }}</td>
-                                        <td class="validation-cell">{{ result.get_validation_image_html() | safe }}</td>
-                                        <td class="correction-cell">{{ result.get_html_input() | safe }}</td>
-                                        <td class="roi-cell">
-                                            <img
-                                                    src="/job-file/{{ job_id }}/{{ image_index }}/{{ page_region }}/{{ result.roi_image_path.name }}"
-                                            />
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                        </table>
+                    <table class="image-table">
+                        <tr>
+                            <th>Data Field</th>
+                            <th>Validation</th>
+                            <th>Extracted Text</th>
+                            <th class="roi-cell">ROI Image</th>
+                        </tr>
+                            {% for result in results %}
+                                <tr class="form-field-row">
+                                    <td class="field-name-cell">{{ result.name }}</td>
+                                    <td class="validation-cell">{{ result.get_validation_image_html() | safe }}</td>
+                                    <td class="correction-cell">{{ result.get_html_input() | safe }}</td>
+                                    <td class="roi-cell">
+                                        <img
+                                                src="/job-file/{{ job_id }}/{{ image_index }}/{{ page_region }}/{{ result.roi_image_path.name }}"
+                                        />
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                    </table>
 
-                        <br>
-                    {% endfor %}
+                    <br>
+                {% endfor %}
 
-                    <input type="submit" value="Submit" style="margin-bottom: 10px;"/>
-                </form>
-            </div>
+                <input type="submit" value="Submit" style="margin-bottom: 10px;"/>
+            </form>
 
-            <div class="whole-form-image-div">
-                <img src="/job-test-image/{{ job_id }}/{{ image_index }}" class="whole-form-image">
-            </div>
+            <img src="/job-test-image/{{ job_id }}/{{ image_index }}" class="whole-form-image">
         </div>
     {% endfor %}
 {% endblock %}

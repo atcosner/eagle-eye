@@ -25,7 +25,7 @@ function updateViewport(forward, force_id) {
     current_div.style.display = "none";
 
     var new_div = document.getElementById("results-viewport-" + temp_index);
-    new_div.style.display = "block";
+    new_div.style.display = "flex";
 
     // Update the image label
     var image_label = document.getElementById("image_id");
@@ -40,7 +40,7 @@ function changeRoiCellsDisplay(visible) {
         var cell = roi_cells[i];
 
         if (visible === true) {
-            cell.style.display = "block";
+            cell.style.display = "";
         } else {
             cell.style.display = "none";
         }
@@ -48,14 +48,14 @@ function changeRoiCellsDisplay(visible) {
 }
 
 function changeWholeImageDisplay(visible) {
-    const wholeFormDivs = document.getElementsByClassName("whole-form-image-div");
-    for (let i = 0; i < wholeFormDivs.length; i++) {
-        var wholeFormDiv = wholeFormDivs[i];
+    const wholeFormImages = document.getElementsByClassName("whole-form-image");
+    for (let i = 0; i < wholeFormImages.length; i++) {
+        var wholeFormImage = wholeFormImages[i];
 
         if (visible === true) {
-            wholeFormDiv.style.display = "block";
+            wholeFormImage.style.display = "";
         } else {
-            wholeFormDiv.style.display = "none";
+            wholeFormImage.style.display = "none";
         }
     }
 }

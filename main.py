@@ -77,6 +77,14 @@ def job_reference_image(job_id: uuid.UUID):
         abort(404)
 
 
+@app.route('/job-test-image/<uuid:job_id>/<int:image_id>')
+def job_test_image(job_id: uuid.UUID, image_id: int):
+    if job := manager.get_job(job_id):
+        return send_file(job.submitted_images[image_id])
+    else:
+        abort(404)
+
+
 @app.route('/job-file/<uuid:job_id>/<int:image_id>/<part_name>')
 @app.route('/job-file/<uuid:job_id>/<int:image_id>/<part_name>/<file_name>')
 def job_file(job_id: uuid.UUID, image_id: int, part_name: str, file_name: str | None = None):

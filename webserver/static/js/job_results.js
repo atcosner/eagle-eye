@@ -1,3 +1,5 @@
+var CURRENT_IMAGE_DISPLAY_FORMAT = 'field-snippets';
+
 function updateViewport(forward, force_id) {
     // Determine the new iterator
     var temp_index = CURRENT_INDEX;
@@ -30,6 +32,47 @@ function updateViewport(forward, force_id) {
     var display_index = temp_index + 1;
     image_label.innerHTML = display_index + " (" + display_index + "/" + IMAGE_COUNT + ")";
     CURRENT_INDEX = temp_index;
+}
+
+function changeRoiCellsDisplay(visible) {
+    const roi_cells = document.getElementsByClassName("roi-cell");
+    for (let i = 0; i < roi_cells.length; i++) {
+        var cell = roi_cells[i];
+
+        if (visible === true) {
+            cell.style.display = "block";
+        } else {
+            cell.style.display = "none";
+        }
+    }
+}
+
+function changeWholeImageDisplay(visible) {
+    const wholeFormDivs = document.getElementsByClassName("whole-form-image-div");
+    for (let i = 0; i < wholeFormDivs.length; i++) {
+        var wholeFormDiv = wholeFormDivs[i];
+
+        if (visible === true) {
+            wholeFormDiv.style.display = "block";
+        } else {
+            wholeFormDiv.style.display = "none";
+        }
+    }
+}
+
+function updateImageDisplayFormat(formatString) {
+    console.log("Switching image display to: " + formatString);
+    CURRENT_IMAGE_DISPLAY_FORMAT = formatString;
+
+    if (formatString === "field-snippets") {
+        changeRoiCellsDisplay(true);
+        changeWholeImageDisplay(false);
+    } else if (formatString === "whole-form") {
+        changeRoiCellsDisplay(false);
+        changeWholeImageDisplay(true);
+    } else {
+        throw Error("Unknown format: " + formatString);
+    }
 }
 
 function installMultiCheckboxListeners() {
@@ -113,6 +156,21 @@ function installLinkInputListeners() {
     }
 }
 
+function installDisplayFormatListeners() {
+    const format_radio_buttons = document.getElementsByName("image-display-format");
+    for (let i = 0; i < format_radio_buttons.length; i++) {
+        var radio_button = format_radio_buttons[i];
+
+        radio_button.onchange = function() {
+            if (this.value === CURRENT_IMAGE_DISPLAY_FORMAT) {
+                return;
+            }
+
+            updateImageDisplayFormat(this.value);
+        }
+    }
+}
+
 window.onload = () => {
     let params = new URLSearchParams(document.location.search);
     let focus_id = params.get("focus_id");
@@ -126,7 +184,17 @@ window.onload = () => {
     updateViewport(true, focus_id);
 
     // Install all the event listeners we are using
+    installDisplayFormatListeners();
     installMultiCheckboxListeners();
     installLinkCheckboxListeners();
     installLinkInputListeners();
+
+    // Ensure we use the display that matched the selected value
+    const format_radio_buttons = document.getElementsByName("image-display-format");
+    for (let i = 0; i < format_radio_buttons.length; i++) {
+        var radio_button = format_radio_buttons[i];
+        if (radio_button.checked === true) {
+            updateImageDisplayFormat(radio_button.value);
+        }
+    }
 };

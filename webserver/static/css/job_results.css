@@ -1,3 +1,12 @@
+#display-type-selection {
+    background: #e6eceb;
+    border-radius: 25px;
+    border: 2px solid #809994;
+
+    width: fit-content;
+    padding: 10px;
+}
+
 .image-table {
     border-collapse: collapse;
 }
@@ -47,6 +56,13 @@
     flex: 1;
 }
 
-
 .multi-checkbox-optional-text {
+}
+
+.whole-form-image {
+    width: 800px;
+    border: 1px solid;
+
+    position: sticky;
+    top: 20px;
 }

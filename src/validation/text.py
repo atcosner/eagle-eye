@@ -5,7 +5,7 @@ import re
 from rapidfuzz import process, fuzz, utils
 
 from .base import Validator
-from .util import ValidationState, ValidationResult
+from .util import ValidationState, ValidationResult, ORNITHOLOGY_SPECIES_LIST, find_best_string_match
 
 logger = logging.getLogger(__name__)
 
@@ -177,16 +177,31 @@ class Locality(TextValidator):
 class Species(TextValidator):
     @staticmethod
     def validate(text: str) -> ValidationResult:
-        cleaned_text = text.strip()
+        cleaned_text = text.strip().lower()
+        if cleaned_text in ORNITHOLOGY_SPECIES_LIST:
+            return ValidationResult(state=ValidationState.PASSED, reasoning=None)
 
-        # TODO: Check the species against a offline list
+        # Try to find the closest match
+        found_match, correction = find_best_string_match(cleaned_text, ORNITHOLOGY_SPECIES_LIST)
+
+        if found_match:
+            state = ValidationState.CORRECTED
+            reasoning = f'Corrected "{cleaned_text}" -> "{correction}"'
+        else:
+            state = ValidationState.MALFORMED
+            reasoning = f'Species ("{cleaned_text}") not found'
+
+        return ValidationResult(state=state, reasoning=reasoning, correction=correction)
 
     @staticmethod
     def export(base_column_name: str, text: str) -> dict[str, str]:
-        formatted_text = text.strip()
+        cleaned_text = text.strip()
+        text_parts = cleaned_text.split(' ')
+
+        genus = '' if not text_parts else text_parts[0]
         return {
-            'genus': 'USA',
-            'species': formatted_text,
+            'genus': genus,
+            'species': cleaned_text,
         }
 
 
@@ -262,16 +277,8 @@ class Date(TextValidator):
         # Attempt to correct the month if it did not match
         made_correction = False
         if month not in calendar.month_name:
-            match, ratio, edits = process.extractOne(
-                month,
-                calendar.month_name,
-                scorer=fuzz.WRatio,
-                processor=utils.default_process,
-            )
-            logger.info(f'Found match: "{match}", ratio: {ratio}, edits: {edits}')
-            if ratio > 65:
-                made_correction = True
-                month = match.capitalize()
+            made_correction, correction = find_best_string_match(month, calendar.month_name)
+            month = correction.capitalize()
 
         # Enforce constraints on values
         day_match = 1 <= day <= 31

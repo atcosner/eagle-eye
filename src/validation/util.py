@@ -1,5 +1,13 @@
-from typing import Any, NamedTuple
+import logging
+
 from enum import Enum, auto
+from pathlib import Path
+from rapidfuzz import process, fuzz, utils
+from typing import Any, NamedTuple, Iterable
+
+logger = logging.getLogger(__name__)
+
+_ORNITHOLOGY_SPECIES_FILE = Path(__file__).parent / 'NACC_list_species.csv'
 
 
 class ValidationState(Enum):
@@ -43,3 +51,23 @@ def get_base_reasoning(state: ValidationState) -> str:
 
 def export_bool_to_string(value: bool) -> str:
     return 'yes' if value else 'no'
+
+
+def _read_species_list(file_path: Path) -> list[str]:
+    with file_path.open('r') as file:
+        return [line.lower() for line in file.readlines()]
+
+
+# Read in the list of species on import
+ORNITHOLOGY_SPECIES_LIST = _read_species_list(_ORNITHOLOGY_SPECIES_FILE)
+
+
+def find_best_string_match(text: str, options: Iterable[str]) -> tuple[bool, str]:
+    match, ratio, edits = process.extractOne(
+        text,
+        options,
+        scorer=fuzz.WRatio,
+        processor=utils.default_process,
+    )
+    logger.info(f'Best match: "{text}" -> "{match}", ratio: {ratio}, edits: {edits}')
+    return (True, match) if ratio > 65 else (False, text)

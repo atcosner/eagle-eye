@@ -1,7 +1,7 @@
 import cv2
 import imutils
 
-from src.definitions.forms import SUPPORTED_FORMS
+from src.forms import SUPPORTED_FORMS
 from src.definitions.util import BoxBounds
 
 

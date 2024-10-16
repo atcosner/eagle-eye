@@ -29,6 +29,7 @@ class BaseProcessedField:
         else:
             img_tooltip = self.validation_result.reasoning
 
+        img_tooltip = img_tooltip.replace('"', '&quot;')
         return f'''
             <img 
                 src="{validation_util.get_result_image_path(self.validation_result.state)}"

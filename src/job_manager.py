@@ -5,7 +5,8 @@ from pathlib import Path
 
 from src import JOB_WORKING_DIR_PATH
 
-from .definitions.forms import ReferenceForm, SUPPORTED_FORMS
+from .forms import SUPPORTED_FORMS
+from .forms.reference import ReferenceForm
 from .job import Job, HtmlJobInfo
 
 logger = logging.getLogger(__name__)

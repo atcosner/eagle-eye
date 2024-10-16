@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import NamedTuple
 from werkzeug.datastructures import FileStorage
 
-from .definitions.forms import ReferenceForm
+from .forms.reference import ReferenceForm
 from .definitions.processed_fields import BaseProcessedField
 from .google_api import API_SETTINGS
 from .pre_processing import AlignmentResult, grayscale_image, align_images

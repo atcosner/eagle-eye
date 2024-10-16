@@ -80,11 +80,11 @@ resources including this [tutorial](https://docs.python.org/3/tutorial/index.htm
 3. Add functions in `src/processing.py` to handle creating a `ProcessedField` from your `BaseField`
 
 ### Adding Additional Reference Forms
-1. Create a new file under `src/defintions` with name that matches the reference form
+1. Create a new file under `src/forms` with name that matches the reference form
 2. Define all supported fields in the new file
-   * Support for multiple copies of the form on a single page can be seen in `src/definitions/ornithology_form_v8.py`
+   * Support for multiple copies of the form on a single page can be seen in `src/forms/ornithology_form_v8.py`
    * Ensure that `BoxBounds` in your fields are slightly smaller than the field itself to help with OCR
-3. Create an entry in the `SUPPORTED_FORMS` list in `src/definitions/forms.py`
+3. Create an entry in the `SUPPORTED_FORMS` list in `src/forms/reference.py`
    * You may want to change which form in `SUPPORTED_FORMS` has `default=True` which reflects the default form on the job creation page
 4. The form should now be selectable on the `Create Job` webpage
 

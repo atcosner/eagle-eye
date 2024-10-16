@@ -1,11 +1,11 @@
-from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckbox
+from src.validation.multi_checkbox import  RequireOneCheckbox
 from src.validation.single_checkbox import OptionalCheckbox
-from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, GpsCoordinatePoint, Date, Time, \
-    IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass
+from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, Time, IntegerOrFloat, OtNumber, Tissues, \
+    TextValidationBypass
 
-from .base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
+from src.definitions.base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
     CheckboxField, create_field_with_offset
-from .util import BoxBounds
+from src.definitions.util import BoxBounds
 
 TOP_REGION = [
     TextField(name='KT Number', visual_region=BoxBounds(x=194, y=55, width=126, height=43), validator=KtNumber),

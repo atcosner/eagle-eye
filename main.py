@@ -2,7 +2,7 @@ import logging
 import uuid
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, send_file
 
-from src.definitions.forms import SUPPORTED_FORMS
+from src.forms import SUPPORTED_FORMS
 from src.job_manager import JobManager
 from src.util import set_up_root_logger
 

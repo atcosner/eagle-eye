@@ -1,11 +1,11 @@
 from src.validation.multi_checkbox import OptionalCheckboxes, RequireOneCheckbox
 from src.validation.single_checkbox import OptionalCheckbox
 from src.validation.text import TextRequired, KtNumber, PrepNumber, Locality, GpsCoordinatePoint, Date, Time, \
-    IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass, GpsWaypoint, Habitat, Integer
+    IntegerOrFloat, OtNumber, Initials, Tissues, TextValidationBypass, GpsWaypoint, Habitat, Integer, Species
 
-from .base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
+from src.definitions.base_fields import TextField, MultilineTextField, MultiCheckboxOption, MultiCheckboxField, \
     CheckboxField, create_field_with_offset
-from .util import BoxBounds
+from src.definitions.util import BoxBounds
 
 TOP_REGION = [
     TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44), validator=KtNumber),
@@ -20,7 +20,7 @@ TOP_REGION = [
     TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33), validator=GpsCoordinatePoint),
     TextField(name='Error', visual_region=BoxBounds(x=1120, y=225, width=108, height=33), validator=TextValidationBypass),
 
-    TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True, validator=TextValidationBypass),
+    TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True, validator=Species),
     TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True, validator=TextValidationBypass),
 
     TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True, validator=Date),

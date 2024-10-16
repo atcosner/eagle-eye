@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 from typing import NamedTuple
 
-from .definitions.forms import ReferenceForm
+from .forms.reference import ReferenceForm
 
 # Allow for an image to be +/- 6 degrees rotated
 ROTATION_ATTEMPTS = [0] + list(range(1, 6, 1)) + list(range(-1, -6, -1))

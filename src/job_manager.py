@@ -2,22 +2,40 @@ import logging
 import pandas as pd
 import uuid
 from pathlib import Path
+from threading import Thread
+from werkzeug.datastructures import FileStorage
 
 from src import JOB_WORKING_DIR_PATH
 
 from .forms import SUPPORTED_FORMS
 from .forms.reference import ReferenceForm
-from .job import Job, HtmlJobInfo
+from .job import Job, HtmlJobInfo, JobState
 
 logger = logging.getLogger(__name__)
+
+
+class JobThread(Thread):
+    def __init__(self, job: Job) -> None:
+        super().__init__()
+        self.job = job
+        self.states = []
+
+    def run(self):
+        self.job.progress_to_terminal_state(self.states)
 
 
 class JobManager:
     def __init__(self):
         self.job_map: dict[uuid.UUID, Job] = {}
 
+        # TODO: Everywhere we get a job out of the map above we need to ensure it is not owned by a thread first
+        self.job_threads: dict[uuid.UUID, JobThread] = {}
+
         self.working_dir: Path = JOB_WORKING_DIR_PATH
         logger.info(f'JobManager working directory: {self.working_dir}')
+
+    def job_exists(self, job_id: uuid.UUID) -> bool:
+        return job_id in self.job_map
 
     def get_job(self, job_id: uuid.UUID) -> Job | None:
         return self.job_map.get(job_id, None)
@@ -28,7 +46,13 @@ class JobManager:
     def get_exportable_jobs(self) -> list[Job]:
         return [job for job in self.job_map.values() if job.succeeded()]
 
-    def create_job(self, job_id: str, job_name: str, reference_form_name: str) -> Job:
+    def create_job(
+            self,
+            job_id: str,
+            job_name: str,
+            reference_form_name: str,
+            job_files: list[FileStorage] | None = None,
+    ) -> uuid.UUID:
         # Find the reference form
         reference_form: ReferenceForm | None = None
         for form in SUPPORTED_FORMS:
@@ -45,7 +69,12 @@ class JobManager:
             reference_form=reference_form,
             job_name=job_name,
         )
-        return self.job_map[job_uuid]
+
+        # Save files if we were given then
+        if job_files is not None:
+            self.job_map[job_uuid].save_files(job_files)
+
+        return job_uuid
 
     def export_jobs(self, job_ids: list[uuid.UUID]) -> Path:
         dataframes = []
@@ -62,3 +91,25 @@ class JobManager:
         export_columns = [column for column in merged_df.columns.values if column != 'index']
         merged_df.to_excel(excel_path, index=False, columns=export_columns)
         return excel_path
+
+    def start_job_thread(self, job_id: uuid.UUID) -> None:
+        job = self.get_job(job_id)
+        assert job is not None, f'No job: {job_id}'
+
+        thread = JobThread(job)
+        thread.start()
+        self.job_threads[job_id] = thread
+
+    def is_job_thread_complete(self, job_id: uuid.UUID) -> bool:
+        if job_id not in self.job_threads:
+            return True
+
+        thread = self.job_threads[job_id]
+        if thread.is_alive():
+            return False
+        else:
+            # Job is finished
+            self.job_map[job_id] = thread.job
+            self.job_threads.pop(job_id)
+            return True
+

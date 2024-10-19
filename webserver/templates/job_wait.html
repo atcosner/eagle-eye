@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}KU BI Form Processor - Job Status{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/css/job_wait.css">
+    <script src="/static/js/job_wait.js" defer></script>
+    <script>
+        var JOB_ID = "{{ job_id }}";
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div style="margin: 0 auto; width: fit-content;">
+        <h2>Job: {{ job_name }}</h2>
+
+        <table>
+            <tr>
+                <td><div class="lds-dual-ring"></div></td>
+                <td><h4>Running...</h4></td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

@@ -41,22 +41,21 @@ def submit_job():
     auto_progress = 'auto-progress' in request.form
 
     try:
-        job = manager.create_job(
+        job_uuid = manager.create_job(
             request.form['job-id'],
             request.form['job-name'],
             request.form['reference-form'],
+            request.files.getlist('job-files')
         )
     except RuntimeError:
         logger.exception('Failed to create job')
         return redirect(url_for('submit_job'))
 
-    job.save_files(request.files.getlist('job-files'))
-
     if auto_progress:
-        job.progress_to_terminal_state()
-        return redirect(url_for('job_status_results', job_id=job.job_id))
-    else:
-        return redirect(url_for('job_status', job_id=job.job_id))
+        manager.start_job_thread(job_uuid)
+        return redirect(url_for('job_wait', job_id=request.form['job-id']))
+
+    return redirect(url_for('job_status', job_id=request.form['job-id']))
 
 
 @app.route('/list-jobs')
@@ -116,6 +115,25 @@ def job_status(job_id: uuid.UUID):
         return render_template('unknown_job.html', job_id=job_id)
 
 
+@app.route('/job-wait/<uuid:job_id>')
+def job_wait(job_id: uuid.UUID):
+    if not manager.job_exists(job_id):
+        return render_template('unknown_job.html', job_id=job_id)
+
+    # Redirect to status if there is no thread
+    if manager.is_job_thread_complete(job_id):
+        return redirect(url_for('job_status_results', job_id=job_id))
+    else:
+        # TODO: Not good to reach into the job owned by a thread
+        job = manager.get_job(job_id)
+        return render_template('job_wait.html', job_id=job_id, job_name=job.job_name)
+
+
+@app.route('/job-thread-status/<uuid:job_id>')
+def job_thread_status(job_id: uuid.UUID):
+    return str(manager.is_job_thread_complete(job_id)).lower()
+
+
 @app.route('/job-status/<uuid:job_id>/pre-process')
 def job_status_pre_process(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
@@ -133,6 +151,9 @@ def job_status_pre_process(job_id: uuid.UUID):
 @app.route('/job-status/<uuid:job_id>/results')
 def job_status_results(job_id: uuid.UUID):
     if job := manager.get_job(job_id):
+        if not job.succeeded():
+            return redirect(url_for('job_status', job_id=job_id))
+
         return render_template(
             'job_results.html',
             job_id=job_id,

@@ -1,6 +1,6 @@
-<h1 align="center"><img src="/webserver/static/images/ku_bi_logo.jpg"></h1>
+<h1 align="center"><img src="/webserver/static/images/eagle_eye_logo.jpg"></h1>
 
-KU BI Collection Form Processor
+Eagle Eye
 ===============================
 
 Description
@@ -36,7 +36,7 @@ Installation
 * #### PyCharm
   1. Clone the repo
       ```commandline
-      git clone https://github.com/atcosner/ku-bi-form-processor.git
+      git clone https://github.com/atcosner/eagle-eye.git
       ```
   2. Open the folder in PyCharm
   3. PyCharm should prompt you to create a virtual environment from the `requirements.txt`
@@ -44,9 +44,9 @@ Installation
 * #### Manual
   1. Clone the repo
       ```commandline
-      git clone https://github.com/atcosner/ku-bi-form-processor.git
+      git clone https://github.com/atcosner/eagle-eye.git
       ```
-  2. Open a terminal and change into the `ku-bi-form-processor` directory
+  2. Open a terminal and change into the `eagle-eye` directory
       ```commandline
       cd ku-bi-form-processor
       ```
@@ -61,13 +61,12 @@ Installation
 
 Usage
 -----
-1. Open a terminal and change into the `ku-bi-form-processor` directory
+1. Open a terminal and change into the `eagle-eye` directory
     ```commandline
     cd ku-bi-form-processor
     ```
 2. Activate the virtual environment in your terminal
-   * Command Prompt: `.venv\Scripts\activate.bat`
-   * PowerShell: `.venv\Scripts\Activate.ps1`
+   * https://docs.python.org/3/library/venv.html#how-venvs-work
 3. Start the webserver with the following command
     ```commandline
     python3 main.py

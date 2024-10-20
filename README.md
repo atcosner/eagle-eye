@@ -1,4 +1,4 @@
-<h1 align="center"><img style="max-height: 200px" src="/webserver/static/images/eagle_eye_logo_small.png"></h1>
+<div align="center"><img style="max-height: 200px" src="/webserver/static/images/eagle_eye_logo_small.png"></div>
 
 Eagle Eye
 ===============================

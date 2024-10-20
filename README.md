@@ -1,4 +1,4 @@
-<h1 align="center"><img src="/webserver/static/images/eagle_eye_logo.jpg"></h1>
+<h1 align="center"><img src="/webserver/static/images/eagle_eye_logo.png"></h1>
 
 Eagle Eye
 ===============================

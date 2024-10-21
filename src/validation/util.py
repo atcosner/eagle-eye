@@ -7,7 +7,7 @@ from typing import Any, NamedTuple, Iterable
 
 logger = logging.getLogger(__name__)
 
-_ORNITHOLOGY_SPECIES_FILE = Path(__file__).parent / 'NACC_list_species.csv'
+_ORNITHOLOGY_SPECIES_FILE = Path(__file__).parent / 'ku_orn_taxonomy_reference.csv'
 
 
 class ValidationState(Enum):

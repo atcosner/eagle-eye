@@ -1,5 +1,6 @@
 import logging
 import pandas as pd
+import shutil
 import uuid
 from pathlib import Path
 from threading import Thread
@@ -33,6 +34,15 @@ class JobManager:
 
         self.working_dir: Path = JOB_WORKING_DIR_PATH
         logger.info(f'JobManager working directory: {self.working_dir}')
+
+        # Clean up old submissions
+        self._retain_job_files(10)
+
+    def _retain_job_files(self, retain_count: int) -> None:
+        job_dirs = [path for path in self.working_dir.glob('*') if path.is_dir()]
+        sorted_dirs = sorted(job_dirs, key=lambda x: x.stat().st_mtime, reverse=True)
+        for dir_path in sorted_dirs[retain_count:]:
+            shutil.rmtree(dir_path)
 
     def job_exists(self, job_id: uuid.UUID) -> bool:
         return job_id in self.job_map

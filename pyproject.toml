@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "eagle-eye"
+name = "ku-eagle-eye"
 version = "1.0.0"
 authors = [
   { name="Austin Cosner", email="atcosner@gmail.com" },
@@ -19,5 +19,8 @@ Issues = "https://github.com/atcosner/eagle-eye/issues"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools_scm]

@@ -1,4 +1,4 @@
-<div align="center"><img style="max-height: 200px" src="/webserver/static/images/eagle_eye_logo_small.png"></div>
+<div align="center"><img style="max-height: 200px" src="https://raw.githubusercontent.com/atcosner/eagle-eye/refs/heads/main/webserver/static/images/eagle_eye_logo_small.png"></div>
 
 Eagle Eye
 ===============================
@@ -33,14 +33,11 @@ Requirements
 
 Installation
 -------------
-* #### PyCharm
-  1. Clone the repo
+* #### PyPI
+  1. Install via `pip`
       ```commandline
-      git clone https://github.com/atcosner/eagle-eye.git
+      python -m pip install ku-eagle-eye
       ```
-  2. Open the folder in PyCharm
-  3. PyCharm should prompt you to create a virtual environment from the `requirements.txt`
-     * Ensure you create the environment in `.venv`
 * #### Manual
   1. Clone the repo
       ```commandline
@@ -48,28 +45,37 @@ Installation
       ```
   2. Open a terminal and change into the `eagle-eye` directory
       ```commandline
-      cd ku-bi-form-processor
+      cd eagle-eye
       ```
   3. Create a Python virtual environment for the project
       ```commandline
-      python3 -m venv .venv
+      python -m venv .venv
       ```
   4. Install the required packages via pip
       ```commandline
-      python3 -m pip install -r requirements.txt
+      python -m pip install -r requirements.txt
       ```
 
 Usage
 -----
+* #### PyPI
+1. Run via `python`
+    ```commandline
+    python -m eagle-eye
+    ```
+4. Navigate to the web application with the following URL
+   * http://127.0.0.1:5000
+* #### Manual
 1. Open a terminal and change into the `eagle-eye` directory
     ```commandline
-    cd ku-bi-form-processor
+    cd eagle-eye
     ```
 2. Activate the virtual environment in your terminal
    * https://docs.python.org/3/library/venv.html#how-venvs-work
 3. Start the webserver with the following command
     ```commandline
-    python3 main.py
+    cd src/
+    python3 -m eagle-eye
     ```
 4. Navigate to the web application with the following URL
    * http://127.0.0.1:5000
@@ -81,26 +87,28 @@ other collections may need. This process involves writing Python which can be le
 resources including this [tutorial](https://docs.python.org/3/tutorial/index.html) from the Python developers themselves.
 
 ### Adding Additional Field Types
-1. Define a new field in `src/definitions/base_fields.py` by deriving from `BaseField`
+1. Define a new field in `src/eagle-eye/definitions/base_fields.py` by deriving from `BaseField`
    * Use the existing fields as examples for how to structure the new field.
-2. Define the corresponding processed field in `src/definitions/processed_fields.py` by deriving from `ProcessedField`
+2. Define the corresponding processed field in `src/eagle-eye/definitions/processed_fields.py` by deriving from `ProcessedField`
    * Ensure you define the required `export()`, `validate()`, and `handle_form_update()` functions
-3. Add functions in `src/processing.py` to handle creating a `ProcessedField` from your `BaseField`
+3. Add functions in `src/eagle-eye/processing.py` to handle creating a `ProcessedField` from your `BaseField`
 
 ### Adding Additional Reference Forms
-1. Create a new file under `src/forms` with name that matches the reference form
-2. Define all supported fields in the new file
-   * Support for multiple copies of the form on a single page can be seen in `src/forms/ornithology_form_v8.py`
+1. Add a blank unfilled reference form in `src/eagle-eye/form_templates`
+2. Create a new file under `src/eagle-eye/forms` with name that matches the reference form
+3. Define all supported fields in the new file
+   * Support for multiple copies of the form on a single page can be seen in `src/eagle-eye/forms/ornithology_form_v8.py`
    * Ensure that `BoxBounds` in your fields are slightly smaller than the field itself to help with OCR
-3. Create an entry in the `SUPPORTED_FORMS` list in `src/forms/reference.py`
+   * `BoxBounds` coordinates should be based on the blank reference form you created in Step 1
+4. Create an entry in the `SUPPORTED_FORMS` list in `src/eagle-eye/forms/__init__.py`
    * You may want to change which form in `SUPPORTED_FORMS` has `default=True` which reflects the default form on the job creation page
-4. The form should now be selectable on the `Create Job` webpage
+5. The form should now be selectable on the `Create Job` webpage
 
 ### Adding Additional Validators
-1. Create a new file under `src/validation` or append to one of the exiting files
+1. Create a new file under `src/eagle-eye/validation` or append to one of the exiting files
    * The files are grouped and named based on the type of field data they need to validate (e.g. text vs checkboxes)
 2. Define both the `validate()` and `export()` functions for the new validator
-3. Apply it to a `BaseField` in a reference form definition (e.g. `src/definitions/test_form_v1.py`)
+3. Apply it to a `BaseField` in a reference form definition (e.g. `src/eagle-eye/definitions/test_form_v1.py`)
 
 ### Adding New Export Formats
 Currently only exporting to an Excel workbook is supported but this can easily be extended to export the form data in

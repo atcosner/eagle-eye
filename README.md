@@ -1,4 +1,6 @@
-<div align="center"><img style="max-height: 200px" src="https://raw.githubusercontent.com/atcosner/eagle-eye/refs/heads/main/webserver/static/images/eagle_eye_logo_small.png"></div>
+<div align="center">
+<img style="max-height: 200px" src="https://raw.githubusercontent.com/atcosner/eagle-eye/refs/heads/main/src/eagle-eye/webserver/static/images/eagle_eye_logo_small.png">
+</div>
 
 Eagle Eye
 ===============================

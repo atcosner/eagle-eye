@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.definitions.base_fields import BaseField
+from ..definitions.base_fields import BaseField
 
 
 @dataclass(frozen=True)

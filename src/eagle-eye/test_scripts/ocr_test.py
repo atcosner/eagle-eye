@@ -37,7 +37,7 @@ def cleanup_text(text):
 
 
 if __name__ == '__main__':
-    resource_path = Path.cwd() / '..' / '..' / 'forms'
+    resource_path = Path.cwd() / '..' / '..' / 'form_templates'
 
     # Load the dev and production images
     test_img = cv2.imread(str(resource_path / 'production' / 'ku_collection_form_1_top.png'))

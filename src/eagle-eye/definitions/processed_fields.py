@@ -2,10 +2,10 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-import src.validation.util as validation_util
-
 from . import base_fields as fields
 from . import util
+
+from ..validation import util as validation_util
 
 logger = logging.getLogger(__name__)
 

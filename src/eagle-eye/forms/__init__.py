@@ -1,8 +1,8 @@
-from src import FORMS_PATH
-
 from . import test_form_v1
 from . import ornithology_form_v8
 from .reference import ReferenceForm
+
+from .. import FORMS_PATH
 
 PRODUCTION_PATH = FORMS_PATH / 'production'
 DEVELOPMENT_PATH = FORMS_PATH / 'dev'

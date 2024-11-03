@@ -1,9 +1,9 @@
 import copy
 from dataclasses import dataclass
 
-from src.validation.multi_checkbox import MultiCheckboxValidator
-from src.validation.single_checkbox import SingleCheckboxValidator
-from src.validation.text import TextValidator
+from ..validation.multi_checkbox import MultiCheckboxValidator
+from ..validation.single_checkbox import SingleCheckboxValidator
+from ..validation.text import TextValidator
 
 from .util import BoxBounds
 

@@ -171,7 +171,7 @@ def align_images(
 
 
 if __name__ == '__main__':
-    resource_path = Path.cwd() / '..' / '..' / 'forms'
+    resource_path = Path.cwd() / '..' / '..' / 'form_templates'
 
     # Load the dev and production images
     test_img = cv2.imread(str(resource_path / 'dev' / 'test_kt_form__filled_errors.jpg'))

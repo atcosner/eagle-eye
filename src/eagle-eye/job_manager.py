@@ -6,11 +6,11 @@ from pathlib import Path
 from threading import Thread
 from werkzeug.datastructures import FileStorage
 
-from src import JOB_WORKING_DIR_PATH
+from . import JOB_WORKING_DIR_PATH
 
 from .forms import SUPPORTED_FORMS
 from .forms.reference import ReferenceForm
-from .job import Job, HtmlJobInfo, JobState
+from .job import Job, HtmlJobInfo
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,10 @@ class JobManager:
 
         # Clean up old submissions
         self._retain_job_files(10)
+
+    @staticmethod
+    def get_supported_forms() -> list[ReferenceForm]:
+        return SUPPORTED_FORMS
 
     def _retain_job_files(self, retain_count: int) -> None:
         job_dirs = [path for path in self.working_dir.glob('*') if path.is_dir()]

@@ -1,20 +1,12 @@
 import logging
 import uuid
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, abort, send_file
+from flask import render_template, request, redirect, url_for, send_from_directory, abort, send_file
 
-from src.forms import SUPPORTED_FORMS
-from src.job_manager import JobManager
-from src.util import set_up_root_logger
-
-
-app = Flask(
-    __name__,
-    static_folder='webserver/static/',
-    template_folder='webserver/templates/',
-)
+from . import app
+from ..job_manager import JobManager
 
 logger = logging.getLogger(__name__)
-manager: JobManager | None = None
+manager = JobManager()
 
 
 @app.route('/')
@@ -27,7 +19,7 @@ def create_job():
     return render_template(
         'create_job.html',
         job_id=uuid.uuid4(),
-        reference_forms=SUPPORTED_FORMS,
+        reference_forms=JobManager.get_supported_forms(),
     )
 
 
@@ -198,12 +190,3 @@ def export_jobs():
     jobs_to_export = [uuid.UUID(key) for key, value in request.form.items() if value == 'on']
     excel_path = manager.export_jobs(jobs_to_export)
     return send_file(excel_path)
-
-
-if __name__ == '__main__':
-    set_up_root_logger(verbose=True)
-    manager = JobManager()
-
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True, host='127.0.0.1')

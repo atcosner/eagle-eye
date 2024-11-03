@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eagle-eye"
+version = "1.0.0"
+authors = [
+  { name="Austin Cosner", email="atcosner@gmail.com" },
+]
+description = "KU Biodiversity Institute Collection Form Processing"
+readme = "README.md"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/atcosner/eagle-eye"
+Issues = "https://github.com/atcosner/eagle-eye/issues"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools_scm]

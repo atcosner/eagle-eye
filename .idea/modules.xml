@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/eagle-eye.iml" filepath="$PROJECT_DIR$/.idea/eagle-eye.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/eagle-eye-gui.iml" filepath="$PROJECT_DIR$/.idea/eagle-eye-gui.iml" />
     </modules>
   </component>
 </project>

@@ -3,6 +3,7 @@ from PyQt6.QtGui import QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PyQt6.QtWidgets import QWidget, QListWidget, QListWidgetItem
 
 from pathlib import Path
+from typing import Iterable
 
 from .. import RESOURCES_PATH
 
@@ -29,6 +30,8 @@ class FileDropList(QListWidget):
         self.setAcceptDrops(True)
         self.setIconSize(QSize(40, 40))
 
+        self.setStyleSheet(f'background-position: center; background-image: url({RESOURCES_PATH / "drag_files.png"})')
+
         self.mime_db = QMimeDatabase()
 
     def check_drag_event(self, data: QMimeData) -> bool:
@@ -44,9 +47,17 @@ class FileDropList(QListWidget):
 
         return not invalid_file
 
-    def add_item(self, url: QUrl) -> None:
-        file_path = Path(url.toLocalFile())
+    def add_item(self, file_path: QUrl | Path | str) -> None:
+        if isinstance(file_path, QUrl):
+            file_path = Path(file_path.toLocalFile())
+        elif isinstance(file_path, str):
+            file_path = Path(file_path)
+
         self.addItem(FileItem(file_path))
+
+    def add_items(self, files: Iterable[QUrl | Path | str]) -> None:
+        for file in files:
+            self.add_item(file)
 
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         if self.check_drag_event(event.mimeData()):
@@ -62,7 +73,6 @@ class FileDropList(QListWidget):
 
     def dropEvent(self, event: QDropEvent) -> None:
         if event.mimeData().hasUrls():
-            for url in event.mimeData().urls():
-                self.add_item(url)
+            self.add_items(event.mimeData().urls())
 
             event.acceptProposedAction()

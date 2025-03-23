@@ -2,7 +2,7 @@ from PyQt6.QtCore import QMimeDatabase
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtPdfWidgets import QPdfView
-from PyQt6.QtWidgets import QWidget, QScrollArea, QLabel, QSizePolicy, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QScrollArea, QLabel, QSizePolicy, QVBoxLayout, QPushButton
 
 
 class ImageViewer(QScrollArea):
@@ -40,6 +40,9 @@ class FilePreview(QWidget):
     def __init__(self):
         super().__init__()
         self.mime_db = QMimeDatabase()
+
+        # self.zoom_up_button = QPushButton()
+        # self.zoom_down_button = QPushButton()
 
         self.pdf_viewer = PdfViewer()
         self.image_viewer = ImageViewer()

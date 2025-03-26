@@ -1,5 +1,5 @@
 <div align="center">
-<img style="max-height: 200px" src="https://raw.githubusercontent.com/atcosner/eagle-eye/refs/heads/main/src/eagle-eye/webserver/static/images/eagle_eye_logo_small.png">
+<img style="max-height: 200px" src="https://raw.githubusercontent.com/atcosner/eagle-eye-qt/refs/heads/main/src/gui/resources/white_icon.png?token=GHSAT0AAAAAADAZNSICCEA7PKIR42YDVSQYZ7EITIQ">
 </div>
 
 Eagle Eye

@@ -10,6 +10,7 @@ class FormProcessing(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowIcon(QIcon(str(RESOURCES_PATH / 'white_icon.png')))
+        self.setWindowTitle('Eagle Eye')
 
         self.picker = FilePicker()
 

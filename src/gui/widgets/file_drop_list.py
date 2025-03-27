@@ -56,8 +56,13 @@ class FileDropList(QListWidget):
         self.addItem(FileItem(file_path))
 
     def add_items(self, files: Iterable[QUrl | Path | str]) -> None:
+        prev_item_count = self.count()
         for file in files:
             self.add_item(file)
+
+        # Auto-select the first element if we had no children to start
+        if prev_item_count == 0:
+            self.setCurrentRow(0)
 
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         if self.check_drag_event(event.mimeData()):

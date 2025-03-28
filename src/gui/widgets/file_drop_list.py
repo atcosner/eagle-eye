@@ -20,8 +20,8 @@ class FileItem(QListWidgetItem):
 
         self._path = file_path
 
-    def path(self) -> str:
-        return str(self._path)
+    def path(self) -> Path:
+        return self._path
 
 
 class FileDropList(QListWidget):
@@ -64,6 +64,12 @@ class FileDropList(QListWidget):
         if prev_item_count == 0:
             self.setCurrentRow(0)
 
+    def get_files(self) -> list[Path]:
+        return [self.item(idx).path() for idx in range(self.count())]
+
+    #
+    # Drag and Drop behavior
+    #
     def dragEnterEvent(self, event: QDragEnterEvent) -> None:
         if self.check_drag_event(event.mimeData()):
             event.acceptProposedAction()

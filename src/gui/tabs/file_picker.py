@@ -1,9 +1,11 @@
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QListWidgetItem, QSplitter
 
-from .file_dialog import ScanFileDialog
-from .file_drop_list import FileDropList, FileItem
-from .file_preview import FilePreview
+from pathlib import Path
+
+from ..widgets.file_dialog import ScanFileDialog
+from ..widgets.file_drop_list import FileDropList, FileItem
+from ..widgets.file_preview import FilePreview
 
 
 class FileListWithButton(QWidget):
@@ -26,14 +28,23 @@ class FileListWithButton(QWidget):
         if dialog.exec():
             self.file_list.add_items(dialog.selectedFiles())
 
+    def get_files(self) -> list[Path]:
+        return self.file_list.get_files()
+
 
 class FilePicker(QWidget):
+    filesConfirmed = pyqtSignal(list)  # list[Path]
+
     def __init__(self):
         super().__init__()
+        self.setContentsMargins(0, 0, 0, 0)
 
         self.file_list = FileListWithButton()
         self.file_preview = FilePreview()
         self.file_list.file_list.currentItemChanged.connect(self.update_preview)
+
+        self.confirm_files_button = QPushButton('Confirm Files')
+        self.confirm_files_button.pressed.connect(self.confirm_files)
 
         self.splitter = QSplitter()
         self.splitter.addWidget(self.file_list)
@@ -43,10 +54,22 @@ class FilePicker(QWidget):
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)
 
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
         layout.addWidget(self.splitter)
+
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(self.confirm_files_button)
+        layout.addLayout(button_layout)
+
         self.setLayout(layout)
 
     @pyqtSlot(QListWidgetItem, QListWidgetItem)
     def update_preview(self, current: FileItem, _: FileItem):
         self.file_preview.update_preview(current.path())
+
+    @pyqtSlot()
+    def confirm_files(self) -> None:
+        files = self.file_list.get_files()
+        print(files)
+        self.filesConfirmed.emit(files)

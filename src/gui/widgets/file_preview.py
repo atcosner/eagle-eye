@@ -4,6 +4,8 @@ from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QScrollArea, QLabel, QSizePolicy, QVBoxLayout, QPushButton, QHBoxLayout, QScrollBar
 
+from pathlib import Path
+
 
 def adjust_scroll_bar_scale(bar: QScrollBar, factor: float) -> None:
     bar.setValue(int(factor * bar.value() + ((factor - 1) * bar.pageStep() / 2)))
@@ -109,7 +111,10 @@ class FilePreview(QWidget):
         self.image_viewer.reset_zoom()
         self.pdf_viewer.reset_zoom()
 
-    def update_preview(self, file_path: str) -> None:
+    def update_preview(self, file_path: str | Path) -> None:
+        if isinstance(file_path, Path):
+            file_path = str(file_path)
+
         mime_type = self.mime_db.mimeTypeForFile(file_path)
 
         # Split based on if it is an image or PDF

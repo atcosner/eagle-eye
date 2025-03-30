@@ -1,3 +1,4 @@
+from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem
 
@@ -20,6 +21,8 @@ class FileStatusItem(QTreeWidgetItem):
         self.setIcon(2, QIcon(str(RESOURCES_PATH / 'file_pending.png')))
 
         self._path = file_path
+
+        self.setData(0, Qt.ItemDataRole.SizeHintRole, QSize(40, 40))
 
 
 class FileStatusList(QTreeWidget):

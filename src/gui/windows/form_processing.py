@@ -1,17 +1,13 @@
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QMainWindow, QTabWidget
+from PyQt6.QtWidgets import QTabWidget
 
+from .base import BaseWindow
 from ..tabs.file_picker import FilePicker
 from ..tabs.file_pre_processing import FilePreProcessing
 
-from .. import RESOURCES_PATH
 
-
-class FormProcessing(QMainWindow):
+class FormProcessing(BaseWindow):
     def __init__(self):
-        super().__init__()
-        self.setWindowIcon(QIcon(str(RESOURCES_PATH / 'white_icon.png')))
-        self.setWindowTitle('Eagle Eye')
+        super().__init__('Form Processing')
 
         self.picker = FilePicker()
         self.pre_processing = FilePreProcessing()

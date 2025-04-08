@@ -9,4 +9,4 @@ class Job(MappedAsDataclass, OrmBase):
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     name: Mapped[str]
-    uuid: Mapped[uuid.uuid4]
+    uuid: Mapped[uuid.UUID]

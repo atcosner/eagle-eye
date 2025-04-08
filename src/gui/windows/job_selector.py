@@ -1,5 +1,11 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QRadioButton, QVBoxLayout, QLabel, QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QRadioButton, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QListWidget
+
+from src.database import DB_ENGINE
+from src.database.job import Job
 
 from .base import BaseWindow
 
@@ -10,11 +16,14 @@ class JobSelector(BaseWindow):
 
         self.new_job_button = QRadioButton('Create a new job', self)
         self.existing_job_button = QRadioButton('Continue an existing job', self)
+        self.existing_job_list = QListWidget()
 
         self.new_job_button.setChecked(True)
+        self.existing_job_list.setDisabled(True)
         self.existing_job_button.pressed.connect(self.toggle_job_list_visibility)
 
         self._set_up_layout()
+        self._populate_jobs()
 
     def _set_up_layout(self) -> None:
         layout = QVBoxLayout()
@@ -27,11 +36,17 @@ class JobSelector(BaseWindow):
         layout.addLayout(divider_layout)
 
         layout.addWidget(self.existing_job_button)
+        layout.addWidget(self.existing_job_list)
 
         widget = QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
 
-    @pyqtSlot
+    def _populate_jobs(self) -> None:
+        with Session(DB_ENGINE) as session:
+            for row in session.execute(select(Job)):
+                self.existing_job_list.addItem(row.Job.name)
+
+    @pyqtSlot()
     def toggle_job_list_visibility(self) -> None:
-        pass
+        self.existing_job_list.setDisabled(self.new_job_button.isChecked())

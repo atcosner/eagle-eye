@@ -16,19 +16,22 @@ def get_user_data_dir() -> Path | None:
     return None
 
 
+def get_working_dir() -> Path | None:
+    work_dir = get_user_data_dir() / 'EagleEye'
+    work_dir.mkdir(exist_ok=True)
+
+    return work_dir
+
+
 class LocalPaths:
     @staticmethod
     def log_directory() -> Path:
-        return get_user_data_dir() / 'logs'
+        return get_working_dir() / 'logs'
 
     @staticmethod
     def settings_file() -> Path:
-        return get_user_data_dir() / 'settings.json'
+        return get_working_dir() / 'settings.json'
 
     @staticmethod
-    def primary_database_file() -> Path:
-        return get_user_data_dir() / 'primary.db'
-
-    @staticmethod
-    def secondary_database_file() -> Path:
-        return get_user_data_dir() / 'secondary.db'
+    def database_file(primary: bool = True) -> Path:
+        return get_working_dir() / ('primary.db' if primary else 'secondary.db')

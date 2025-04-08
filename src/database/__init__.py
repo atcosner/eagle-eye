@@ -14,7 +14,7 @@ from .job import Job
 
 
 def create_db(path: Path, overwrite: bool = False) -> sqlalchemy.Engine:
-    engine = sqlalchemy.create_engine(f'sqlite+pysqlite:///{path}')
+    engine = sqlalchemy.create_engine(f'sqlite+pysqlite:///{path}', echo=True)
 
     if overwrite:
         path.unlink(missing_ok=True)

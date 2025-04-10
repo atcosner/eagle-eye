@@ -29,6 +29,10 @@ class LocalPaths:
         return get_working_dir() / 'logs'
 
     @staticmethod
+    def reference_form_directory() -> Path:
+        return get_working_dir() / 'reference_form'
+
+    @staticmethod
     def settings_file() -> Path:
         return get_working_dir() / 'settings.json'
 

@@ -1,11 +1,14 @@
 import logging
 import uuid
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QComboBox, QSizePolicy
 
 from src.database import DB_ENGINE
 from src.database.job import Job
+from src.database.reference_form import ReferenceForm
 
 from .base import BaseWindow
 from .job_selector import JobSelector
@@ -36,6 +39,7 @@ class MainWindow(BaseWindow):
         self.job_name.setDisabled(True)
 
         self.job_reference = QComboBox(self)
+        self.job_reference.setPlaceholderText('< No Reference Form Selected >')
         size_policy = QSizePolicy()
         size_policy.setHorizontalPolicy(QSizePolicy.Policy.MinimumExpanding)
         self.job_reference.setSizePolicy(size_policy)
@@ -74,7 +78,14 @@ class MainWindow(BaseWindow):
             job = session.get(Job, job_id)
             self.job_name.setText(job.name)
 
+    def reload_reference_forms(self) -> None:
+        self.job_reference.clear()
+        with Session(DB_ENGINE) as session:
+            for row in session.execute(select(ReferenceForm)):
+                self.job_reference.addItem(row.ReferenceForm.name)
+
     def start(self) -> None:
+        self.reload_reference_forms()
         self.show()
 
         selector = JobSelector(self)

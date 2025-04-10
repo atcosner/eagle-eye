@@ -11,6 +11,7 @@ class OrmBase(DeclarativeBase):
 
 # TODO: A more elegant solution?
 from .job import Job
+from .reference_form import ReferenceForm
 
 
 def create_db(path: Path, overwrite: bool = False) -> sqlalchemy.Engine:

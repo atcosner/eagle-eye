@@ -1,6 +1,5 @@
 import logging
 import uuid
-
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -9,6 +8,7 @@ from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QLineEdit, QHBoxLa
 from src.database import DB_ENGINE
 from src.database.job import Job
 from src.database.reference_form import ReferenceForm
+from src.util.paths import LocalPaths
 
 from .base import BaseWindow
 from .job_selector import JobDetails, JobSelector
@@ -24,6 +24,8 @@ def create_job(job_name: str) -> int:
         session.add(new_job)
         session.commit()
 
+        LocalPaths.set_up_job_directory(job_name)
+
         logger.info(f'Created new job with ID: {new_job.id}')
         return new_job.id
 
@@ -31,6 +33,7 @@ def create_job(job_name: str) -> int:
 class MainWindow(BaseWindow):
     def __init__(self):
         super().__init__(None, 'Form Processing')
+        self._job_db_id: int | None = None
 
         self.picker = FilePicker()
         self.pre_processing = FilePreProcessing()
@@ -81,7 +84,10 @@ class MainWindow(BaseWindow):
     def load_job(self, job_id: int) -> None:
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job_id)
+
             self.job_name.setText(job.name)
+            self._job_db_id = job_id
+            self.picker.load_job(job)
 
         self._toggle_controls(True)
 

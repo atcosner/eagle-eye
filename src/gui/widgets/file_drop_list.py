@@ -1,11 +1,17 @@
 import logging
+import shutil
+from pathlib import Path
+from sqlalchemy.orm import Session
+from typing import Iterable
 
 from PyQt6.QtCore import QSize, QMimeData, QMimeDatabase, QUrl
 from PyQt6.QtGui import QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PyQt6.QtWidgets import QWidget, QListWidget, QListWidgetItem
 
-from pathlib import Path
-from typing import Iterable
+from src.database import DB_ENGINE
+from src.database.input_file import InputFile
+from src.database.job import Job
+from src.util.paths import LocalPaths
 
 from .. import RESOURCES_PATH
 
@@ -17,10 +23,8 @@ class FileItem(QListWidgetItem):
         super().__init__()
 
         self.setText(file_path.name)
-        if file_path.suffix == '.pdf':
-            self.setIcon(QIcon(str(RESOURCES_PATH / 'pdf_icon.png')))
-        else:
-            self.setIcon(QIcon(str(RESOURCES_PATH / 'image_icon.png')))
+        icon_file_name = 'pdf_icon.png' if file_path.suffix == '.pdf' else 'image_icon.png'
+        self.setIcon(QIcon(str(RESOURCES_PATH / icon_file_name)))
 
         self._path = file_path
 
@@ -34,9 +38,20 @@ class FileDropList(QListWidget):
         self.setAcceptDrops(True)
         self.setIconSize(QSize(40, 40))
 
-        self.setStyleSheet(f'background-position: center; background-image: url({RESOURCES_PATH / "drag_files.png"})')
+        self._job_db_id: int | None = None
+        self._job_db_name: str | None = None
+
+        # self.setStyleSheet(f'background-position: center; background-image: url({RESOURCES_PATH / "drag_files.png"})')
 
         self.mime_db = QMimeDatabase()
+
+    def load_job(self, job: Job | None) -> None:
+        self._job_db_id = job.id if job else None
+        self._job_db_name = job.name if job else None
+
+        if job is not None:
+            for input_file in job.input_files:
+                self.add_item(input_file.path)
 
     def check_drag_event(self, data: QMimeData) -> bool:
         if not data.hasUrls():
@@ -51,11 +66,26 @@ class FileDropList(QListWidget):
 
         return not invalid_file
 
-    def add_item(self, file_path: QUrl | Path | str) -> None:
+    def add_item(self, file_path: QUrl | Path | str, from_db: bool = True) -> None:
         if isinstance(file_path, QUrl):
             file_path = Path(file_path.toLocalFile())
         elif isinstance(file_path, str):
             file_path = Path(file_path)
+
+        if not from_db:
+            # Copy the file into our internal storage
+            input_file_directory = LocalPaths.input_files_directory(self._job_db_name)
+            new_path = input_file_directory.with_name(file_path.name)
+
+            logger.info(f'Copying: "{file_path}" -> "{new_path}"')
+            shutil.copy(file_path, new_path)
+            file_path = new_path
+
+            # Add it to the job in the DB
+            with Session(DB_ENGINE) as session:
+                job = session.get(Job, self._job_db_id)
+                job.input_files.append(InputFile(path=file_path))
+                session.commit()
 
         logger.info(f'Adding file: {file_path}')
         self.addItem(FileItem(file_path))

@@ -3,9 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import NamedTuple
 
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, Qt
 from PyQt6.QtWidgets import QRadioButton, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QListWidget, QPushButton, QDialog, \
-    QLineEdit
+    QLineEdit, QListWidgetItem
 
 from src.database import DB_ENGINE
 from src.database.job import Job
@@ -34,7 +34,8 @@ class JobSelector(QDialog):
 
         self.new_job_button.setChecked(True)
         self.existing_job_list.setDisabled(True)
-        self.existing_job_button.pressed.connect(self.toggle_visibility)
+        self.new_job_button.toggled.connect(self.toggle_visibility)
+        self.existing_job_button.toggled.connect(self.toggle_visibility)
 
         self._set_up_layout()
         self._populate_jobs()
@@ -67,7 +68,9 @@ class JobSelector(QDialog):
     def _populate_jobs(self) -> None:
         with Session(DB_ENGINE) as session:
             for row in session.execute(select(Job)):
-                self.existing_job_list.addItem(row.Job.name)
+                job_item = QListWidgetItem(row.Job.name)
+                job_item.setData(Qt.ItemDataRole.UserRole, row.Job.id)
+                self.existing_job_list.addItem(job_item)
 
         # Disable the existing job widgets if we loaded no jobs
         if self.existing_job_list.count() == 0:
@@ -86,4 +89,8 @@ class JobSelector(QDialog):
                 job_name=self.new_job_name.text() if self.new_job_name.text() else self.new_job_name.placeholderText(),
             )
         else:
-            return JobDetails(db_id=None, job_name=None)
+            selected_job = self.existing_job_list.selectedItems()[0]
+            return JobDetails(
+                db_id=selected_job.data(Qt.ItemDataRole.UserRole),
+                job_name=None,
+            )

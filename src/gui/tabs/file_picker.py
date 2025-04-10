@@ -1,9 +1,10 @@
 import logging
+from pathlib import Path
 
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QListWidgetItem, QSplitter
 
-from pathlib import Path
+from src.database.job import Job
 
 from ..widgets.file_dialog import ScanFileDialog
 from ..widgets.file_drop_list import FileDropList, FileItem
@@ -16,6 +17,8 @@ class FileListWithButton(QWidget):
     def __init__(self):
         super().__init__()
 
+        self._job_db_id: int | None = None
+
         self.file_list = FileDropList()
 
         self.add_files_button = QPushButton('Add files')
@@ -25,6 +28,10 @@ class FileListWithButton(QWidget):
         layout.addWidget(self.add_files_button)
         layout.addWidget(self.file_list)
         self.setLayout(layout)
+
+    def load_job(self, job: Job | None) -> None:
+        self._job_db_id = job.id if job else None
+        self.file_list.load_job(job)
 
     @pyqtSlot()
     def show_file_dialog(self) -> None:
@@ -42,6 +49,8 @@ class FilePicker(QWidget):
     def __init__(self):
         super().__init__()
         self.setContentsMargins(0, 0, 0, 0)
+
+        self._job_db_id: int | None = None
 
         self.file_list = FileListWithButton()
         self.file_preview = FilePreview()
@@ -67,6 +76,10 @@ class FilePicker(QWidget):
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
+
+    def load_job(self, job: Job | None) -> None:
+        self._job_db_id = job.id if job else None
+        self.file_list.load_job(job)
 
     @pyqtSlot(QListWidgetItem, QListWidgetItem)
     def update_preview(self, current: FileItem, _: FileItem):

@@ -1,3 +1,5 @@
+import logging
+
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QListWidgetItem, QSplitter
 
@@ -6,6 +8,8 @@ from pathlib import Path
 from ..widgets.file_dialog import ScanFileDialog
 from ..widgets.file_drop_list import FileDropList, FileItem
 from ..widgets.file_preview import FilePreview
+
+logger = logging.getLogger(__name__)
 
 
 class FileListWithButton(QWidget):
@@ -71,5 +75,8 @@ class FilePicker(QWidget):
     @pyqtSlot()
     def confirm_files(self) -> None:
         files = self.file_list.get_files()
-        print(files)
+        logger.info('Confirming selected files:')
+        for file in files:
+            logger.info(file)
+
         self.filesConfirmed.emit(files)

@@ -15,7 +15,7 @@ from .reference_form import ReferenceForm
 
 
 def create_db(path: Path, overwrite: bool = False) -> sqlalchemy.Engine:
-    engine = sqlalchemy.create_engine(f'sqlite+pysqlite:///{path}', echo=True)
+    engine = sqlalchemy.create_engine(f'sqlite+pysqlite:///{path}', echo=False)
 
     if overwrite:
         path.unlink(missing_ok=True)
@@ -26,4 +26,4 @@ def create_db(path: Path, overwrite: bool = False) -> sqlalchemy.Engine:
     return engine
 
 
-DB_ENGINE = create_db(LocalPaths.database_file(), overwrite=True)
+DB_ENGINE = create_db(LocalPaths.database_file(), overwrite=False)

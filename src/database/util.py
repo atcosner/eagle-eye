@@ -7,9 +7,8 @@ class DbBoxBounds(types.TypeDecorator):
     impl = types.String
 
     def process_bind_param(self, value: BoxBounds | None, dialect) -> str | None:
-        assert isinstance(value, BoxBounds), f'Invalid type: {type(value)}'
-
         if value is not None:
+            assert isinstance(value, BoxBounds), f'Invalid type: {type(value)}'
             value = value.to_db()
 
         return value

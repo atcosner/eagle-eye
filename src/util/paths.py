@@ -30,7 +30,7 @@ class LocalPaths:
 
     @staticmethod
     def reference_form_directory() -> Path:
-        return get_working_dir() / 'reference_form'
+        return get_working_dir() / 'reference_forms'
 
     @staticmethod
     def settings_file() -> Path:

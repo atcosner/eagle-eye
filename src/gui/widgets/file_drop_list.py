@@ -1,3 +1,5 @@
+import logging
+
 from PyQt6.QtCore import QSize, QMimeData, QMimeDatabase, QUrl
 from PyQt6.QtGui import QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PyQt6.QtWidgets import QWidget, QListWidget, QListWidgetItem
@@ -6,6 +8,8 @@ from pathlib import Path
 from typing import Iterable
 
 from .. import RESOURCES_PATH
+
+logger = logging.getLogger(__name__)
 
 
 class FileItem(QListWidgetItem):
@@ -53,6 +57,7 @@ class FileDropList(QListWidget):
         elif isinstance(file_path, str):
             file_path = Path(file_path)
 
+        logger.info(f'Adding file: {file_path}')
         self.addItem(FileItem(file_path))
 
     def add_items(self, files: Iterable[QUrl | Path | str]) -> None:

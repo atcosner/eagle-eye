@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import NamedTuple
 
 
@@ -13,3 +14,8 @@ class BoxBounds(NamedTuple):
     @staticmethod
     def from_db(db_value: str | None) -> 'BoxBounds | None':
         return BoxBounds(*(db_value.split(','))) if db_value else None
+
+
+class InputFileDetails(NamedTuple):
+    db_id: int
+    path: Path

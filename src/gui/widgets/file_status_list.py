@@ -1,26 +1,27 @@
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QIcon, QMovie
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView
 
-from pathlib import Path
 from typing import Iterable
 
-from ...util.resources import RESOURCES_PATH
-from ...util.status import FileStatus, get_icon_for_status
+from src.util.resources import RESOURCES_PATH
+from src.util.status import FileStatus, get_icon_for_status
+from src.util.types import InputFileDetails
 
 
 class FileStatusItem(QTreeWidgetItem):
-    def __init__(self, file_path: Path):
+    def __init__(self, file_details: InputFileDetails):
         super().__init__()
-        self.path = file_path
+        self.details = file_details
         self.status: FileStatus = FileStatus.PENDING
 
-        icon_file_name = 'pdf_icon.png' if file_path.suffix == '.pdf' else 'image_icon.png'
+        icon_file_name = 'pdf_icon.png' if self.details.path.suffix == '.pdf' else 'image_icon.png'
         self.setIcon(0, QIcon(str(RESOURCES_PATH / icon_file_name)))
-        self.setText(1, file_path.name)
+        self.setText(1, self.details.path.name)
         self.set_status(self.status)
 
-        self._path = file_path
+    def get_details(self) -> InputFileDetails:
+        return self.details
 
     def set_status(self, status: FileStatus) -> None:
         self.status = status
@@ -48,5 +49,5 @@ class FileStatusList(QTreeWidget):
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
-    def add_files(self, files: Iterable[Path]) -> None:
-        self.addTopLevelItems([FileStatusItem(path) for path in files])
+    def add_files(self, files: Iterable[InputFileDetails]) -> None:
+        self.addTopLevelItems([FileStatusItem(file) for file in files])

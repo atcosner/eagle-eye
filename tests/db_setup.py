@@ -1,3 +1,4 @@
+from pathlib import Path
 from sqlalchemy.orm import Session
 
 from src.database import DB_ENGINE, OrmBase
@@ -15,8 +16,8 @@ if LocalPaths.database_file().exists():
 with Session(DB_ENGINE) as session:
     new_form = ReferenceForm(
         name='KU Ornithology Form v8',
-        template_path=r'C:\Users\atcos\AppData\Local\EagleEye\reference_forms\kt_field_form_v8.png',
-        reference_mark_count=8,
+        path=Path(r'C:\Users\atcos\AppData\Local\EagleEye\reference_forms\kt_field_form_v8.png'),
+        alignment_mark_count=16,
         whole_page_form=False,
     )
     new_form.text_fields = [

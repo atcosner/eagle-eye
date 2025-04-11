@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
@@ -12,9 +13,10 @@ class InputFile(MappedAsDataclass, OrmBase):
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     job_id: Mapped[int] = mapped_column(ForeignKey("job.id"), init=False)
+
     path: Mapped[Path] = mapped_column(DbPath)
 
     # Relationships
 
     job: Mapped["Job"] = relationship(init=False, back_populates="input_files")
-    pre_process_results: Mapped[list[PreProcessResult]] = relationship(init=False, back_populates="input_file")
+    pre_process_result: Mapped[PreProcessResult] = relationship(init=False, back_populates="input_file")

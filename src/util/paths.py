@@ -37,6 +37,10 @@ class LocalPaths:
         return LocalPaths.job_directory(job_name) / 'input_files'
 
     @staticmethod
+    def input_file_directory(job_name: str, file_id: int) -> Path:
+        return LocalPaths.input_files_directory(job_name) / str(file_id)
+
+    @staticmethod
     def logs_directory() -> Path:
         return get_working_dir() / 'logs'
 

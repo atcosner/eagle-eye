@@ -33,6 +33,8 @@ def create_job(job_name: str) -> int:
 class MainWindow(BaseWindow):
     def __init__(self):
         super().__init__(None, 'Form Processing')
+        self.setMinimumHeight(700)
+
         self._job_db_id: int | None = None
 
         self.picker = FilePicker()

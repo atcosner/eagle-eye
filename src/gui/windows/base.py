@@ -1,7 +1,7 @@
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QMainWindow, QWidget
 
-from .. import RESOURCES_PATH
+from ...util.resources import RESOURCES_PATH
 
 
 class BaseWindow(QMainWindow):

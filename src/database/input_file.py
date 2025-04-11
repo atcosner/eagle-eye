@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from . import OrmBase
+from .pre_process_result import PreProcessResult
 from .util import DbPath
 
 
@@ -10,9 +11,10 @@ class InputFile(MappedAsDataclass, OrmBase):
     __tablename__ = "input_file"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    job_id = mapped_column(ForeignKey("job.id"))
+    job_id: Mapped[int] = mapped_column(ForeignKey("job.id"), init=False)
     path: Mapped[Path] = mapped_column(DbPath)
 
     # Relationships
 
     job: Mapped["Job"] = relationship(init=False, back_populates="input_files")
+    pre_process_results: Mapped[list[PreProcessResult]] = relationship(init=False, back_populates="input_file")

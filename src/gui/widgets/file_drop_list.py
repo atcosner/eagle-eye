@@ -13,7 +13,7 @@ from src.database.input_file import InputFile
 from src.database.job import Job
 from src.util.paths import LocalPaths
 
-from .. import RESOURCES_PATH
+from ...util.resources import RESOURCES_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class FileDropList(QListWidget):
         if not from_db:
             # Copy the file into our internal storage
             input_file_directory = LocalPaths.input_files_directory(self._job_db_name)
-            new_path = input_file_directory.with_name(file_path.name)
+            new_path = input_file_directory / file_path.name
 
             logger.info(f'Copying: "{file_path}" -> "{new_path}"')
             shutil.copy(file_path, new_path)

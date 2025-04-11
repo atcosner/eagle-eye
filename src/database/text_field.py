@@ -11,7 +11,7 @@ class TextField(MappedAsDataclass, OrmBase):
     __tablename__ = "text_field"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    reference_form_id = mapped_column(ForeignKey("reference_form.id"))
+    reference_form_id: Mapped[int] = mapped_column(ForeignKey("reference_form.id"), init=False)
 
     name: Mapped[str]
     visual_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds)

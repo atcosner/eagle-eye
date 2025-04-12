@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, pyqtSignal
 from PyQt6.QtGui import QIcon, QMovie
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView
 
@@ -37,6 +37,8 @@ class FileStatusItem(QTreeWidgetItem):
 
 
 class FileStatusList(QTreeWidget):
+    fileClicked = pyqtSignal(QTreeWidgetItem, int)
+
     def __init__(self):
         super().__init__()
         self.setIconSize(QSize(40, 40))
@@ -48,6 +50,8 @@ class FileStatusList(QTreeWidget):
         # Set column 1 (file name) to consume all extra space
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+
+        self.itemClicked.connect(self.fileClicked)
 
     def add_files(self, files: Iterable[InputFileDetails]) -> None:
         self.addTopLevelItems([FileStatusItem(file) for file in files])

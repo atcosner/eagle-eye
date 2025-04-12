@@ -1,5 +1,5 @@
 from PyQt6.QtCore import pyqtSlot, QThread, QMutex
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxLayout, QTreeWidgetItem
 
 from src.database.job import Job
 from src.processing.pre_process_worker import PreProcessingWorker
@@ -7,6 +7,7 @@ from src.util.status import FileStatus, is_finished
 from src.util.types import InputFileDetails
 
 from ..widgets.file_status_list import FileStatusList, FileStatusItem
+from ..windows.pre_processing_result import PreProcessingResult
 
 
 class FilePreProcessing(QWidget):
@@ -19,7 +20,7 @@ class FilePreProcessing(QWidget):
         self.pre_processing_threads: dict[int, tuple[QThread, PreProcessingWorker]] = {}
 
         self.status_list = FileStatusList()
-        self.file_details = QWidget()
+        self.status_list.fileClicked.connect(self.file_clicked)
 
         self.process_file_button = QPushButton('Pre-Process Files')
         self.process_file_button.pressed.connect(self.start_pre_processing)
@@ -62,6 +63,14 @@ class FilePreProcessing(QWidget):
     @pyqtSlot(list)
     def add_files(self, files: list[InputFileDetails]) -> None:
         self.status_list.add_files(files)
+
+    @pyqtSlot(QTreeWidgetItem, int)
+    def file_clicked(self, item: FileStatusItem, col: int) -> None:
+        if not is_finished(item.get_status()):
+            return
+
+        window = PreProcessingResult(self, item.get_details().db_id)
+        window.show()
 
     @pyqtSlot(int, FileStatus)
     def worker_status_update(self, db_id: int, status: FileStatus) -> None:

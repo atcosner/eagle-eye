@@ -2,7 +2,7 @@ import logging
 import sys
 from contextlib import contextmanager
 from types import TracebackType
-from typing import Type, Callable
+from typing import Any, Type, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +10,9 @@ LOG_WIDTH = 120
 
 
 class NamedLoggerAdapter(logging.LoggerAdapter):
+    def __init__(self, log: logging.Logger, name: Any):
+        super().__init__(log, {'name': str(name)})
+
     def process(self, msg, kwargs):
         return f'[{self.extra["name"]}] | {msg}', kwargs
 

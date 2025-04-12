@@ -36,6 +36,7 @@ class ImageViewer(QScrollArea):
             self.image_label.pixmap().size().scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio)
         )
 
+    # TODO: there is a bug here (switch to zoom in to zoom out continues for 1 more press before reversing)
     def adjust_scale(self, factor: float) -> None:
         self.scale_factor *= factor
         self.image_label.resize(self.scale_factor * self.image_label.size())
@@ -81,10 +82,11 @@ class FilePreview(QWidget):
 
         self.zoom_in_button = QPushButton('+')
         self.zoom_out_button = QPushButton('-')
-        self.zoom_reset_button = QPushButton('Reset')
+        self.fit_to_window_button = QPushButton('Fit to Window')
+
         self.zoom_in_button.pressed.connect(lambda: self.update_scale(1.25))
         self.zoom_out_button.pressed.connect(lambda: self.update_scale(0.8))
-        self.zoom_reset_button.pressed.connect(self.reset_scale)
+        self.fit_to_window_button.pressed.connect(self.reset_scale)
 
         self.pdf_viewer = PdfViewer()
         self.image_viewer = ImageViewer()
@@ -94,8 +96,8 @@ class FilePreview(QWidget):
         zoom_layout = QHBoxLayout()
         zoom_layout.addWidget(self.zoom_in_button)
         zoom_layout.addWidget(self.zoom_out_button)
-        zoom_layout.addWidget(self.zoom_reset_button)
         zoom_layout.addStretch()
+        zoom_layout.addWidget(self.fit_to_window_button)
 
         layout = QVBoxLayout()
         layout.addLayout(zoom_layout)
@@ -118,7 +120,7 @@ class FilePreview(QWidget):
         mime_type = self.mime_db.mimeTypeForFile(file_path)
 
         # Split based on if it is an image or PDF
-        # TODO: Qt says I should use .inherit() here?d
+        # TODO: Qt says I should use .inherit() here?
         if mime_type.name().startswith('image'):
             self.pdf_viewer.setVisible(False)
             self.image_viewer.setVisible(True)

@@ -131,12 +131,14 @@ class PreProcessingWorker(QObject):
             aligned_image = cv2.warpPerspective(input_image_rotated, matrix_h, (w, h))
             self.log.info(f'Writing aligned image: {aligned_path}')
             cv2.imwrite(str(aligned_path), aligned_image)
+            input_file.pre_process_result.aligned_image_path = aligned_path
 
             # Save an overlaid image to assist in debugging
             overlaid_image = aligned_image.copy()
             cv2.addWeighted(reference_image_gray, 0.5, aligned_image, 0.5, 0, overlaid_image)
             self.log.info(f'Writing overlaid image: {overlaid_path}')
             cv2.imwrite(str(overlaid_path), overlaid_image)
+            input_file.pre_process_result.overlaid_image_path = overlaid_path
 
             session.commit()
             self.updateStatus.emit(input_file.id, FileStatus.SUCCESS)

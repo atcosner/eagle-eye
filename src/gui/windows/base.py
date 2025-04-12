@@ -9,7 +9,10 @@ class BaseWindow(QMainWindow):
         super().__init__(parent)
         self.setWindowIcon(QIcon(str(RESOURCES_PATH / 'white_icon.png')))
 
-        title = 'Eagle Eye'
-        if title_suffix is not None:
-            title += f' | {title_suffix}'
-        self.setWindowTitle(title)
+        self.update_title(title_suffix)
+
+    def update_title(self, suffix: str | None) -> None:
+        base_title = 'Eagle Eye'
+        if suffix is not None:
+            base_title += f' | {suffix}'
+        self.setWindowTitle(base_title)

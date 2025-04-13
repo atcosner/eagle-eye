@@ -6,11 +6,11 @@ from typing import Iterable
 
 from src.util.resources import RESOURCES_PATH
 from src.util.status import FileStatus, get_icon_for_status
-from src.util.types import InputFileDetails
+from src.util.types import FileDetails
 
 
 class FileStatusItem(QTreeWidgetItem):
-    def __init__(self, file_details: InputFileDetails):
+    def __init__(self, file_details: FileDetails):
         super().__init__()
         self.details = file_details
         self.status: FileStatus = FileStatus.PENDING
@@ -20,7 +20,7 @@ class FileStatusItem(QTreeWidgetItem):
         self.setText(1, self.details.path.name)
         self.set_status(self.status)
 
-    def get_details(self) -> InputFileDetails:
+    def get_details(self) -> FileDetails:
         return self.details
 
     def set_status(self, status: FileStatus) -> None:
@@ -37,8 +37,6 @@ class FileStatusItem(QTreeWidgetItem):
 
 
 class FileStatusList(QTreeWidget):
-    fileClicked = pyqtSignal(QTreeWidgetItem, int)
-
     def __init__(self):
         super().__init__()
         self.setIconSize(QSize(40, 40))
@@ -51,7 +49,5 @@ class FileStatusList(QTreeWidget):
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
-        self.itemClicked.connect(self.fileClicked)
-
-    def add_files(self, files: Iterable[InputFileDetails]) -> None:
+    def add_files(self, files: Iterable[FileDetails]) -> None:
         self.addTopLevelItems([FileStatusItem(file) for file in files])

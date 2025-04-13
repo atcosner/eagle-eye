@@ -16,6 +16,6 @@ class BoxBounds(NamedTuple):
         return BoxBounds(*(db_value.split(','))) if db_value else None
 
 
-class InputFileDetails(NamedTuple):
+class FileDetails(NamedTuple):
     db_id: int
     path: Path

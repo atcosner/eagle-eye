@@ -11,7 +11,7 @@ from src.database.pre_process_result import PreProcessResult
 from src.database.rotation_attempt import RotationAttempt
 from src.util.logging import NamedLoggerAdapter
 from src.util.status import FileStatus
-from src.util.types import InputFileDetails
+from src.util.types import FileDetails
 
 from .util import rotate_image, find_alignment_marks, AlignmentMark, alignment_marks_to_points
 
@@ -26,7 +26,7 @@ class PreProcessingWorker(QObject):
     updateStatus = pyqtSignal(int, FileStatus)
     processingComplete = pyqtSignal(int)
 
-    def __init__(self, job_id: int, file_details: InputFileDetails, mutex: QMutex):
+    def __init__(self, job_id: int, file_details: FileDetails, mutex: QMutex):
         super().__init__()
         self.mutex = mutex
         self.job_id = job_id
@@ -47,7 +47,7 @@ class PreProcessingWorker(QObject):
             assert job.reference_form.path.exists(), f'Ref image did not exist: {job.reference_form.path}'
 
             self.log.info(f'Using reference: {job.reference_form.name}')
-            input_file.pre_process_result = PreProcessResult(successful_match=False)
+            input_file.pre_process_result = PreProcessResult(successful_alignment=False)
 
             # Build the paths for our output results
             matches_path = self.file_details.path.parent / 'matches.png'
@@ -104,7 +104,7 @@ class PreProcessingWorker(QObject):
             if best_angle is None:
                 self.updateStatus.emit(input_file.id, FileStatus.FAILED)
                 return
-            input_file.pre_process_result.successful_match = True
+            input_file.pre_process_result.successful_alignment = True
             input_file.pre_process_result.accepted_rotation_angle = best_angle
 
             # Convert the alignment marks to matchpoints

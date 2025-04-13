@@ -66,4 +66,5 @@ class PreProcessingResult(BaseWindow):
 
                 # Focus on the accepted rotation
                 if angle == result.accepted_rotation_angle:
+                    self.rotation_tabs.setTabText(index, f'* {angle} *')
                     self.rotation_tabs.setCurrentIndex(index)

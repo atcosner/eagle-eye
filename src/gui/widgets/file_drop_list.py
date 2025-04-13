@@ -13,7 +13,7 @@ from src.database.input_file import InputFile
 from src.database.job import Job
 from src.util.paths import LocalPaths
 from src.util.resources import RESOURCES_PATH
-from src.util.types import InputFileDetails
+from src.util.types import FileDetails
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +31,8 @@ class FileItem(QListWidgetItem):
     def path(self) -> Path:
         return self._path
 
-    def file_details(self) -> InputFileDetails:
-        return InputFileDetails(
+    def file_details(self) -> FileDetails:
+        return FileDetails(
             db_id=self._db_id,
             path=self._path,
         )
@@ -108,7 +108,7 @@ class FileDropList(QListWidget):
         if prev_item_count == 0:
             self.setCurrentRow(0)
 
-    def get_files(self) -> list[InputFileDetails]:
+    def get_files(self) -> list[FileDetails]:
         return [self.item(idx).file_details() for idx in range(self.count())]
 
     #

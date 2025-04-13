@@ -4,10 +4,10 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxL
 from src.database.job import Job
 from src.processing.pre_process_worker import PreProcessingWorker
 from src.util.status import FileStatus, is_finished
-from src.util.types import InputFileDetails
+from src.util.types import FileDetails
 
 from ..widgets.file_status_list import FileStatusList, FileStatusItem
-from ..windows.pre_processing_result import PreProcessingResult
+from ..widgets.pre_processing_details import PreProcessingDetails
 
 
 class FilePreProcessing(QWidget):
@@ -20,7 +20,9 @@ class FilePreProcessing(QWidget):
         self.pre_processing_threads: dict[int, tuple[QThread, PreProcessingWorker]] = {}
 
         self.status_list = FileStatusList()
-        self.status_list.fileClicked.connect(self.file_clicked)
+        self.status_list.currentItemChanged.connect(self.selected_file_changed)
+
+        self.details = PreProcessingDetails()
 
         self.process_file_button = QPushButton('Pre-Process Files')
         self.process_file_button.pressed.connect(self.start_pre_processing)
@@ -29,11 +31,12 @@ class FilePreProcessing(QWidget):
         self.auto_process.setChecked(True)
         self.auto_process.checkStateChanged.connect(self.update_button_text)
 
-        self._set_layout()
+        self._set_up_layout()
 
-    def _set_layout(self) -> None:
+    def _set_up_layout(self) -> None:
         layout = QVBoxLayout()
         layout.addWidget(self.status_list)
+        layout.addWidget(self.details)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -61,25 +64,25 @@ class FilePreProcessing(QWidget):
         self.process_file_button.setText(text)
 
     @pyqtSlot(list)
-    def add_files(self, files: list[InputFileDetails]) -> None:
+    def add_files(self, files: list[FileDetails]) -> None:
         self.status_list.add_files(files)
 
-    @pyqtSlot(QTreeWidgetItem, int)
-    def file_clicked(self, item: FileStatusItem, col: int) -> None:
-        if not is_finished(item.get_status()):
-            return
-
-        window = PreProcessingResult(self, item.get_details().db_id)
-        window.show()
+    @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
+    def selected_file_changed(self, current: FileStatusItem, prev: FileStatusItem) -> None:
+        self.details.load_file(current.get_details().db_id)
 
     @pyqtSlot(int, FileStatus)
     def worker_status_update(self, db_id: int, status: FileStatus) -> None:
         for idx in range(self.status_list.topLevelItemCount()):
             item = self.status_list.topLevelItem(idx)
 
+            # Update the status if this item matches the worker
             if item.get_details().db_id == db_id:
                 item.set_status(status)
-                return
+
+            # Update the details of this status matches the details
+            if item.get_details().db_id == self.details.loaded_id():
+                self.details.load_file(db_id)
 
     @pyqtSlot(int)
     def worker_complete(self, db_id: int) -> None:

@@ -5,7 +5,7 @@ from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QListWidgetItem, QSplitter
 
 from src.database.job import Job
-from src.util.types import InputFileDetails
+from src.util.types import FileDetails
 
 from ..widgets.file_dialog import ScanFileDialog
 from ..widgets.file_drop_list import FileDropList, FileItem
@@ -40,7 +40,7 @@ class FileListWithButton(QWidget):
         if dialog.exec():
             self.file_list.add_items(dialog.selectedFiles())
 
-    def get_files(self) -> list[InputFileDetails]:
+    def get_files(self) -> list[FileDetails]:
         return self.file_list.get_files()
 
 

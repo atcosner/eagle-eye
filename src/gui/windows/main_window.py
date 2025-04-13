@@ -11,12 +11,13 @@ from src.database import DB_ENGINE
 from src.database.job import Job
 from src.database.reference_form import ReferenceForm
 from src.util.paths import LocalPaths
-from src.util.types import InputFileDetails
+from src.util.types import FileDetails
 
 from .base import BaseWindow
 from .job_selector import JobDetails, JobSelector
 from ..tabs.file_picker import FilePicker
 from ..tabs.file_pre_processing import FilePreProcessing
+from ..tabs.ocr_processing import OcrProcessing
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class MainWindow(BaseWindow):
 
         self.picker = FilePicker()
         self.pre_processing = FilePreProcessing()
+        self.processing = OcrProcessing()
 
         self.job_name = QLineEdit(self)
         self.job_name.setDisabled(True)
@@ -55,6 +57,7 @@ class MainWindow(BaseWindow):
         self.tabs = QTabWidget(self)
         self.tabs.addTab(self.picker, 'Step 1 - Choose Files')
         self.tabs.addTab(self.pre_processing, 'Step 2 - Pre-Processing')
+        self.tabs.addTab(self.processing, 'Step 3 - OCR Processing')
 
         self._connect_signals()
         self._set_layout()
@@ -64,7 +67,7 @@ class MainWindow(BaseWindow):
         self.picker.filesConfirmed.connect(self.confirm_files)
 
     @pyqtSlot(list)
-    def confirm_files(self, files: list[InputFileDetails]) -> None:
+    def confirm_files(self, files: list[FileDetails]) -> None:
         # Do nothing if we have no reference form selected
         if not self.reference_form_selector.currentText():
             return

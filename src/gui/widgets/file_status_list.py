@@ -49,5 +49,9 @@ class FileStatusList(QTreeWidget):
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
+    def add_file(self, file: FileDetails) -> None:
+        self.addTopLevelItem(FileStatusItem(file))
+
     def add_files(self, files: Iterable[FileDetails]) -> None:
-        self.addTopLevelItems([FileStatusItem(file) for file in files])
+        for file in files:
+            self.add_file(file)

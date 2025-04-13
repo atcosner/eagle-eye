@@ -5,19 +5,16 @@ from PyQt6.QtCore import pyqtSlot
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QComboBox, QSizePolicy
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QComboBox, QSizePolicy
 
 from src.database import DB_ENGINE
 from src.database.job import Job
 from src.database.reference_form import ReferenceForm
 from src.util.paths import LocalPaths
-from src.util.types import FileDetails
 
 from .base import BaseWindow
 from .job_selector import JobDetails, JobSelector
-from ..tabs.file_picker import FilePicker
-from ..tabs.file_pre_processing import FilePreProcessing
-from ..tabs.ocr_processing import OcrProcessing
+from ..widgets.processing_pipeline import ProcessingPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -41,10 +38,6 @@ class MainWindow(BaseWindow):
 
         self._job_db_id: int | None = None
 
-        self.picker = FilePicker()
-        self.pre_processing = FilePreProcessing()
-        self.processing = OcrProcessing()
-
         self.job_name = QLineEdit(self)
         self.job_name.setDisabled(True)
 
@@ -53,37 +46,13 @@ class MainWindow(BaseWindow):
         size_policy = QSizePolicy()
         size_policy.setHorizontalPolicy(QSizePolicy.Policy.MinimumExpanding)
         self.reference_form_selector.setSizePolicy(size_policy)
+        self.reference_form_selector.currentIndexChanged.connect(self.handle_reference_form_change)
 
-        self.tabs = QTabWidget(self)
-        self.tabs.addTab(self.picker, 'Step 1 - Choose Files')
-        self.tabs.addTab(self.pre_processing, 'Step 2 - Pre-Processing')
-        self.tabs.addTab(self.processing, 'Step 3 - OCR Processing')
+        self.processing_pipeline = ProcessingPipeline(self)
+        self.processing_pipeline.inputFilesConfirmed.connect(self.handle_input_files_confirmed)
 
-        self._connect_signals()
         self._set_layout()
         self._toggle_controls(False)
-
-    def _connect_signals(self) -> None:
-        self.picker.filesConfirmed.connect(self.confirm_files)
-
-    @pyqtSlot(list)
-    def confirm_files(self, files: list[FileDetails]) -> None:
-        # Do nothing if we have no reference form selected
-        if not self.reference_form_selector.currentText():
-            return
-
-        # Disable the Step 1 tab and the reference form selector
-        self.tabs.setTabEnabled(0, False)
-        self.reference_form_selector.setDisabled(True)
-
-        # Add the selected reference form to the job
-        with Session(DB_ENGINE) as session:
-            job = session.get(Job, self._job_db_id)
-            reference_form = session.get(ReferenceForm, self.reference_form_selector.currentData())
-            job.reference_form = reference_form
-            session.commit()
-
-        self.pre_processing.add_files(files)
 
     def _set_layout(self) -> None:
         job_name_layout = QHBoxLayout()
@@ -98,7 +67,7 @@ class MainWindow(BaseWindow):
         layout.addLayout(job_name_layout)
         layout.addLayout(job_reference_layout)
         layout.addSpacing(15)
-        layout.addWidget(self.tabs)
+        layout.addWidget(self.processing_pipeline)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -106,16 +75,23 @@ class MainWindow(BaseWindow):
 
     def _toggle_controls(self, enabled: bool) -> None:
         self.reference_form_selector.setDisabled(not enabled)
-        self.tabs.setDisabled(not enabled)
+        self.processing_pipeline.setDisabled(not enabled)
+
+    @pyqtSlot()
+    def handle_input_files_confirmed(self) -> None:
+        self.reference_form_selector.setDisabled(True)
+
+    @pyqtSlot(int)
+    def handle_reference_form_change(self, _: int) -> None:
+        self.processing_pipeline.change_reference_form(self.reference_form_selector.currentData())
 
     def load_job(self, job_id: int) -> None:
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job_id)
+            self._job_db_id = job_id
 
             self.job_name.setText(job.name)
-            self._job_db_id = job_id
-            self.picker.load_job(job)
-            self.pre_processing.load_job(job)
+            self.processing_pipeline.load_job(job_id)
 
         self._toggle_controls(True)
 

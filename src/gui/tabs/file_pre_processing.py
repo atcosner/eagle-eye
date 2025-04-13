@@ -1,4 +1,4 @@
-from PyQt6.QtCore import pyqtSlot, QThread, QMutex
+from PyQt6.QtCore import pyqtSlot, QThread, QMutex, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxLayout, QTreeWidgetItem
 
 from src.database.job import Job
@@ -11,6 +11,8 @@ from ..widgets.pre_processing_details import PreProcessingDetails
 
 
 class FilePreProcessing(QWidget):
+    continueToOcr = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self._job_db_id: int | None = None
@@ -31,6 +33,10 @@ class FilePreProcessing(QWidget):
         self.auto_process.setChecked(True)
         self.auto_process.checkStateChanged.connect(self.update_button_text)
 
+        self.continue_button = QPushButton('Continue')
+        self.continue_button.setVisible(False)
+        self.continue_button.pressed.connect(self.continueToOcr)
+
         self._set_up_layout()
 
     def _set_up_layout(self) -> None:
@@ -42,18 +48,13 @@ class FilePreProcessing(QWidget):
         button_layout.addStretch()
         button_layout.addWidget(self.auto_process)
         button_layout.addWidget(self.process_file_button)
+        button_layout.addWidget(self.continue_button)
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
 
     def load_job(self, job: Job | None) -> None:
         self._job_db_id = job.id if job else None
-
-    def reset_threads(self) -> None:
-        for thread, worker in self.pre_processing_threads.values():
-            thread.quit()
-            thread.wait()
-        self.pre_processing_threads.clear()
 
     @pyqtSlot()
     def update_button_text(self) -> None:
@@ -70,41 +71,6 @@ class FilePreProcessing(QWidget):
     @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
     def selected_file_changed(self, current: FileStatusItem, prev: FileStatusItem) -> None:
         self.details.load_file(current.get_details().db_id)
-
-    @pyqtSlot(int, FileStatus)
-    def worker_status_update(self, db_id: int, status: FileStatus) -> None:
-        for idx in range(self.status_list.topLevelItemCount()):
-            item = self.status_list.topLevelItem(idx)
-
-            # Update the status if this item matches the worker
-            if item.get_details().db_id == db_id:
-                item.set_status(status)
-
-            # Update the details of this status matches the details
-            if item.get_details().db_id == self.details.loaded_id():
-                self.details.load_file(db_id)
-
-    @pyqtSlot(int)
-    def worker_complete(self, db_id: int) -> None:
-        thread, _ = self.pre_processing_threads.pop(db_id)
-        thread.quit()
-
-        if not self.pre_processing_threads:
-            self.process_file_button.setDisabled(False)
-
-    def start_thread(self, item: FileStatusItem) -> None:
-        thread = QThread(self)
-        worker = PreProcessingWorker(self._job_db_id, item.get_details(), self.thread_mutex)
-        worker.moveToThread(thread)
-
-        worker.updateStatus.connect(self.worker_status_update)
-        worker.processingComplete.connect(self.worker_complete)
-
-        thread.started.connect(worker.start)
-        thread.finished.connect(worker.deleteLater)
-
-        thread.start()
-        self.pre_processing_threads[item.get_details().db_id] = (thread, worker)
 
     @pyqtSlot()
     def start_pre_processing(self) -> None:
@@ -127,3 +93,54 @@ class FilePreProcessing(QWidget):
 
             item.set_status(FileStatus.IN_PROGRESS)
             self.start_thread(item)
+
+    #
+    # THREAD CODE
+    #
+
+    def reset_threads(self) -> None:
+        for thread, worker in self.pre_processing_threads.values():
+            thread.quit()
+            thread.wait()
+        self.pre_processing_threads.clear()
+
+    def threads_complete(self) -> None:
+        self.process_file_button.setDisabled(False)
+        self.process_file_button.setVisible(False)
+        self.auto_process.setVisible(False)
+        self.continue_button.setVisible(True)
+
+    @pyqtSlot(int, FileStatus)
+    def worker_status_update(self, db_id: int, status: FileStatus) -> None:
+        for idx in range(self.status_list.topLevelItemCount()):
+            item = self.status_list.topLevelItem(idx)
+
+            # Update the status if this item matches the worker
+            if item.get_details().db_id == db_id:
+                item.set_status(status)
+
+            # Update the details of this status matches the details
+            if item.get_details().db_id == self.details.loaded_id():
+                self.details.load_file(db_id)
+
+    @pyqtSlot(int)
+    def worker_complete(self, db_id: int) -> None:
+        thread, _ = self.pre_processing_threads.pop(db_id)
+        thread.quit()
+
+        if not self.pre_processing_threads:
+            self.threads_complete()
+
+    def start_thread(self, item: FileStatusItem) -> None:
+        thread = QThread(self)
+        worker = PreProcessingWorker(self._job_db_id, item.get_details(), self.thread_mutex)
+        worker.moveToThread(thread)
+
+        worker.updateStatus.connect(self.worker_status_update)
+        worker.processingComplete.connect(self.worker_complete)
+
+        thread.started.connect(worker.start)
+        thread.finished.connect(worker.deleteLater)
+
+        thread.start()
+        self.pre_processing_threads[item.get_details().db_id] = (thread, worker)

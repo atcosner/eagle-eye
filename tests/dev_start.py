@@ -14,13 +14,13 @@ window = MainWindow()
 window.start(auto_new_job=True)
 
 # Add some files to the selector
-window.picker.file_list.file_list.add_items([
+window.processing_pipeline.picker.file_list.file_list.add_items([
     r'D:\Documents\PycharmProjects\eagle-eye-qt\src\eagle-eye\form_templates\dev\test_kt_form__filled.jpg',
     r'D:\Documents\PycharmProjects\eagle-eye-qt\src\eagle-eye\form_templates\dev\test_kt_form__filled_errors.jpg',
 ])
 
 # Move them to pre-processing
-window.picker.confirm_files()
-window.tabs.setCurrentIndex(1)
+window.processing_pipeline.picker.confirm_files()
+window.processing_pipeline.setCurrentIndex(1)
 
 app.exec()

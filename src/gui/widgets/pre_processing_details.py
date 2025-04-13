@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy.orm import Session
 
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, Qt
 from PyQt6.QtGui import QFont, QPalette, QColor
 from PyQt6.QtWidgets import QFrame, QLabel, QLineEdit, QGridLayout, QPushButton
 
@@ -31,6 +31,7 @@ class PreProcessingDetails(QFrame):
         self.status_font.setBold(True)
         self.status_label.setFont(self.status_font)
         self.status_label.setAutoFillBackground(True)
+        self.status_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         self.accepted_rotation_label = QLabel()
         rotation_font = QFont()

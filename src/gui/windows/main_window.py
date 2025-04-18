@@ -25,7 +25,7 @@ def create_job(job_name: str) -> int:
         session.add(new_job)
         session.commit()
 
-        LocalPaths.set_up_job_directory(job_name)
+        LocalPaths.set_up_job_directory(new_job.uuid)
 
         logger.info(f'Created new job with ID: {new_job.id}')
         return new_job.id

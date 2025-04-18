@@ -10,6 +10,7 @@ from src.database.job import Job
 from src.database.pre_process_result import PreProcessResult
 from src.database.rotation_attempt import RotationAttempt
 from src.util.logging import NamedLoggerAdapter
+from src.util.paths import LocalPaths
 from src.util.status import FileStatus
 from src.util.types import FileDetails
 
@@ -32,7 +33,7 @@ class PreProcessingWorker(QObject):
         self.job_id = job_id
         self.file_details = file_details
 
-        self.log = NamedLoggerAdapter(logger, {'name': f'Thread: {file_details.path.name}'})
+        self.log = NamedLoggerAdapter(logger, f'Thread: {file_details.path.name}')
 
     @pyqtSlot()
     def start(self) -> None:
@@ -50,9 +51,12 @@ class PreProcessingWorker(QObject):
             input_file.pre_process_result = PreProcessResult(successful_alignment=False)
 
             # Build the paths for our output results
-            matches_path = self.file_details.path.parent / 'matches.png'
-            aligned_path = self.file_details.path.parent / 'aligned.png'
-            overlaid_path = self.file_details.path.parent / 'overlaid.png'
+            pre_process_directory = LocalPaths.pre_processing_directory(job.uuid, self.file_details.db_id)
+            pre_process_directory.mkdir(exist_ok=True)
+
+            matches_path = pre_process_directory / 'matches.png'
+            aligned_path = pre_process_directory / 'aligned.png'
+            overlaid_path = pre_process_directory / 'overlaid.png'
 
             # Load and grayscale both images
             input_image = cv2.imread(str(input_file.path))
@@ -65,8 +69,8 @@ class PreProcessingWorker(QObject):
             # Find the alignment marks in the reference image
             reference_alignment_marks = find_alignment_marks(reference_image_gray)
             self.log.info(
-                f'Reference Image: Found {len(reference_alignment_marks)} marks, \
-                expected {job.reference_form.alignment_mark_count}'
+                f'Reference Image: Found {len(reference_alignment_marks)} marks, '
+                f'expected {job.reference_form.alignment_mark_count}'
             )
             assert len(reference_alignment_marks) == job.reference_form.alignment_mark_count
 
@@ -78,7 +82,7 @@ class PreProcessingWorker(QObject):
                 if rotation_angle != 0:
                     rotated_image = rotate_image(rotated_image, rotation_angle)
 
-                rotated_path = self.file_details.path.parent / f'rotation_{rotation_angle}.png'
+                rotated_path = pre_process_directory / f'rotation_{rotation_angle}.png'
                 cv2.imwrite(str(rotated_path), rotated_image)
 
                 alignment_marks = find_alignment_marks(rotated_image)

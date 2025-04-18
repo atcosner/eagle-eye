@@ -5,6 +5,7 @@ from PyQt6.QtCore import pyqtSlot, QSize
 from PyQt6.QtGui import QIcon, QCloseEvent
 from PyQt6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox
 
+from src.util.google_api import save_api_settings
 from src.util.resources import GENERIC_ICON_PATH
 
 from .base import BaseWindow
@@ -41,22 +42,6 @@ class VisionApiConfig(BaseWindow):
         self._set_up_layout()
         self.check_gcloud_cli_install()
         self.check_gcloud_cli_initialization()
-
-    def closeEvent(self, event: QCloseEvent) -> None:
-        if self._gcloud_installed and self._gcloud_initialized:
-            event.accept()
-        else:
-            result = QMessageBox.warning(
-                self,
-                'Conform Close',
-                'Are you sure you want to close the Google Vision API Config?\n'
-                'OCR will be unavailable until you complete the three setup steps',
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            )
-            if result == QMessageBox.StandardButton.Yes:
-                event.accept()
-            else:
-                event.ignore()
 
     def _set_up_step_one(self) -> None:
         project_label = LinkLabel(
@@ -127,6 +112,23 @@ class VisionApiConfig(BaseWindow):
         widget = QWidget()
         widget.setLayout(main_layout)
         self.setCentralWidget(widget)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        if self._gcloud_installed and self._gcloud_initialized:
+            save_api_settings()
+            event.accept()
+        else:
+            result = QMessageBox.warning(
+                self,
+                'Conform Close',
+                'Are you sure you want to close the Google Vision API Config?\n'
+                'OCR will be unavailable until you complete the three setup steps',
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            if result == QMessageBox.StandardButton.Yes:
+                event.accept()
+            else:
+                event.ignore()
 
     def update_close_button(self) -> None:
         if not self._gcloud_installed or not self._gcloud_initialized:

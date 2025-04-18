@@ -17,6 +17,12 @@ class SettingsManager:
     def __post_init__(self):
         self.load()
 
+    def __enter__(self) -> 'SettingsManager':
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.save()
+
     def valid_api_config(self) -> bool:
         return self.google_project_id is not None and self.google_access_token is not None
 
@@ -32,4 +38,14 @@ class SettingsManager:
                         setattr(self, key, value)
 
     def save(self) -> None:
-        pass
+        settings_file = LocalPaths.settings_file()
+        logger.info(f'Saving settings: {settings_file}')
+
+        save_data = {}
+        for member, value in self.__dict__.items():
+            if not member.startswith('__') and not member.startswith('_') and not callable(getattr(self, member)):
+                logger.info(f'Saving: "{member}" = "{value}"')
+                save_data[member] = value
+
+        with settings_file.open('wt') as file:
+            json.dump(save_data, file)

@@ -9,7 +9,7 @@ from src.database.reference_form import ReferenceForm
 
 from ..tabs.file_picker import FilePicker
 from ..tabs.file_pre_processing import FilePreProcessing
-from ..tabs.ocr_processing import OcrProcessing
+from ..tabs.file_processing import FileProcessing
 from ...util.types import FileDetails
 
 
@@ -23,7 +23,7 @@ class ProcessingPipeline(QTabWidget):
 
         self.picker = FilePicker()
         self.pre_processing = FilePreProcessing()
-        self.processing = OcrProcessing()
+        self.processing = FileProcessing()
 
         self.addTab(self.picker, 'Step 1 - Choose Files')
         self.addTab(self.pre_processing, 'Step 2 - Pre-Processing')

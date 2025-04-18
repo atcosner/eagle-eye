@@ -1,10 +1,10 @@
-import uuid
 from pathlib import Path
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from . import OrmBase
 from .pre_process_result import PreProcessResult
+from .process_result import ProcessResult
 from .util import DbPath
 
 
@@ -20,3 +20,4 @@ class InputFile(MappedAsDataclass, OrmBase):
 
     job: Mapped["Job"] = relationship(init=False, back_populates="input_files")
     pre_process_result: Mapped[PreProcessResult] = relationship(init=False, back_populates="input_file")
+    process_results: Mapped[list[ProcessResult]] = relationship(init=False, back_populates="input_file")

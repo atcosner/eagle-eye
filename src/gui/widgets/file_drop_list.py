@@ -1,5 +1,6 @@
 import logging
 import shutil
+import uuid
 from pathlib import Path
 from sqlalchemy.orm import Session
 from typing import Iterable
@@ -45,13 +46,13 @@ class FileDropList(QListWidget):
         self.setIconSize(QSize(40, 40))
 
         self._job_db_id: int | None = None
-        self._job_db_name: str | None = None
+        self._job_db_uuid: uuid.UUID | None = None
 
         self.mime_db = QMimeDatabase()
 
     def load_job(self, job: Job | None) -> None:
         self._job_db_id = job.id if job else None
-        self._job_db_name = job.name if job else None
+        self._job_db_uuid = job.uuid if job else None
 
         if job is not None:
             for input_file in job.input_files:
@@ -88,7 +89,7 @@ class FileDropList(QListWidget):
                 db_id = input_file.id
 
             # Copy the file into our internal storage
-            input_file_directory = LocalPaths.input_file_directory(self._job_db_name, db_id)
+            input_file_directory = LocalPaths.input_file_directory(self._job_db_uuid, db_id)
             input_file_directory.mkdir()
             new_path = input_file_directory / file_path.name
 

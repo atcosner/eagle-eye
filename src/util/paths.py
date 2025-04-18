@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+import uuid
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -29,16 +30,24 @@ class LocalPaths:
         return get_working_dir() / 'jobs'
 
     @staticmethod
-    def job_directory(job_name: str) -> Path:
-        return LocalPaths.jobs_directory() / job_name
+    def job_directory(job_uuid: uuid.UUID) -> Path:
+        return LocalPaths.jobs_directory() / str(job_uuid)
 
     @staticmethod
-    def input_files_directory(job_name: str) -> Path:
-        return LocalPaths.job_directory(job_name) / 'input_files'
+    def input_files_directory(job_uuid: uuid.UUID) -> Path:
+        return LocalPaths.job_directory(job_uuid) / 'input_files'
 
     @staticmethod
-    def input_file_directory(job_name: str, file_id: int) -> Path:
-        return LocalPaths.input_files_directory(job_name) / str(file_id)
+    def input_file_directory(job_uuid: uuid.UUID, file_id: int) -> Path:
+        return LocalPaths.input_files_directory(job_uuid) / str(file_id)
+
+    @staticmethod
+    def pre_processing_directory(job_uuid: uuid.UUID, file_id: int) -> Path:
+        return LocalPaths.input_file_directory(job_uuid, file_id) / 'pre_processing'
+
+    @staticmethod
+    def processing_directory(job_uuid: uuid.UUID, file_id: int) -> Path:
+        return LocalPaths.input_file_directory(job_uuid, file_id) / 'processing'
 
     @staticmethod
     def logs_directory() -> Path:
@@ -57,15 +66,15 @@ class LocalPaths:
         return get_working_dir() / ('primary.db' if primary else 'secondary.db')
 
     @staticmethod
-    def set_up_job_directory(job_name: str) -> None:
+    def set_up_job_directory(job_uuid: uuid.UUID) -> None:
         jobs_directory = LocalPaths.jobs_directory()
         jobs_directory.mkdir(exist_ok=True)
 
-        top_directory = LocalPaths.job_directory(job_name)
+        top_directory = LocalPaths.job_directory(job_uuid)
         logger.info(f'Creating job directory: {top_directory}')
         top_directory.mkdir(exist_ok=True)
 
-        input_file_dir = LocalPaths.input_files_directory(job_name)
+        input_file_dir = LocalPaths.input_files_directory(job_uuid)
         logger.info(f'Creating input file directory: {input_file_dir}')
         input_file_dir.mkdir(exist_ok=True)
 

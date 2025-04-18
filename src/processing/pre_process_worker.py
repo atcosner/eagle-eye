@@ -17,8 +17,8 @@ from .util import rotate_image, find_alignment_marks, AlignmentMark, alignment_m
 
 logger = logging.getLogger(__name__)
 
-# TODO: Control this with a user setting
 # Allow for an image to be +/- 6 degrees rotated
+# TODO: Control this with a user setting
 ALLOWED_ROTATIONS = [0] + list(range(1, 6, 1)) + list(range(-1, -6, -1))
 
 

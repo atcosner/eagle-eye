@@ -2,7 +2,7 @@ from pathlib import Path
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from . import OrmBase
-from .text_field import TextField
+from .fields.form_fields import FormField
 from .job import Job
 from .util import DbPath
 
@@ -16,8 +16,9 @@ class ReferenceForm(MappedAsDataclass, OrmBase):
 
     alignment_mark_count: Mapped[int]
     whole_page_form: Mapped[bool]
+    second_form_y_offset: Mapped[int] = mapped_column(nullable=True, default=None)
 
     # Relationships
 
     jobs: Mapped[list[Job]] = relationship(init=False, back_populates="reference_form")
-    text_fields: Mapped[list[TextField]] = relationship(init=False, back_populates="reference_form")
+    fields: Mapped[list[FormField]] = relationship(init=False, back_populates="reference_form")

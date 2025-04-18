@@ -2,7 +2,7 @@ from enum import Enum
 
 from PyQt6.QtGui import QIcon, QMovie
 
-from .resources import STATUS_ICON_PATH
+from .resources import FILE_STATUS_ICON_PATH
 
 
 class FileStatus(Enum):
@@ -15,13 +15,13 @@ class FileStatus(Enum):
 def get_icon_for_status(status: FileStatus) -> QIcon | QMovie:
     match status:
         case FileStatus.PENDING:
-            return QIcon(str(STATUS_ICON_PATH / 'file_pending.png'))
+            return QIcon(str(FILE_STATUS_ICON_PATH / 'file_pending.png'))
         case FileStatus.IN_PROGRESS:
-            return QMovie(str(STATUS_ICON_PATH / 'progress.gif'))
+            return QMovie(str(FILE_STATUS_ICON_PATH / 'progress.gif'))
         case FileStatus.SUCCESS:
-            return QIcon(str(STATUS_ICON_PATH / 'file_success.png'))
+            return QIcon(str(FILE_STATUS_ICON_PATH / 'file_success.png'))
         case FileStatus.FAILED:
-            return QIcon(str(STATUS_ICON_PATH / 'file_error.png'))
+            return QIcon(str(FILE_STATUS_ICON_PATH / 'file_error.png'))
         case _:
             raise Exception(f'Unknown status: {status}')
 

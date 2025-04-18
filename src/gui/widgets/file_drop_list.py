@@ -12,7 +12,7 @@ from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.database.job import Job
 from src.util.paths import LocalPaths
-from src.util.resources import RESOURCES_PATH
+from src.util.resources import FILE_TYPE_ICON_PATH
 from src.util.types import FileDetails
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class FileItem(QListWidgetItem):
 
         self.setText(file_path.name)
         icon_file_name = 'pdf_icon.png' if file_path.suffix == '.pdf' else 'image_icon.png'
-        self.setIcon(QIcon(str(RESOURCES_PATH / icon_file_name)))
+        self.setIcon(QIcon(str(FILE_TYPE_ICON_PATH / icon_file_name)))
 
     def path(self) -> Path:
         return self._path

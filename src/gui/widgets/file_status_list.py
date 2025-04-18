@@ -1,10 +1,10 @@
-from PyQt6.QtCore import QSize, pyqtSignal
+from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QIcon, QMovie
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView
 
 from typing import Iterable
 
-from src.util.resources import RESOURCES_PATH
+from src.util.resources import FILE_TYPE_ICON_PATH
 from src.util.status import FileStatus, get_icon_for_status
 from src.util.types import FileDetails
 
@@ -16,7 +16,7 @@ class FileStatusItem(QTreeWidgetItem):
         self.status: FileStatus = FileStatus.PENDING
 
         icon_file_name = 'pdf_icon.png' if self.details.path.suffix == '.pdf' else 'image_icon.png'
-        self.setIcon(0, QIcon(str(RESOURCES_PATH / icon_file_name)))
+        self.setIcon(0, QIcon(str(FILE_TYPE_ICON_PATH / icon_file_name)))
         self.setText(1, self.details.path.name)
         self.set_status(self.status)
 

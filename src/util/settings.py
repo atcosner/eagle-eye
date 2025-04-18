@@ -9,9 +9,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SettingsManager:
-    test: int
+    google_project_id: str | None = None
+    google_access_token: str | None = None
 
     # Members with a proceeding underscore are NOT written to disk
+
+    def __post_init__(self):
+        self.load()
+
+    def valid_api_config(self) -> bool:
+        return self.google_project_id is not None and self.google_access_token is not None
 
     def load(self) -> None:
         settings_file = LocalPaths.settings_file()

@@ -8,6 +8,7 @@ from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.multi_checkbox_option import MultiCheckboxOption
 from src.database.fields.multiline_text_field import MultilineTextField
 from src.database.fields.text_field import TextField
+from src.database.page_region import PageRegion
 from src.database.reference_form import ReferenceForm
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds
@@ -25,7 +26,9 @@ with Session(DB_ENGINE) as session:
         alignment_mark_count=16,
         whole_page_form=False,
     )
-    new_form.fields = [
+
+    top_region = PageRegion(name='top')
+    top_region.fields = [
         FormField(text_field=TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44))),
         FormField(text_field=TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46))),
         FormField(text_field=TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46))),
@@ -65,6 +68,8 @@ with Session(DB_ENGINE) as session:
             ),
         )
     ]
+
+    new_form.regions.append(top_region)
 
     session.add(new_form)
     session.commit()

@@ -1,9 +1,9 @@
 from pathlib import Path
-from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
+from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship, attribute_keyed_dict
 
 from . import OrmBase
-from .fields.form_fields import FormField
 from .job import Job
+from .page_region import PageRegion
 from .util import DbPath
 
 
@@ -21,4 +21,4 @@ class ReferenceForm(MappedAsDataclass, OrmBase):
     # Relationships
 
     jobs: Mapped[list[Job]] = relationship(init=False, back_populates="reference_form")
-    fields: Mapped[list[FormField]] = relationship(init=False, back_populates="reference_form")
+    regions: Mapped[list[PageRegion]] = relationship(init=False, back_populates="reference_form")

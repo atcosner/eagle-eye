@@ -13,10 +13,10 @@ from src.util.resources import RESOURCES_PATH
 class SplashScreen(QSplashScreen):
     def __init__(self):
         # Scale the icon to an appropriate size
-        main_icon = QPixmap(str(RESOURCES_PATH / 'white_icon.png'))
+        main_icon = QPixmap(str(RESOURCES_PATH / 'splash_screen.png'))
         super().__init__(
             main_icon.scaled(
-                200,
+                600,
                 200,
                 Qt.AspectRatioMode.KeepAspectRatio,
             )

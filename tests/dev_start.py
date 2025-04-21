@@ -2,8 +2,8 @@ import logging
 import sys
 from PyQt6.QtWidgets import QApplication
 
+from src.gui.widgets.splash_screen import SplashScreen
 from src.gui.windows.main_window import MainWindow
-from src.util.google_api import save_api_settings
 from src.util.logging import configure_root_logger
 
 configure_root_logger(logging.INFO)
@@ -11,8 +11,8 @@ configure_root_logger(logging.INFO)
 app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(True)
 
-# Update the API settings
-save_api_settings()
+screen = SplashScreen()
+screen.initial_setup()
 
 window = MainWindow()
 window.start(auto_new_job=True)

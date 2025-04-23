@@ -101,5 +101,5 @@ def ocr_text_region(
     if ocr_string is not None:
         ocr_string = ocr_string.strip().replace('\n', ' ')
 
-    logger.info(f'Detected: "{ocr_string}"')
+    # logger.info(f'Detected: "{ocr_string}"')
     return ocr_string if ocr_string is not None else ''

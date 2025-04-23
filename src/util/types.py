@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from typing import NamedTuple
 
@@ -23,3 +24,9 @@ class BoxBounds(NamedTuple):
 class FileDetails(NamedTuple):
     db_id: int
     path: Path
+
+
+class FormLinkingMethod(Enum):
+    NO_LINKING = 1
+    PREVIOUS_IDENTIFIER = 2
+    PREVIOUS_REGION = 3

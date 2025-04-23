@@ -10,6 +10,7 @@ from src.util.paths import LocalPaths
 from src.util.settings import SettingsManager
 from src.util.resources import RESOURCES_PATH
 
+
 class SplashScreen(QSplashScreen):
     def __init__(self):
         # Scale the icon to an appropriate size

@@ -3,15 +3,15 @@ from sqlalchemy.orm import Session
 
 from src.database import DB_ENGINE, OrmBase
 from src.database.fields.checkbox_field import CheckboxField
-from src.database.fields.form_fields import FormField
+from src.database.fields.form_field import FormField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.multi_checkbox_option import MultiCheckboxOption
 from src.database.fields.multiline_text_field import MultilineTextField
 from src.database.fields.text_field import TextField
-from src.database.page_region import PageRegion
+from src.database.form_region import FormRegion
 from src.database.reference_form import ReferenceForm
 from src.util.paths import LocalPaths
-from src.util.types import BoxBounds
+from src.util.types import BoxBounds, FormLinkingMethod
 
 
 if LocalPaths.database_file().exists():
@@ -24,15 +24,19 @@ with Session(DB_ENGINE) as session:
         name='KU Ornithology Form v8',
         path=Path(r'C:\Users\atcos\AppData\Local\EagleEye\reference_forms\kt_field_form_v8.png'),
         alignment_mark_count=16,
-        whole_page_form=False,
+        linking_method=FormLinkingMethod.PREVIOUS_REGION,
     )
 
-    top_region = PageRegion(name='top')
+    top_region = FormRegion(local_id=0, name='top')
     top_region.fields = [
-        FormField(text_field=TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44))),
         FormField(text_field=TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46))),
         FormField(text_field=TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46))),
         FormField(text_field=TextField(name='OT Number', visual_region=BoxBounds(x=972, y=120, width=215, height=46))),
+        FormField(
+            identifier=True,
+            identifier_regex=r'^(?P<id>[0-9]{5})$',
+            text_field=TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44))
+        ),
         FormField(
             multi_checkbox_field=MultiCheckboxField(
                 name='Collection Method',
@@ -69,7 +73,7 @@ with Session(DB_ENGINE) as session:
         )
     ]
 
-    new_form.regions.append(top_region)
+    new_form.regions[top_region.local_id] = top_region
 
     session.add(new_form)
     session.commit()

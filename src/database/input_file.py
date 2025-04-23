@@ -20,4 +20,4 @@ class InputFile(MappedAsDataclass, OrmBase):
 
     job: Mapped["Job"] = relationship(init=False, back_populates="input_files")
     pre_process_result: Mapped[PreProcessResult] = relationship(init=False, back_populates="input_file")
-    process_results: Mapped[list[ProcessResult]] = relationship(init=False, back_populates="input_file")
+    process_result: Mapped[ProcessResult] = relationship(init=False, back_populates="input_file")

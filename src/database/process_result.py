@@ -1,8 +1,8 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
+from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship, attribute_keyed_dict
 
 from . import OrmBase
-from .processed_fields.processed_text_field import ProcessedTextField
+from .processed_region import ProcessedRegion
 
 
 class ProcessResult(MappedAsDataclass, OrmBase):
@@ -13,9 +13,9 @@ class ProcessResult(MappedAsDataclass, OrmBase):
 
     # Relationships
 
-    text_field: Mapped[ProcessedTextField] = relationship(default=None, back_populates="process_result")
-    # multiline_text_field: Mapped[MultilineTextField] = relationship(default=None, back_populates="form_field")
-    # checkbox_field: Mapped[CheckboxField] = relationship(default=None, back_populates="form_field")
-    # multi_checkbox_field: Mapped[MultiCheckboxField] = relationship(default=None, back_populates="form_field")
-
-    input_file: Mapped["InputFile"] = relationship(init=False, back_populates="process_results")
+    input_file: Mapped["InputFile"] = relationship(init=False, back_populates="process_result")
+    regions: Mapped[dict[int, ProcessedRegion]] = relationship(
+        init=False,
+        collection_class=attribute_keyed_dict("local_id"),
+        back_populates="process_result",
+    )

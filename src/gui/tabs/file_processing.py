@@ -140,9 +140,9 @@ class FileProcessing(QWidget):
             if item.get_details().db_id == db_id:
                 item.set_status(status)
 
-            # Update the details of this status matches the details
-            if item.get_details().db_id == self.details.loaded_id():
-                self.details.load_file(db_id)
+            # # Update the details of this status matches the details
+            # if item.get_details().db_id == self.details.loaded_id():
+            #     self.details.load_file(db_id)
 
     @pyqtSlot(int)
     def worker_complete(self, db_id: int) -> None:

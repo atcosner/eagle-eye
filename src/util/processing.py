@@ -3,6 +3,10 @@ import logging
 import numpy as np
 from pathlib import Path
 
+from src.database.fields.text_field import TextField
+from src.database.processed_fields.processed_text_field import ProcessedTextField
+from src.util.types import FormLinkingMethod
+
 from .types import BoxBounds
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
@@ -68,3 +72,29 @@ def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
 
     # Check if there are enough black pixels to confirm a selection
     return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
+
+
+def should_copy_from_previous(ocr_text: str) -> bool:
+    # TODO: Be smarter about this
+    copy_values = ['11', '=', '"']
+    return any([value in ocr_text for value in copy_values])
+
+
+def locate_linked_field(
+        link_method: FormLinkingMethod,
+        current_field: TextField,
+        identifier_field: ProcessedTextField | None,
+) -> ProcessedTextField | None:
+    match link_method:
+        case FormLinkingMethod.NO_LINKING:
+            logger.error(f'Requested to link "{current_field.name}" but the reference form does not allow linking')
+            return None
+        case FormLinkingMethod.PREVIOUS_REGION:
+            pass
+        case FormLinkingMethod.PREVIOUS_IDENTIFIER:
+            assert identifier_field is not None
+            # TODO
+            return None
+        case _:
+            logger.error(f'Unknown link method: "{link_method.name}"')
+            return None

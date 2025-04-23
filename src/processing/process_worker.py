@@ -10,11 +10,13 @@ from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
 
 import src.util.processing as process_util
 from src.database import DB_ENGINE
+from src.database.fields.text_field import TextField
 from src.database.input_file import InputFile
 from src.database.job import Job
-from src.database.fields.text_field import TextField
-from src.database.page_region import PageRegion
+from src.database.process_result import ProcessResult
+from src.database.processed_fields.processed_field import ProcessedField
 from src.database.processed_fields.processed_text_field import ProcessedTextField
+from src.database.processed_region import ProcessedRegion
 from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
@@ -38,7 +40,6 @@ class ProcessWorker(QObject):
     def process_text_field(
             self,
             session: requests.Session,
-            page_region: PageRegion,
             field: TextField,
             aligned_image: np.ndarray,
             roi_dest_path: Path,
@@ -57,20 +58,30 @@ class ProcessWorker(QObject):
             from_controlled_language = True
         elif process_util.should_ocr_region(aligned_image, ocr_region):
             ocr_result = ocr_text_region(session, aligned_image, ocr_region, add_border=True)
+            self.log.info(f'OCR returned: "{ocr_result}"')
         else:
             self.log.info(f'Detected mostly white image, skipping OCR')
             ocr_result = ''
 
-        # TODO: Copy from previous region
+        # Check if we should search for a linking field
+        copied_from_linked = False
+        if field.allow_copy and process_util.should_copy_from_previous(ocr_result):
+            link_field = process_util.locate_linked_field()
+            if link_field is None:
+                self.log.warning(f'Failed to locate a field to link to')
+            else:
+                self.log.info(f'Located linked field: {link_field.name} -> "{link_field.text}"')
+                copied_from_linked = True
+                ocr_result = link_field.text
 
         return ProcessedTextField(
             name=field.name,
-            page_region=page_region.name,
             roi_path=roi_dest_path,
             ocr_result=ocr_result,
-            allow_linking=False,
-            copied_from_linked=False,
+            text=ocr_result,
+            copied_from_linked=copied_from_linked,
             from_controlled_language=from_controlled_language,
+            text_field=field,
         )
 
     @pyqtSlot()
@@ -98,18 +109,39 @@ class ProcessWorker(QObject):
             # Establish a session to the Google API
             api_session = open_api_session()
 
+            result = ProcessResult()
+            input_file.process_result = result
+
             # Work through all regions in the reference form
-            for page_region in job.reference_form.regions:
-                self.log.info(f'Processing region: "{page_region.name}"')
-                for field in page_region.fields:
+            for local_id, page_region in job.reference_form.regions.items():
+                self.log.info(f'Processing region: "{page_region.name}" ({local_id})')
+                processed_region = ProcessedRegion(local_id=page_region.local_id, name=page_region.name)
+
+                # Sort the fields so that we process the identifier field first
+                for field in sorted(page_region.fields, key=lambda f: f.identifier, reverse=True):
                     roi_path = processing_directory / f'{field.id}.png'
+                    processed_field = ProcessedField()
 
                     if field.text_field is not None:
                         self.log.info(f'Processing Text Field: {field.text_field.name}')
                         result_field = self.process_text_field(
                             session=api_session,
-                            page_region=page_region,
                             field=field.text_field,
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
                         )
+                        processed_field.text_field = result_field
+                    else:
+                        self.log.error(f'Form field had no parts to process')
+                        continue
+
+                    # Add the processed field to our region
+                    processed_region.fields.append(processed_field)
+
+                # Add the processed region to the result
+                result.regions[processed_region.local_id] = processed_region
+
+            # Commit the results to the DB and signal out that our status is changed
+            session.commit()
+            self.updateStatus.emit(input_file.id, FileStatus.SUCCESS)
+            self.processComplete.emit(input_file.id)

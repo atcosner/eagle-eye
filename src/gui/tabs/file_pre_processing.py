@@ -88,6 +88,9 @@ class FilePreProcessing(QWidget):
                         initial_status=initial_status,
                     )
 
+        # Run GUI updates based if all our items are complete
+        self.threads_complete()
+
     def all_items_processed(self) -> bool:
         all_done = True
         for idx in range(self.status_list.topLevelItemCount()):

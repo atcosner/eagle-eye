@@ -34,6 +34,9 @@ class FileProcessing(QWidget):
         self.process_file_button = QPushButton('Process Files')
         self.process_file_button.pressed.connect(self.start_processing)
 
+        self.view_results_button = QPushButton('View Results')
+        self.view_results_button.setVisible(False)
+
         self._set_up_layout()
         self._check_api_config()
 
@@ -108,6 +111,9 @@ class FileProcessing(QWidget):
                     initial_status=FileStatus.SUCCESS if input_file.process_result is not None else FileStatus.PENDING,
                 )
 
+        # Run GUI updates based if all our items are complete
+        self.threads_complete()
+
     @pyqtSlot()
     def start_processing(self) -> None:
         assert self._job_db_id is not None, 'Attempt to start processing without a Job ID'
@@ -145,7 +151,7 @@ class FileProcessing(QWidget):
             self.process_file_button.setDisabled(False)
             self.process_file_button.setVisible(False)
             self.auto_process.setVisible(False)
-            # self.continue_button.setVisible(True)
+            self.view_results_button.setVisible(True)
         else:
             self.process_file_button.setDisabled(False)
 

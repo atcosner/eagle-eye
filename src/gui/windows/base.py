@@ -11,8 +11,12 @@ class BaseWindow(QMainWindow):
 
         self.update_title(title_suffix)
 
-    def update_title(self, suffix: str | None) -> None:
-        base_title = 'Eagle Eye'
-        if suffix is not None:
-            base_title += f' | {suffix}'
-        self.setWindowTitle(base_title)
+    def update_title(self, suffix: str | None, append: bool = False) -> None:
+        if append:
+            new_title = f'{self.windowTitle()}{suffix}'
+        else:
+            new_title = 'Eagle Eye'
+            if suffix is not None:
+                new_title += f' | {suffix}'
+
+        self.setWindowTitle(new_title)

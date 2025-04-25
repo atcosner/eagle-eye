@@ -77,6 +77,7 @@ class PreProcessingDetails(QFrame):
 
             self.status_label.setText('PENDING')
             self.accepted_rotation_label.setText('None')
+            self.status_label.setPalette(QPalette())
 
             self.file_name.setText(file.path.name)
             self.file_path.setText(str(file.path))

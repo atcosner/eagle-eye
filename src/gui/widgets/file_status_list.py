@@ -10,10 +10,10 @@ from src.util.types import FileDetails
 
 
 class FileStatusItem(QTreeWidgetItem):
-    def __init__(self, file_details: FileDetails):
+    def __init__(self, file_details: FileDetails, initial_status: FileStatus):
         super().__init__()
         self.details = file_details
-        self.status: FileStatus = FileStatus.PENDING
+        self.status: FileStatus = initial_status
 
         icon_file_name = 'pdf_icon.png' if self.details.path.suffix == '.pdf' else 'image_icon.png'
         self.setIcon(0, QIcon(str(FILE_TYPE_ICON_PATH / icon_file_name)))
@@ -49,8 +49,8 @@ class FileStatusList(QTreeWidget):
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
-    def add_file(self, file: FileDetails) -> None:
-        self.addTopLevelItem(FileStatusItem(file))
+    def add_file(self, file: FileDetails, initial_status: FileStatus = FileStatus.PENDING) -> None:
+        self.addTopLevelItem(FileStatusItem(file, initial_status))
 
     def add_files(self, files: Iterable[FileDetails]) -> None:
         for file in files:

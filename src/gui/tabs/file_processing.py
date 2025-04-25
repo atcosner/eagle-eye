@@ -10,9 +10,9 @@ from src.processing.process_worker import ProcessWorker
 from src.util.resources import GENERIC_ICON_PATH
 from src.util.settings import SettingsManager
 from src.util.status import FileStatus, is_finished
+from src.util.types import FileDetails
 
 from ..widgets.file_status_list import FileStatusList, FileStatusItem
-from ...util.types import FileDetails
 
 
 class FileProcessing(QWidget):
@@ -80,8 +80,11 @@ class FileProcessing(QWidget):
 
         self.process_file_button.setText(text)
 
-    def load_job(self, job: Job | int) -> None:
+    def load_job(self, job: Job | int | None) -> None:
         self.status_list.clear()
+        if job is None:
+            self._job_db_id = None
+            return
 
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job) if isinstance(job, int) else job
@@ -92,14 +95,17 @@ class FileProcessing(QWidget):
                 if input_file.pre_process_result is None:
                     continue
 
+                # Only add files that were aligned to their reference
                 if not input_file.pre_process_result.successful_alignment:
                     continue
 
                 self.status_list.add_file(
-                    FileDetails(
+                    file=FileDetails(
                         db_id=input_file.id,
                         path=input_file.path,
-                    )
+                    ),
+                    # TODO: Failed status?
+                    initial_status=FileStatus.SUCCESS if input_file.process_result is not None else FileStatus.PENDING,
                 )
 
     @pyqtSlot()

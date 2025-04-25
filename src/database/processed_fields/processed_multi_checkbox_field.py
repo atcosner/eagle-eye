@@ -17,6 +17,8 @@ class ProcessedMultiCheckboxField(MappedAsDataclass, OrmBase):
     name: Mapped[str]
     roi_path: Mapped[Path] = mapped_column(DbPath)
 
+    validation_result: Mapped[bool] = mapped_column(nullable=True)
+
     # Relationships
 
     processed_field: Mapped["ProcessedField"] = relationship(init=False, back_populates="multi_checkbox_field")

@@ -28,6 +28,7 @@ from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus
+from src.util.validation import MultiCheckboxValidation
 
 logger = logging.getLogger(__name__)
 
@@ -151,13 +152,16 @@ class ProcessWorker(QObject):
         checkboxes: dict[str, ProcessedMultiCheckboxOption] = {}
         for checkbox in field.checkboxes:
             checked = process_util.get_checked(aligned_image, checkbox.region)
-            optional_text: str | None = None
+            self.log.info(f'Checkbox "{checkbox.name}" = {checked}')
 
             # If the checkbox has a text region, check if we should run OCR
+            optional_text: str | None = None
             if checkbox.text_region is not None:
                 if process_util.should_ocr_region(aligned_image, checkbox.text_region):
                     optional_text = ocr_text_region(session, aligned_image, checkbox.text_region, add_border=True)
                     self.log.info(f'OCR returned: "{optional_text}"')
+
+                    # TODO: What if we did an OCR, but the checkbox was not checked?
                 else:
                     self.log.info(f'Detected mostly white image, skipping OCR')
                     optional_text = ''
@@ -169,9 +173,26 @@ class ProcessWorker(QObject):
                 ocr_result=optional_text,
             )
 
+        # Validate the field
+        validation_result: bool | None = None
+        match field.validator:
+            case MultiCheckboxValidation.NONE:
+                validation_result = None
+            case MultiCheckboxValidation.REQUIRE_ONE:
+                # Ensure that at least one checkbox was checked
+                validation_result = any([option.checked for option in checkboxes.values()])
+            case MultiCheckboxValidation.OPTIONAL:
+                # Optional multi-checkboxes always pass validation
+                validation_result = True
+            case _:
+                self.log.error(f'Unknown validator: {field.validator.name}')
+                validation_result = None
+        self.log.info(f'Validation result ({field.validator.name}): {validation_result}')
+
         return ProcessedMultiCheckboxField(
             name=field.name,
             roi_path=roi_dest_path,
+            validation_result=validation_result,
             multi_checkbox_field=field,
             checkboxes=checkboxes,
         )

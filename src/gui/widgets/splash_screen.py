@@ -41,7 +41,7 @@ class SplashScreen(QSplashScreen):
 
         # Update the Google API project and auth key
         settings = SettingsManager()
-        if settings.valid_api_config():
+        if settings.valid_api_config() and settings.api_needs_update():
             self.showMessage(
                 'Updating Google API Config',
                 Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight,

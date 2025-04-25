@@ -1,5 +1,6 @@
 import base64
 import cv2
+import datetime
 import logging
 import numpy as np
 import requests
@@ -29,6 +30,7 @@ def save_api_settings() -> None:
     ).stdout.strip()
 
     with SettingsManager() as settings:
+        settings.google_api_update_date = datetime.date.today()
         settings.google_project_id = project_id
         settings.google_access_token = access_token
 

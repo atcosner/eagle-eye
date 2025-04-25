@@ -56,6 +56,15 @@ class FilePreProcessing(QWidget):
     def load_job(self, job: Job | None) -> None:
         self._job_db_id = job.id if job else None
 
+    def all_items_processed(self) -> bool:
+        all_done = True
+        for idx in range(self.status_list.topLevelItemCount()):
+            item = self.status_list.topLevelItem(idx)
+            if not is_finished(item.get_status()):
+                all_done = False
+
+        return all_done
+
     @pyqtSlot()
     def update_button_text(self) -> None:
         text = 'Pre-Process File'
@@ -105,10 +114,13 @@ class FilePreProcessing(QWidget):
         self.pre_processing_threads.clear()
 
     def threads_complete(self) -> None:
-        self.process_file_button.setDisabled(False)
-        self.process_file_button.setVisible(False)
-        self.auto_process.setVisible(False)
-        self.continue_button.setVisible(True)
+        if self.all_items_processed():
+            self.process_file_button.setDisabled(False)
+            self.process_file_button.setVisible(False)
+            self.auto_process.setVisible(False)
+            self.continue_button.setVisible(True)
+        else:
+            self.process_file_button.setDisabled(False)
 
     @pyqtSlot(int, FileStatus)
     def worker_status_update(self, db_id: int, status: FileStatus) -> None:

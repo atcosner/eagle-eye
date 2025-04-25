@@ -2,6 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from src.util.types import BoxBounds
+from src.util.validation import MultiCheckboxValidation
 
 from .multi_checkbox_option import MultiCheckboxOption
 from .. import OrmBase
@@ -16,6 +17,7 @@ class MultiCheckboxField(MappedAsDataclass, OrmBase):
 
     name: Mapped[str]
     visual_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds)
+    validator: Mapped[MultiCheckboxValidation]
 
     # Relationships
 

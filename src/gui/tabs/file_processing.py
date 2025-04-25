@@ -37,6 +37,15 @@ class FileProcessing(QWidget):
         self._set_up_layout()
         self._check_api_config()
 
+    def all_items_processed(self) -> bool:
+        all_done = True
+        for idx in range(self.status_list.topLevelItemCount()):
+            item = self.status_list.topLevelItem(idx)
+            if not is_finished(item.get_status()):
+                all_done = False
+
+        return all_done
+
     def _set_up_layout(self) -> None:
         layout = QVBoxLayout()
         layout.addWidget(self.status_list)
@@ -126,10 +135,13 @@ class FileProcessing(QWidget):
         self.threads.clear()
 
     def threads_complete(self) -> None:
-        self.process_file_button.setDisabled(False)
-        self.process_file_button.setVisible(False)
-        self.auto_process.setVisible(False)
-        # self.continue_button.setVisible(True)
+        if self.all_items_processed():
+            self.process_file_button.setDisabled(False)
+            self.process_file_button.setVisible(False)
+            self.auto_process.setVisible(False)
+            # self.continue_button.setVisible(True)
+        else:
+            self.process_file_button.setDisabled(False)
 
     @pyqtSlot(int, FileStatus)
     def worker_status_update(self, db_id: int, status: FileStatus) -> None:

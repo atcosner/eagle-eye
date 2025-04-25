@@ -44,6 +44,25 @@ class ProcessingPipeline(QTabWidget):
             self.pre_processing.load_job(job)
             self.processing.load_job(job)
 
+            # Check if any of the input files have been pre-processed
+            pre_process_results = [(input_file.pre_process_result is not None) for input_file in job.input_files]
+            if any(pre_process_results):
+                self.gui_move_to_step_2()
+
+            # If all the files have been pre-processed, move to step 3
+            if pre_process_results and all(pre_process_results):
+                self.gui_move_to_step_3()
+
+    def gui_move_to_step_2(self) -> None:
+        # Disable the Step 1 tab
+        self.setTabEnabled(0, False)
+
+        # Signal out for the main window to update and gui elements
+        self.inputFilesConfirmed.emit()
+
+    def gui_move_to_step_3(self) -> None:
+        self.setCurrentIndex(2)
+
     def change_reference_form(self, db_id: int | None) -> None:
         self._reference_form_id = db_id
 
@@ -52,10 +71,6 @@ class ProcessingPipeline(QTabWidget):
         # Do nothing if we have no reference form selected
         if self._reference_form_id is None:
             return
-
-        # Disable the Step 1 tab and the reference form selector
-        self.setTabEnabled(0, False)
-        self.inputFilesConfirmed.emit()
 
         # Add the selected reference form to the job
         with Session(DB_ENGINE) as session:
@@ -66,7 +81,10 @@ class ProcessingPipeline(QTabWidget):
 
         self.pre_processing.add_files(files)
 
+        # Move to Step 2
+        self.gui_move_to_step_2()
+
     @pyqtSlot()
     def pre_processing_done(self) -> None:
-        self.setCurrentIndex(2)
         self.processing.load_job(self._job_id)
+        self.gui_move_to_step_3()

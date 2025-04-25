@@ -86,14 +86,14 @@ class MainWindow(BaseWindow):
         self.processing_pipeline.change_reference_form(self.reference_form_selector.currentData())
 
     def load_job(self, job_id: int) -> None:
+        self._toggle_controls(True)
+
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job_id)
             self._job_db_id = job_id
 
             self.job_name.setText(job.name)
             self.processing_pipeline.load_job(job_id)
-
-        self._toggle_controls(True)
 
     def reload_reference_forms(self) -> None:
         self.reference_form_selector.clear()

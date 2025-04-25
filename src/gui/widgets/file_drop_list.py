@@ -54,9 +54,10 @@ class FileDropList(QListWidget):
         self._job_db_id = job.id if job else None
         self._job_db_uuid = job.uuid if job else None
 
+        # Load in the input files if we are loading a job
         if job is not None:
             for input_file in job.input_files:
-                self.add_item(input_file.path)
+                self.add_item(input_file.path, db_id=input_file.id)
 
     def check_drag_event(self, data: QMimeData) -> bool:
         if not data.hasUrls():

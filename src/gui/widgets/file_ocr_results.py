@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy.orm import Session
 
-from PyQt6.QtWidgets import QWidget, QGridLayout
+from PyQt6.QtWidgets import QWidget, QGridLayout, QSizePolicy
 
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
@@ -29,6 +29,8 @@ class FileOcrResults(QWidget):
                 for field in region.fields:
                     if field.text_field is not None:
                         logger.info(f'Adding text field: {field.text_field.name}')
+                        row_idx = self.field_grid.rowCount()
+
                         field_widget = TextField(field.text_field)
-                        field_widget.add_to_grid(self.field_grid)
-                        self.field_widgets[self.field_grid.rowCount()-1] = field_widget
+                        field_widget.add_to_grid(row_idx, self.field_grid)
+                        self.field_widgets[row_idx] = field_widget

@@ -11,7 +11,7 @@ app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(True)
 
 window = ResultViewer()
-window.show()
 window.load_job(10)
+window.show()
 
 app.exec()

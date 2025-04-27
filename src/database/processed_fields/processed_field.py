@@ -14,6 +14,8 @@ class ProcessedField(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     processed_region_id: Mapped[int] = mapped_column(ForeignKey("processed_region.id"), init=False)
 
+    processing_error: Mapped[bool]
+
     # Relationships
 
     processed_region: Mapped["ProcessedRegion"] = relationship(init=False, back_populates="fields")

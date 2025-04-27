@@ -51,13 +51,14 @@ class ProcessWorker(QObject):
             field: TextField,
             aligned_image: np.ndarray,
             roi_dest_path: Path,
-    ) -> ProcessedTextField:
+    ) -> tuple[bool, ProcessedTextField]:
         # Snip and save off the ROI image
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
         # Determine the region to OCR
         ocr_region = field.text_region if field.text_region is not None else field.visual_region
 
+        ocr_error = False
         from_controlled_language = False
         if field.checkbox_region is not None and process_util.get_checked(aligned_image, field.checkbox_region):
             assert field.checkbox_text is not None
@@ -66,10 +67,14 @@ class ProcessWorker(QObject):
             from_controlled_language = True
         elif process_util.should_ocr_region(aligned_image, ocr_region):
             ocr_result = ocr_text_region(session, aligned_image, ocr_region, add_border=True)
+            ocr_error = ocr_result is None
             self.log.info(f'OCR returned: "{ocr_result}"')
         else:
             self.log.info(f'Detected mostly white image, skipping OCR')
             ocr_result = ''
+
+        # OCR result should not be None even if we had an error
+        ocr_result = '' if ocr_error else ocr_result
 
         # Check if we should search for a linking field
         copied_from_linked = False
@@ -82,15 +87,16 @@ class ProcessWorker(QObject):
                 copied_from_linked = True
                 ocr_result = link_field.text
 
-        return ProcessedTextField(
+        field = ProcessedTextField(
             name=field.name,
             roi_path=roi_dest_path,
-            ocr_result=ocr_result,
             text=ocr_result,
+            ocr_text=ocr_result,
             copied_from_linked=copied_from_linked,
             from_controlled_language=from_controlled_language,
             text_field=field,
         )
+        return ocr_error, field
 
     def process_multiline_text_field(
             self,
@@ -98,7 +104,7 @@ class ProcessWorker(QObject):
             field: MultilineTextField,
             aligned_image: np.ndarray,
             roi_dest_path: Path,
-    ) -> ProcessedMultilineTextField:
+    ) -> tuple[bool, ProcessedMultilineTextField]:
         # Snip and save off the ROI image
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
@@ -108,36 +114,43 @@ class ProcessWorker(QObject):
         # Check if any of our regions need to be OCR'd
         ocr_checks = [process_util.should_ocr_region(aligned_image, region) for region in field.line_regions]
 
+        ocr_error = False
         if any(ocr_checks):
             ocr_result = ocr_text_region(session, roi=stitched_image, add_border=True)
+            ocr_error = ocr_result is None
             self.log.info(f'OCR returned: "{ocr_result}"')
         else:
             self.log.info(f'Detected mostly white image, skipping OCR')
             ocr_result = ''
 
-        return ProcessedMultilineTextField(
+        # OCR result should not be None even if we had an error
+        ocr_result = '' if ocr_error else ocr_result
+
+        field = ProcessedMultilineTextField(
             name=field.name,
             roi_path=roi_dest_path,
-            ocr_result=ocr_result,
             text=ocr_result,
+            ocr_text=ocr_result,
             multiline_text_field=field,
         )
+        return ocr_error, field
 
     def process_checkbox_field(
             self,
             field: CheckboxField,
             aligned_image: np.ndarray,
             roi_dest_path: Path,
-    ) -> ProcessedCheckboxField:
+    ) -> tuple[bool, ProcessedCheckboxField]:
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
         checked = process_util.get_checked(aligned_image, field.checkbox_region)
-        return ProcessedCheckboxField(
+        field = ProcessedCheckboxField(
             name=field.name,
             roi_path=roi_dest_path,
             checked=checked,
             checkbox_field=field,
         )
+        return False, field
 
     def process_multi_checkbox_field(
             self,
@@ -145,10 +158,11 @@ class ProcessWorker(QObject):
             field: MultiCheckboxField,
             aligned_image: np.ndarray,
             roi_dest_path: Path,
-    ) -> ProcessedMultiCheckboxField:
+    ) -> tuple[bool, ProcessedMultiCheckboxField]:
         # Snip and save off the ROI image
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
+        ocr_error = False
         checkboxes: dict[str, ProcessedMultiCheckboxOption] = {}
         for checkbox in field.checkboxes:
             checked = process_util.get_checked(aligned_image, checkbox.region)
@@ -159,6 +173,7 @@ class ProcessWorker(QObject):
             if checkbox.text_region is not None:
                 if process_util.should_ocr_region(aligned_image, checkbox.text_region):
                     optional_text = ocr_text_region(session, aligned_image, checkbox.text_region, add_border=True)
+                    ocr_error = optional_text is None
                     self.log.info(f'OCR returned: "{optional_text}"')
 
                     # TODO: What if we did an OCR, but the checkbox was not checked?
@@ -170,7 +185,7 @@ class ProcessWorker(QObject):
                 name=checkbox.name,
                 checked=checked,
                 text=optional_text,
-                ocr_result=optional_text,
+                ocr_text=optional_text,
             )
 
         # Validate the field
@@ -189,13 +204,14 @@ class ProcessWorker(QObject):
                 validation_result = None
         self.log.info(f'Validation result ({field.validator.name}): {validation_result}')
 
-        return ProcessedMultiCheckboxField(
+        field = ProcessedMultiCheckboxField(
             name=field.name,
             roi_path=roi_dest_path,
             validation_result=validation_result,
             multi_checkbox_field=field,
             checkboxes=checkboxes,
         )
+        return ocr_error, field
 
     @pyqtSlot()
     def start(self) -> None:
@@ -233,46 +249,54 @@ class ProcessWorker(QObject):
                 # Sort the fields so that we process the identifier field first
                 for field in sorted(page_region.fields, key=lambda f: f.identifier, reverse=True):
                     roi_path = processing_directory / f'{field.id}.png'
-                    processed_field = ProcessedField()
+                    processed_field = ProcessedField(processing_error=False)
 
                     if field.text_field is not None:
                         self.log.info(f'Processing Text Field: {field.text_field.name}')
-                        result_field = self.process_text_field(
+                        had_error, result_field = self.process_text_field(
                             session=api_session,
                             field=field.text_field,
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
                         )
+
+                        processed_field.processing_error = had_error
                         processed_field.text_field = result_field
                     elif field.multiline_text_field is not None:
                         self.log.info(f'Processing Multiline Text Field: {field.multiline_text_field.name}')
-                        result_field = self.process_multiline_text_field(
+                        had_error, result_field = self.process_multiline_text_field(
                             session=api_session,
                             field=field.multiline_text_field,
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
                         )
+
+                        processed_field.processing_error = had_error
                         processed_field.multiline_text_field = result_field
                     elif field.checkbox_field is not None:
                         self.log.info(f'Processing Checkbox Field: {field.checkbox_field.name}')
-                        result_field = self.process_checkbox_field(
+                        had_error, result_field = self.process_checkbox_field(
                             field=field.checkbox_field,
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
                         )
+
+                        processed_field.processing_error = had_error
                         processed_field.checkbox_field = result_field
                     elif field.multi_checkbox_field is not None:
                         self.log.info(f'Processing Multi-Checkbox Field: {field.multi_checkbox_field.name}')
-                        result_field = self.process_multi_checkbox_field(
+                        had_error, result_field = self.process_multi_checkbox_field(
                             session=api_session,
                             field=field.multi_checkbox_field,
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
                         )
+
+                        processed_field.processing_error = had_error
                         processed_field.multi_checkbox_field = result_field
                     else:
                         self.log.error(f'Form field had no parts to process')
-                        continue
+                        processed_field.processing_error = True
 
                     # Add the processed field to our region
                     processed_region.fields.append(processed_field)

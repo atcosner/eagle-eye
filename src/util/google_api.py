@@ -11,6 +11,8 @@ from .types import BoxBounds
 
 logger = logging.getLogger(__name__)
 
+MAX_API_ATTEMPTS = 3
+
 
 def save_api_settings() -> None:
     # TODO: This assumes that Google Cloud CLI has been set up
@@ -48,13 +50,24 @@ def open_api_session() -> requests.Session:
     return session
 
 
+def update_session_config(session: requests.Session) -> requests.Session:
+    settings = SettingsManager()
+    session.headers.update(
+        {
+            'Authorization': f'Bearer {settings.google_access_token}',
+            'x-goog-user-project': settings.google_project_id,
+        }
+    )
+    return session
+
+
 def ocr_text_region(
         session: requests.Session,
         image: np.ndarray | None = None,
         region: BoxBounds | None = None,
         roi: np.ndarray | None = None,
         add_border: bool = False,
-) -> str:
+) -> str | None:
     if roi is None:
         assert image is not None
         assert region is not None
@@ -87,12 +100,32 @@ def ocr_text_region(
         ],
     }
 
-    result = session.post(
-        'https://vision.googleapis.com/v1/images:annotate',
-        json=data_payload,
-    )
-    result.raise_for_status()
-    logger.debug(result.json())
+    attempts = 0
+    while attempts < MAX_API_ATTEMPTS:
+        logger.debug(f'API OCR attempt: {attempts}')
+
+        result = session.post(
+            'https://vision.googleapis.com/v1/images:annotate',
+            json=data_payload,
+        )
+        try:
+            result.raise_for_status()
+            # logger.debug(result.json())
+            break
+        except requests.exceptions.HTTPError as e:
+            attempts += 1
+
+            # If we got unauthorized, try updating the access token
+            if e.response.status_code == 401:
+                logger.info('API Authentication failed, updating acces token and retrying')
+                save_api_settings()
+                update_session_config(session)
+            else:
+                if attempts < MAX_API_ATTEMPTS:
+                    logger.exception('API call failed, retrying')
+                else:
+                    # TODO: Handle a None return at the call sites
+                    return None
 
     ocr_string: str | None = None
     for response in result.json()['responses']:

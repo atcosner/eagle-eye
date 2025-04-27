@@ -18,7 +18,7 @@ class ProcessedMultiCheckboxOption(MappedAsDataclass, OrmBase):
     checked: Mapped[bool]
 
     text: Mapped[str] = mapped_column(nullable=True)
-    ocr_result: Mapped[str] = mapped_column(nullable=True)
+    ocr_text: Mapped[str] = mapped_column(nullable=True)
 
     # Relationships
 

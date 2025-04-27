@@ -17,7 +17,7 @@ class ProcessedTextField(MappedAsDataclass, OrmBase):
     roi_path: Mapped[Path] = mapped_column(DbPath)
 
     text: Mapped[str]  # Text post any user corrections
-    ocr_result: Mapped[str]  # Original OCR result
+    ocr_text: Mapped[str]  # Original OCR result
     copied_from_linked: Mapped[bool]
     from_controlled_language: Mapped[bool]
 

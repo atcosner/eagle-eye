@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 from sqlalchemy.orm import Session
 
@@ -15,6 +16,51 @@ from src.util.types import BoxBounds, FormLinkingMethod
 from src.util.validation import MultiCheckboxValidation
 
 
+def offset_object(item: object, y_offset: int) -> object | None:
+    if isinstance(item, BoxBounds):
+        return item._replace(y=item.y + y_offset)
+    elif isinstance(item, list):
+        return [offset_object(part, y_offset) for part in item if offset_object(part, y_offset) is not None]
+    else:
+        return None
+
+
+def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
+    if field.text_field is not None:
+        new_bounds = copy.copy(field.text_field.visual_region)
+        new_field = TextField(name=field.text_field.name, visual_region=offset_object(new_bounds, y_offset))
+        return FormField(text_field=new_field)
+    else:
+        return None
+
+    # replacements = {}
+    # for key, value in vars(field).items():
+    #     # Throw out callables and dunder functions
+    #     if callable(value) or key.startswith('__'):
+    #         continue
+    #
+    #     if isinstance(value, FormField):
+    #         # Recurse to replace the entire object
+    #         replacements[key] = create_field_with_offset(value, y_offset)
+    #     elif isinstance(value, list) and isinstance(value[0], MultiCheckboxOption):
+    #         # Recurse for collections of checkbox options
+    #         # TODO: Handle this automatically for potentially more things that are not lists of MultiCheckboxOption
+    #         replacements[key] = [create_field_with_offset(part, y_offset) for part in value]
+    #     else:
+    #         # Replacements that do not require recursion
+    #         if (new_value := offset_object(value, y_offset)) is not None:
+    #             replacements[key] = new_value
+    #         else:
+    #             replacements[key] = value
+    #
+    # # Deep copy the object and then perform replacements
+    # new_field = type(field)()
+    # for key, value in replacements.items():
+    #     setattr(new_field, key, value)
+    #
+    # return new_field
+
+
 if LocalPaths.database_file().exists():
     LocalPaths.database_file().unlink()
     OrmBase.metadata.create_all(DB_ENGINE)
@@ -28,7 +74,7 @@ with Session(DB_ENGINE) as session:
         linking_method=FormLinkingMethod.PREVIOUS_REGION,
     )
 
-    top_region = FormRegion(local_id=0, name='top')
+    top_region = FormRegion(local_id=0, name='Top')
     top_region.fields = [
         FormField(
             identifier=True,
@@ -317,8 +363,16 @@ with Session(DB_ENGINE) as session:
             )
         ),
     ]
-
     new_form.regions[top_region.local_id] = top_region
+    session.commit()
+
+    # Duplicate with an offset for the bottom region
+    BOTTOM_HALF_Y_OFFSET = 842
+    bottom_region = FormRegion(local_id=1, name='Bottom')
+    for field in top_region.fields:
+        if (new_field := create_field_with_offset(field, BOTTOM_HALF_Y_OFFSET)) is not None:
+            bottom_region.fields.append(new_field)
+    new_form.regions[bottom_region.local_id] = bottom_region
 
     session.add(new_form)
     session.commit()

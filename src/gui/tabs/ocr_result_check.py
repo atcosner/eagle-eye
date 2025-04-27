@@ -5,8 +5,7 @@ from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 
 from src.database import Job, DB_ENGINE
 
-from ..widgets.file.file_ocr_results import FileOcrResults
-from ..widgets.util.sized_scroll_area import SizedScrollArea
+from ..widgets.ocr_results.file_ocr_results import FileOcrResults
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +34,4 @@ class OcrResultCheck(QWidget):
             for file in job.input_files:
                 file_tab = FileOcrResults()
                 file_tab.load_input_file(file)
-
-                scroll_area = SizedScrollArea(file_tab)
-                self.file_tabs.addTab(scroll_area, file.path.name)
+                self.file_tabs.addTab(file_tab, file.path.name)

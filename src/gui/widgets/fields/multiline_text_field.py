@@ -1,21 +1,21 @@
-from PyQt6.QtWidgets import QLineEdit, QGridLayout
+from PyQt6.QtWidgets import QGridLayout, QTextEdit
 
-from src.database.processed_fields.processed_text_field import ProcessedTextField
+from src.database.processed_fields.processed_multiline_text_field import ProcessedMultilineTextField
 
 from .base import BaseField
 from .util import wrap_in_frame
 
 
-class TextField(BaseField):
-    def __init__(self, field: ProcessedTextField):
+class MultilineTextField(BaseField):
+    def __init__(self, field: ProcessedMultilineTextField):
         super().__init__()
 
-        self.text_input = QLineEdit()
+        self.text_input = QTextEdit()
         self.text_input.setMinimumWidth(350)
 
         self.load_field(field)
 
-    def load_field(self, field: ProcessedTextField) -> None:
+    def load_field(self, field: ProcessedMultilineTextField) -> None:
         super().load_field(field)
         # TODO: Validation result
         self.text_input.setText(field.text)

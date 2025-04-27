@@ -25,6 +25,6 @@ window.processing_pipeline.picker.file_list.file_list.add_items([
 
 # Pre-process
 window.processing_pipeline.picker.confirm_files()
-window.processing_pipeline.pre_processing.start_pre_processing()
+window.processing_pipeline.pre_processing.start_processing()
 
 app.exec()

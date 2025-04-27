@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxL
 from src.database.job import Job
 from src.util.status import FileStatus, is_finished
 
-from ..widgets.file_status_list import FileStatusList, FileStatusItem
+from src.gui.widgets.file.file_status_list import FileStatusList, FileStatusItem
 
 
 class ProcessingStep(QWidget):

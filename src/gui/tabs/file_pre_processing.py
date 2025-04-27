@@ -1,4 +1,4 @@
-from PyQt6.QtCore import pyqtSlot, QThread
+from PyQt6.QtCore import pyqtSlot
 from sqlalchemy.orm import Session
 
 from src.database import DB_ENGINE
@@ -8,7 +8,7 @@ from src.util.status import FileStatus
 from src.util.types import FileDetails
 
 from .processing_step import ProcessingStep
-from ..widgets.file_status_list import FileStatusItem
+from ..widgets.file.file_status_list import FileStatusItem
 from ..widgets.pre_processing_details import PreProcessingDetails
 
 

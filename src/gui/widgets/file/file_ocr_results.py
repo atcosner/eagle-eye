@@ -5,8 +5,7 @@ from PyQt6.QtWidgets import QWidget, QGridLayout, QSizePolicy
 
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
-
-from .fields.text_field import TextField
+from src.gui.widgets.fields.text_field import TextField
 
 logger = logging.getLogger(__name__)
 

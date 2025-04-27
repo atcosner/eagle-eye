@@ -1,19 +1,17 @@
 from sqlalchemy.orm import Session
 
-from PyQt6.QtCore import pyqtSlot, QMutex, QThread
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QPushButton, QHBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.job import Job
 from src.processing.process_worker import ProcessWorker
 from src.util.resources import GENERIC_ICON_PATH
 from src.util.settings import SettingsManager
-from src.util.status import FileStatus, is_finished
+from src.util.status import FileStatus
 from src.util.types import FileDetails
 
 from .processing_step import ProcessingStep
-from ..widgets.file_status_list import FileStatusList, FileStatusItem
+from ..widgets.file.file_status_list import FileStatusItem
 
 
 class FileProcessing(ProcessingStep):

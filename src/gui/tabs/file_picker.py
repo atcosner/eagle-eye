@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QListWidgetItem, QSplitter
@@ -7,8 +6,8 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QVBoxLayout, QLis
 from src.database.job import Job
 from src.util.types import FileDetails
 
-from ..widgets.file_dialog import ScanFileDialog
-from ..widgets.file_drop_list import FileDropList, FileItem
+from ..widgets.file.input_file_dialog import InputFileDialog
+from ..widgets.file.file_drop_list import FileDropList, FileItem
 from ..widgets.file_preview import FilePreview
 
 logger = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ class FileListWithButton(QWidget):
 
     @pyqtSlot()
     def show_file_dialog(self) -> None:
-        dialog = ScanFileDialog(self)
+        dialog = InputFileDialog(self)
         if dialog.exec():
             self.file_list.add_items(dialog.selectedFiles())
 

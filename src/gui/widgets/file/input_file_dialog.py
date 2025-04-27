@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QFileDialog, QWidget
 
 
-class ScanFileDialog(QFileDialog):
+class InputFileDialog(QFileDialog):
     def __init__(self, parent: QWidget):
         super().__init__(parent, 'Please select the files')
 

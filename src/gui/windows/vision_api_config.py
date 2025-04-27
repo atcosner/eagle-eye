@@ -9,7 +9,7 @@ from src.util.google_api import save_api_settings
 from src.util.resources import GENERIC_ICON_PATH
 
 from .base import BaseWindow
-from ..widgets.link_label import LinkLabel
+from ..widgets.util.link_label import LinkLabel
 
 logger = logging.getLogger(__name__)
 

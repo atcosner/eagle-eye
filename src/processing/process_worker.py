@@ -242,6 +242,7 @@ class ProcessWorker(QObject):
             input_file.process_result = result
 
             # Work through all regions in the reference form
+            processing_error = False
             for local_id, page_region in job.reference_form.regions.items():
                 self.log.info(f'Processing region: "{page_region.name}" ({local_id})')
                 processed_region = ProcessedRegion(local_id=page_region.local_id, name=page_region.name)
@@ -299,6 +300,7 @@ class ProcessWorker(QObject):
                         processed_field.processing_error = True
 
                     # Add the processed field to our region
+                    processing_error = processed_field.processing_error
                     processed_region.fields.append(processed_field)
 
                 # Add the processed region to the result
@@ -306,5 +308,5 @@ class ProcessWorker(QObject):
 
             # Commit the results to the DB and signal out that our status is changed
             session.commit()
-            self.updateStatus.emit(input_file.id, FileStatus.SUCCESS)
+            self.updateStatus.emit(input_file.id, FileStatus.SUCCESS if not processing_error else FileStatus.FAILED)
             self.processingComplete.emit(input_file.id)

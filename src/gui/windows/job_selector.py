@@ -77,6 +77,10 @@ class JobSelector(QDialog):
             self.existing_job_button.setDisabled(True)
             self.existing_job_list.setDisabled(True)
 
+        # Select the newest job
+        else:
+            self.existing_job_list.setCurrentRow(self.existing_job_list.count() - 1)
+
     @pyqtSlot()
     def toggle_visibility(self) -> None:
         self.new_job_name.setDisabled(self.existing_job_button.isChecked())

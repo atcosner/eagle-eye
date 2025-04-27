@@ -35,6 +35,7 @@ class MainWindow(BaseWindow):
     def __init__(self):
         super().__init__(None, 'Form Processing')
         self.setMinimumHeight(700)
+        self.setMinimumWidth(1100)
 
         self._job_db_id: int | None = None
 

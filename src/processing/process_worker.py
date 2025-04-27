@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 class ProcessWorker(QObject):
     updateStatus = pyqtSignal(int, FileStatus)
-    processComplete = pyqtSignal(int)
+    processingComplete = pyqtSignal(int)
 
     def __init__(self, name: str, job_id: int, input_file_id: int, mutex: QMutex):
         super().__init__()
@@ -283,4 +283,4 @@ class ProcessWorker(QObject):
             # Commit the results to the DB and signal out that our status is changed
             session.commit()
             self.updateStatus.emit(input_file.id, FileStatus.SUCCESS)
-            self.processComplete.emit(input_file.id)
+            self.processingComplete.emit(input_file.id)

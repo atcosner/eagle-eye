@@ -33,7 +33,7 @@ class ProcessingPipeline(QTabWidget):
 
     def _connect_signals(self) -> None:
         self.picker.filesConfirmed.connect(self.confirm_input_files)
-        self.pre_processing.continueToOcr.connect(self.pre_processing_done)
+        self.pre_processing.continueToNextStep.connect(self.pre_processing_done)
 
     def load_job(self, job_id: int) -> None:
         with Session(DB_ENGINE) as session:
@@ -47,21 +47,32 @@ class ProcessingPipeline(QTabWidget):
             # Check if any of the input files have been pre-processed
             pre_process_results = [(input_file.pre_process_result is not None) for input_file in job.input_files]
             if any(pre_process_results):
-                self.gui_move_to_step_2()
+                self.gui_move_to_pre_processing()
 
             # If all the files have been pre-processed, move to step 3
             if pre_process_results and all(pre_process_results):
-                self.gui_move_to_step_3()
+                self.gui_move_to_processing()
 
-    def gui_move_to_step_2(self) -> None:
-        # Disable the Step 1 tab
-        self.setTabEnabled(0, False)
+    def gui_move_to_pre_processing(self) -> None:
+        self.picker.set_view_only(True)
+
+        # Set the pre-processing tab to have focus
+        self.setCurrentIndex(1)
 
         # Signal out for the main window to update and gui elements
         self.inputFilesConfirmed.emit()
 
-    def gui_move_to_step_3(self) -> None:
+    def gui_move_to_processing(self) -> None:
+        self.pre_processing.set_view_only(True)
+
+        # Set the processing tab to have focus
         self.setCurrentIndex(2)
+
+    def gui_move_to_result_check(self) -> None:
+        self.processing.set_view_only(True)
+
+        # Set the check results tab to have focus
+        self.setCurrentIndex(3)
 
     def change_reference_form(self, db_id: int | None) -> None:
         self._reference_form_id = db_id
@@ -81,10 +92,10 @@ class ProcessingPipeline(QTabWidget):
 
         self.pre_processing.add_files(files)
 
-        # Move to Step 2
-        self.gui_move_to_step_2()
+        # Move to pre-processing
+        self.gui_move_to_pre_processing()
 
     @pyqtSlot()
     def pre_processing_done(self) -> None:
         self.processing.load_job(self._job_id)
-        self.gui_move_to_step_3()
+        self.gui_move_to_processing()

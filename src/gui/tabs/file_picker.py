@@ -30,6 +30,9 @@ class FileListWithButton(QWidget):
         layout.addWidget(self.file_list)
         self.setLayout(layout)
 
+    def set_view_only(self, view_only: bool) -> None:
+        self.add_files_button.setVisible(not view_only)
+
     def load_job(self, job: Job | None) -> None:
         self._job_db_id = job.id if job else None
         self.file_list.load_job(job)
@@ -77,6 +80,11 @@ class FilePicker(QWidget):
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
+
+    def set_view_only(self, view_only: bool) -> None:
+        # Disable control functionality
+        self.file_list.set_view_only(view_only)
+        self.confirm_files_button.setVisible(not view_only)
 
     def load_job(self, job: Job | None) -> None:
         self._job_db_id = job.id if job else None

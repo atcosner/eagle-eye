@@ -3,6 +3,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 
 from src.database import DB_ENGINE, OrmBase
+from src.database.exporters.text_exporter import TextExporter
 from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.form_field import FormField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
@@ -79,53 +80,88 @@ with Session(DB_ENGINE) as session:
         FormField(
             identifier=True,
             identifier_regex=r'^(?P<id>[0-9]{5})$',
-            text_field=TextField(name='KT Number', visual_region=BoxBounds(x=248, y=120, width=120, height=44)),
-            # validator=KtNumber,
+            text_field=TextField(
+                name='KT Number',
+                visual_region=BoxBounds(x=248, y=120, width=120, height=44),
+                text_exporter=TextExporter(prefix='KT_'),
+            ),
         ),
 
         FormField(
-            text_field=TextField(name='Prep Number', visual_region=BoxBounds(x=441, y=120, width=207, height=46)) # validator=PrepNumber)
+            text_field=TextField(
+                name='Prep Number',
+                visual_region=BoxBounds(x=441, y=120, width=207, height=46)
+                # validator=PrepNumber)
+            ),
         ),
         FormField(
-            text_field=TextField(name='KU Number', visual_region=BoxBounds(x=707, y=120, width=207, height=46)) # validator=NoExport)
+            text_field=TextField(
+                name='KU Number',
+                visual_region=BoxBounds(x=707, y=120, width=207, height=46)) # validator=NoExport)
         ),
         FormField(
-            text_field=TextField(name='OT Number', visual_region=BoxBounds(x=972, y=120, width=215, height=46)) # validator=NoExport)
-        ),
-
-        FormField(
-            text_field=TextField(name='Locality', visual_region=BoxBounds(x=249, y=183, width=992, height=39), allow_copy=True) # validator=Locality)
-        ),
-
-        FormField(
-            text_field=TextField(name='GPS Waypoint', visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True) # validator=GpsWaypoint)
-        ),
-        FormField(
-            text_field=TextField(name='Latitude', visual_region=BoxBounds(x=210, y=227, width=250, height=31)) # validator=GpsCoordinatePoint)
-        ),
-        FormField(
-            text_field=TextField(name='Longitude', visual_region=BoxBounds(x=511, y=225, width=253, height=33)) # validator=GpsCoordinatePoint)
-        ),
-        FormField(
-            text_field=TextField(name='Error', visual_region=BoxBounds(x=1120, y=225, width=108, height=33)) # validator=OptionalInteger)
+            text_field=TextField(
+                name='OT Number',
+                visual_region=BoxBounds(x=972, y=120, width=215, height=46)) # validator=NoExport)
         ),
 
         FormField(
-            text_field=TextField(name='Species', visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True) # validator=Species)
-        ),
-        FormField(
-            text_field=TextField(name='Coordinate Source', visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True) # validator=TextValidationBypass)
-        ),
-
-        FormField(
-            text_field=TextField(name='Collection Date', visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True) # validator=Date)
-        ),
-        FormField(
-            text_field=TextField(name='Collector', visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=True) # validator=Initials)
+            text_field=TextField(
+                name='Locality',
+                visual_region=BoxBounds(x=249, y=183, width=992, height=39),
+                allow_copy=True,
+                # validator=Locality,
+                text_exporter=TextExporter(export_field_name='locality_string'),
+            ),
         ),
 
         FormField(
-            text_field=TextField(name='Habitat', visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=True) # validator=Habitat)
+            text_field=TextField(
+                name='GPS Waypoint',
+                visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True) # validator=GpsWaypoint)
+        ),
+        FormField(
+            text_field=TextField(
+                name='Latitude',
+                visual_region=BoxBounds(x=210, y=227, width=250, height=31)) # validator=GpsCoordinatePoint)
+        ),
+        FormField(
+            text_field=TextField(
+                name='Longitude',
+                visual_region=BoxBounds(x=511, y=225, width=253, height=33)) # validator=GpsCoordinatePoint)
+        ),
+        FormField(
+            text_field=TextField(
+                name='Error',
+                visual_region=BoxBounds(x=1120, y=225, width=108, height=33)) # validator=OptionalInteger)
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Species',
+                visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True) # validator=Species)
+        ),
+        FormField(
+            text_field=TextField(
+                name='Coordinate Source',
+                visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True) # validator=TextValidationBypass)
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Collection Date',
+                visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True) # validator=Date)
+        ),
+        FormField(
+            text_field=TextField(
+                name='Collector',
+                visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=True) # validator=Initials)
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Habitat',
+                visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=True) # validator=Habitat)
         ),
 
         FormField(

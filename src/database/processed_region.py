@@ -13,6 +13,7 @@ class ProcessedRegion(MappedAsDataclass, OrmBase):
 
     local_id: Mapped[int]
     name: Mapped[str]
+    human_verified: Mapped[bool] = mapped_column(default=False, init=False)
 
     # Relationships
 

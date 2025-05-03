@@ -46,19 +46,19 @@ class RegionOcrResults(QWidget):
 
                 # Create the specific widget to display the field
                 if field.text_field is not None:
-                    logger.info(f'Adding text field: {field.text_field.name}')
+                    logger.debug(f'Adding text field: {field.text_field.name}')
                     field_widget = TextField(field.text_field)
 
                 elif field.multiline_text_field is not None:
-                    logger.info(f'Adding multi-line text field: {field.multiline_text_field.name}')
+                    logger.debug(f'Adding multi-line text field: {field.multiline_text_field.name}')
                     field_widget = MultilineTextField(field.multiline_text_field)
 
                 elif field.checkbox_field is not None:
-                    logger.info(f'Adding checkbox field: {field.checkbox_field.name}')
+                    logger.debug(f'Adding checkbox field: {field.checkbox_field.name}')
                     field_widget = CheckboxField(field.checkbox_field)
 
                 elif field.multi_checkbox_field is not None:
-                    logger.info(f'Adding multi checkbox field: {field.multi_checkbox_field.name}')
+                    logger.debug(f'Adding multi checkbox field: {field.multi_checkbox_field.name}')
                     field_widget = MultiCheckboxField(field.multi_checkbox_field)
 
                 else:

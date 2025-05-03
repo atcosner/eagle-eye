@@ -50,6 +50,7 @@ class ProcessingPipeline(QTabWidget):
             self.pre_processing.load_job(job)
             self.processing.load_job(job)
             self.result_check.load_job(job)
+            self.result_export.load_job(job)
 
             # Check if any of the input files have been pre-processed
             pre_process_results = [(input_file.pre_process_result is not None) for input_file in job.input_files]

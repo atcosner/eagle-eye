@@ -19,7 +19,8 @@ from src.util.validation import MultiCheckboxValidation
 
 def offset_object(item: object, y_offset: int) -> object | None:
     if isinstance(item, BoxBounds):
-        return item._replace(y=item.y + y_offset)
+        new_item = copy.copy(item)
+        return new_item._replace(y=item.y + y_offset)
     elif isinstance(item, list):
         return [offset_object(part, y_offset) for part in item if offset_object(part, y_offset) is not None]
     else:
@@ -28,9 +29,71 @@ def offset_object(item: object, y_offset: int) -> object | None:
 
 def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
     if field.text_field is not None:
-        new_bounds = copy.copy(field.text_field.visual_region)
-        new_field = TextField(name=field.text_field.name, visual_region=offset_object(new_bounds, y_offset))
+        new_exporter = None
+        if field.text_field.text_exporter is not None:
+            exporter = field.text_field.text_exporter
+            new_exporter = TextExporter(
+                no_export=exporter.no_export,
+                export_field_name=exporter.export_field_name,
+                prefix=exporter.prefix,
+                suffix=exporter.suffix,
+                strip_value=exporter.strip_value,
+            )
+
+        new_field = TextField(
+            name=field.text_field.name,
+            visual_region=offset_object(field.text_field.visual_region, y_offset),
+            checkbox_region=offset_object(field.text_field.checkbox_region, y_offset),
+            text_region=offset_object(field.text_field.text_region, y_offset),
+            checkbox_text=field.text_field.checkbox_text,
+            allow_copy=field.text_field.allow_copy,
+            text_exporter=new_exporter,
+        )
         return FormField(text_field=new_field)
+    elif field.multiline_text_field is not None:
+        new_exporter = None
+        if field.multiline_text_field.text_exporter is not None:
+            exporter = field.multiline_text_field.text_exporter
+            new_exporter = TextExporter(
+                no_export=exporter.no_export,
+                export_field_name=exporter.export_field_name,
+                prefix=exporter.prefix,
+                suffix=exporter.suffix,
+                strip_value=exporter.strip_value,
+            )
+
+        new_field = MultilineTextField(
+            name=field.multiline_text_field.name,
+            visual_region=offset_object(field.multiline_text_field.visual_region, y_offset),
+            line_regions=[offset_object(x, y_offset) for x in field.multiline_text_field.line_regions],
+            text_exporter=new_exporter,
+        )
+        return FormField(multiline_text_field=new_field)
+    elif field.checkbox_field is not None:
+        new_field = CheckboxField(
+            name=field.checkbox_field.name,
+            visual_region=offset_object(field.checkbox_field.visual_region, y_offset),
+            checkbox_region=offset_object(field.checkbox_field.checkbox_region, y_offset),
+        )
+        return FormField(checkbox_field=new_field)
+    elif field.multi_checkbox_field is not None:
+        checkboxes = []
+        for checkbox in field.multi_checkbox_field.checkboxes:
+            checkboxes.append(
+                MultiCheckboxOption(
+                    name=checkbox.name,
+                    region=offset_object(checkbox.region, y_offset),
+                    text_region=offset_object(checkbox.text_region, y_offset),
+                )
+            )
+
+        new_field = MultiCheckboxField(
+            name=field.multi_checkbox_field.name,
+            visual_region=offset_object(field.multi_checkbox_field.visual_region, y_offset),
+            validator=field.multi_checkbox_field.validator,
+            checkboxes=checkboxes,
+        )
+        return FormField(multi_checkbox_field=new_field)
     else:
         return None
 

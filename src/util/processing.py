@@ -90,7 +90,8 @@ def locate_linked_field(
             logger.error(f'Requested to link "{current_field.name}" but the reference form does not allow linking')
             return None
         case FormLinkingMethod.PREVIOUS_REGION:
-            pass
+            # TODO
+            return None
         case FormLinkingMethod.PREVIOUS_IDENTIFIER:
             assert identifier_field is not None
             # TODO

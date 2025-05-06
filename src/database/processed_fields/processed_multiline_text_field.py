@@ -18,6 +18,8 @@ class ProcessedMultilineTextField(MappedAsDataclass, OrmBase):
 
     text: Mapped[str]  # Text post any user corrections
     ocr_text: Mapped[str]  # Original OCR result
+    copied_from_linked: Mapped[bool | None]
+    from_controlled_language: Mapped[bool | None]
 
     # Relationships
 

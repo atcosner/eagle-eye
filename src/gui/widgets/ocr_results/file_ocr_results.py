@@ -35,6 +35,8 @@ class FileOcrResults(QWidget):
 
         with Session(DB_ENGINE) as session:
             input_file = session.get(InputFile, input_file) if isinstance(input_file, int) else input_file
+            if input_file.process_result is None:
+                return
 
             for region in input_file.process_result.regions.values():
                 region_results = RegionOcrResults()

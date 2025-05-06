@@ -1,9 +1,9 @@
 import cv2
 import logging
 import numpy as np
-from pathlib import Path
-
 import requests
+import shutil
+from pathlib import Path
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
@@ -28,6 +28,7 @@ from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus
+from src.util.types import FormLinkingMethod
 from src.util.validation import MultiCheckboxValidation
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,8 @@ class ProcessWorker(QObject):
             field: TextField,
             aligned_image: np.ndarray,
             roi_dest_path: Path,
+            linking_method: FormLinkingMethod,
+            identifier_field: ProcessedTextField | None = None,
     ) -> tuple[bool, ProcessedTextField]:
         # Snip and save off the ROI image
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
@@ -59,7 +62,7 @@ class ProcessWorker(QObject):
         ocr_region = field.text_region if field.text_region is not None else field.visual_region
 
         ocr_error = False
-        from_controlled_language = False
+        from_controlled_language = False if field.checkbox_region is not None else None
         if field.checkbox_region is not None and process_util.get_checked(aligned_image, field.checkbox_region):
             assert field.checkbox_text is not None
             self.log.info(f'Detected checked default option, using: {field.checkbox_text}')
@@ -77,9 +80,13 @@ class ProcessWorker(QObject):
         ocr_result = '' if ocr_error else ocr_result
 
         # Check if we should search for a linking field
-        copied_from_linked = False
+        copied_from_linked = False if field.allow_copy else None
         if field.allow_copy and process_util.should_copy_from_previous(ocr_result):
-            link_field = process_util.locate_linked_field()
+            link_field = process_util.locate_linked_field(
+                link_method=linking_method,
+                current_field=field,
+                identifier_field=identifier_field,
+            )
             if link_field is None:
                 self.log.warning(f'Failed to locate a field to link to')
             else:
@@ -131,6 +138,8 @@ class ProcessWorker(QObject):
             roi_path=roi_dest_path,
             text=ocr_result,
             ocr_text=ocr_result,
+            copied_from_linked=None,
+            from_controlled_language=None,
             multiline_text_field=field,
         )
         return ocr_error, field
@@ -233,6 +242,9 @@ class ProcessWorker(QObject):
 
             # Create a working directory to store our ROI snips
             processing_directory = LocalPaths.processing_directory(job.uuid, input_file.id)
+            if processing_directory.exists():
+                self.log.warning(f'Processing directory already exists: {processing_directory}')
+                shutil.rmtree(processing_directory)
             processing_directory.mkdir()
 
             # Establish a session to the Google API
@@ -243,7 +255,9 @@ class ProcessWorker(QObject):
 
             # Work through all regions in the reference form
             processing_error = False
+            identifier_field: ProcessedTextField | None = None
             for local_id, page_region in job.reference_form.regions.items():
+                self.log.info('-' * 15)
                 self.log.info(f'Processing region: "{page_region.name}" ({local_id})')
                 processed_region = ProcessedRegion(local_id=page_region.local_id, name=page_region.name)
 
@@ -259,7 +273,13 @@ class ProcessWorker(QObject):
                             field=field.text_field,
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
+                            linking_method=job.reference_form.linking_method,
+                            identifier_field=identifier_field,
                         )
+
+                        # Save off the identifier field for later linking use
+                        if field.identifier:
+                            identifier_field = result_field
 
                         processed_field.processing_error = had_error
                         processed_field.text_field = result_field

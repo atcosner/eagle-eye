@@ -65,7 +65,8 @@ class ResultExport(QWidget):
         self.moderate_mode_button.clicked.connect(self.handle_mode_clicked)
         self.full_mode_button.clicked.connect(self.handle_mode_clicked)
 
-        self.strict_mode_button.setChecked(True)
+        # TODO: This choice should be a user setting
+        self.full_mode_button.setChecked(True)
         self.handle_mode_clicked()
 
         self.export_button.pressed.connect(self.handle_export_results)
@@ -109,7 +110,12 @@ class ResultExport(QWidget):
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job) if isinstance(job, int) else job
 
-            path = Path.home() / f'{job.name}_export{self.get_file_filter()[0]}'
+            # Try and put the file on the desktop
+            home_path = Path.home()
+            if (home_path / 'Desktop').exists():
+                home_path = home_path / 'Desktop'
+
+            path = home_path / f'{job.name}_export{self.get_file_filter()[0]}'
             self.export_file_path.setText(str(path))
 
     def get_file_filter(self) -> tuple[str, str]:
@@ -118,6 +124,14 @@ class ResultExport(QWidget):
             return '.csv', 'Comma-Separated-Values (*.csv)'
         else:
             return '.xslx', 'Excel Workbook (*.xslx)'
+
+    def get_export_mode(self) -> ExportMode:
+        if self.strict_mode_button.isChecked():
+            return self.strict_mode_button.get_mode()
+        elif self.moderate_mode_button.isChecked():
+            return self.moderate_mode_button.get_mode()
+        else:
+            return self.full_mode_button.get_mode()
 
     @pyqtSlot(str)
     def handle_export_format_change(self, new_format: str) -> None:
@@ -139,14 +153,7 @@ class ResultExport(QWidget):
 
     @pyqtSlot()
     def handle_mode_clicked(self) -> None:
-        if self.strict_mode_button.isChecked():
-            mode = self.strict_mode_button.get_mode()
-        elif self.moderate_mode_button.isChecked():
-            mode = self.moderate_mode_button.get_mode()
-        else:
-            mode = self.full_mode_button.get_mode()
-
-        self.mode_explanation.setText(get_mode_explanation(mode))
+        self.mode_explanation.setText(get_mode_explanation(self.get_export_mode()))
 
     @pyqtSlot()
     def handle_export_results(self) -> None:
@@ -163,7 +170,7 @@ class ResultExport(QWidget):
         assert self._job_db_id, 'Cannot export without a job id'
         with Session(DB_ENGINE) as session:
             job = session.get(Job, self._job_db_id)
-            export_df = build_export_df(job)
+            export_df = build_export_df(self.get_export_mode(), job)
 
         # Export the dataframe in the requested format
         if 'csv' in self.export_formats.currentText():

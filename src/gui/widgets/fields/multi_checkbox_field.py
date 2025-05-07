@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QGridLayout, QCheckBox, QVBoxLayout, QWidget
 
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
+from src.util.validation import validation_result_image
 
 from .base import BaseField
 from .multi_checkbox_option import MultiCheckboxOption
@@ -18,7 +19,10 @@ class MultiCheckboxField(BaseField):
 
     def load_field(self, field: ProcessedMultiCheckboxField) -> None:
         super().load_field(field)
-        # TODO: Validation result
+
+        result_pixmap = validation_result_image(field.validation_result.result)
+        self.validation_result.setPixmap(result_pixmap)
+        self.validation_result.setToolTip(field.validation_result.explanation)
 
         # Create a checkbox for each option
         layout = QVBoxLayout()

@@ -1,7 +1,34 @@
 from enum import Enum
 
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPixmap
+
+from .resources import GENERIC_ICON_PATH
+
+VALIDATION_ICON_SIZE = QSize(30, 30)
+
 
 class MultiCheckboxValidation(Enum):
     NONE = 1
     REQUIRE_ONE = 2
-    OPTIONAL = 3
+    MAXIMUM_ONE = 3
+    OPTIONAL = 4
+
+
+def validation_result_image(result: bool | None) -> QPixmap:
+    match result:
+        case True:
+            icon_path = GENERIC_ICON_PATH / 'good.png'
+        case False:
+            icon_path = GENERIC_ICON_PATH / 'bad.png'
+        case None:
+            icon_path = GENERIC_ICON_PATH / 'bypass.png'
+        case _:
+            raise RuntimeError(f'Unhandled type: {type(result)}')
+
+    base_pixmap = QPixmap(str(icon_path))
+    return base_pixmap.scaled(
+        VALIDATION_ICON_SIZE,
+        aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+        transformMode=Qt.TransformationMode.SmoothTransformation,
+    )

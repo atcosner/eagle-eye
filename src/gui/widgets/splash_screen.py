@@ -19,7 +19,8 @@ class SplashScreen(QSplashScreen):
             main_icon.scaled(
                 600,
                 200,
-                Qt.AspectRatioMode.KeepAspectRatio,
+                aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
+                transformMode=Qt.TransformationMode.SmoothTransformation,
             )
         )
 

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from .processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from .. import OrmBase
+from ..validation_result import ValidationResult
 from ..util import DbPath
 
 
@@ -17,9 +18,9 @@ class ProcessedMultiCheckboxField(MappedAsDataclass, OrmBase):
     name: Mapped[str]
     roi_path: Mapped[Path] = mapped_column(DbPath)
 
-    validation_result: Mapped[bool] = mapped_column(nullable=True)
-
     # Relationships
+
+    validation_result: Mapped[ValidationResult] = relationship(back_populates="multi_checkbox_field")
 
     processed_field: Mapped["ProcessedField"] = relationship(init=False, back_populates="multi_checkbox_field")
     multi_checkbox_field: Mapped["MultiCheckboxField"] = relationship()

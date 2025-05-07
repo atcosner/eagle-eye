@@ -18,6 +18,6 @@ class BaseField(QWidget):
 
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:
         grid.addWidget(wrap_in_frame(self.field_name), row_idx, 0)
-        grid.addWidget(wrap_in_frame(self.validation_result), row_idx, 1)
+        grid.addWidget(wrap_in_frame(self.validation_result, center_horizontal=True), row_idx, 1)
         # Custom entry widget goes in column #2
         grid.addWidget(wrap_in_frame(self.roi_image), row_idx, 3)

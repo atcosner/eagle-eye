@@ -1,4 +1,5 @@
 import copy
+import shutil
 from pathlib import Path
 from sqlalchemy.orm import Session
 
@@ -97,37 +98,20 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
     else:
         return None
 
-    # replacements = {}
-    # for key, value in vars(field).items():
-    #     # Throw out callables and dunder functions
-    #     if callable(value) or key.startswith('__'):
-    #         continue
-    #
-    #     if isinstance(value, FormField):
-    #         # Recurse to replace the entire object
-    #         replacements[key] = create_field_with_offset(value, y_offset)
-    #     elif isinstance(value, list) and isinstance(value[0], MultiCheckboxOption):
-    #         # Recurse for collections of checkbox options
-    #         # TODO: Handle this automatically for potentially more things that are not lists of MultiCheckboxOption
-    #         replacements[key] = [create_field_with_offset(part, y_offset) for part in value]
-    #     else:
-    #         # Replacements that do not require recursion
-    #         if (new_value := offset_object(value, y_offset)) is not None:
-    #             replacements[key] = new_value
-    #         else:
-    #             replacements[key] = value
-    #
-    # # Deep copy the object and then perform replacements
-    # new_field = type(field)()
-    # for key, value in replacements.items():
-    #     setattr(new_field, key, value)
-    #
-    # return new_field
-
 
 if LocalPaths.database_file().exists():
     LocalPaths.database_file().unlink()
     OrmBase.metadata.create_all(DB_ENGINE)
+
+
+# Determine the location of the project directory
+file_path = Path(__file__)
+project_path = None
+for parent in file_path.parents:
+    if parent.name == 'eagle-eye-qt':
+        project_path = parent
+        break
+print(f'Project path: {project_path}')
 
 
 with Session(DB_ENGINE) as session:
@@ -475,3 +459,13 @@ with Session(DB_ENGINE) as session:
 
     session.add(new_form)
     session.commit()
+
+    # Copy the reference form into our working dir
+    if not new_form.path.exists():
+        reference_image = list(project_path.glob(f'**/{new_form.path.name}'))
+        assert reference_image, 'Failed to locate the reference image'
+        ref_image = reference_image[0]
+
+        print(f'Copying {ref_image} -> {new_form.path}')
+        new_form.path.parent.mkdir(exist_ok=True)
+        shutil.copy(ref_image, new_form.path)

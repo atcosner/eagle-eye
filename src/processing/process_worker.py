@@ -31,6 +31,8 @@ from src.util.status import FileStatus
 from src.util.types import FormLinkingMethod
 from src.util.validation import MultiCheckboxValidation
 
+from . import validation
+
 logger = logging.getLogger(__name__)
 
 
@@ -195,23 +197,11 @@ class ProcessWorker(QObject):
                 checked=checked,
                 text=optional_text,
                 ocr_text=optional_text,
+                multi_checkbox_option=checkbox,
             )
 
         # Validate the field
-        validation_result: bool | None = None
-        match field.validator:
-            case MultiCheckboxValidation.NONE:
-                validation_result = None
-            case MultiCheckboxValidation.REQUIRE_ONE:
-                # Ensure that at least one checkbox was checked
-                validation_result = any([option.checked for option in checkboxes.values()])
-            case MultiCheckboxValidation.OPTIONAL:
-                # Optional multi-checkboxes always pass validation
-                validation_result = True
-            case _:
-                self.log.error(f'Unknown validator: {field.validator.name}')
-                validation_result = None
-        self.log.info(f'Validation result ({field.validator.name}): {validation_result}')
+        validation_result = validation.validate_multi_checkbox_field(field, checkboxes)
 
         field = ProcessedMultiCheckboxField(
             name=field.name,

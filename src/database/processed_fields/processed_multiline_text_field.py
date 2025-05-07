@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from .. import OrmBase
 from ..util import DbPath
+from ..validation.validation_result import ValidationResult
 
 
 class ProcessedMultilineTextField(MappedAsDataclass, OrmBase):
@@ -22,6 +23,8 @@ class ProcessedMultilineTextField(MappedAsDataclass, OrmBase):
     from_controlled_language: Mapped[bool | None]
 
     # Relationships
+
+    validation_result: Mapped[ValidationResult] = relationship(back_populates="multiline_text_field")
 
     processed_field: Mapped["ProcessedField"] = relationship(init=False, back_populates="multiline_text_field")
     multiline_text_field: Mapped["MultilineTextField"] = relationship()

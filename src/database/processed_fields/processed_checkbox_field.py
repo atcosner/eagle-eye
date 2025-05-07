@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from .. import OrmBase
 from ..util import DbPath
+from ..validation.validation_result import ValidationResult
 
 
 class ProcessedCheckboxField(MappedAsDataclass, OrmBase):
@@ -19,6 +20,8 @@ class ProcessedCheckboxField(MappedAsDataclass, OrmBase):
     checked: Mapped[bool]
 
     # Relationships
+
+    validation_result: Mapped[ValidationResult] = relationship(back_populates="checkbox_field")
 
     processed_field: Mapped["ProcessedField"] = relationship(init=False, back_populates="checkbox_field")
     checkbox_field: Mapped["CheckboxField"] = relationship()

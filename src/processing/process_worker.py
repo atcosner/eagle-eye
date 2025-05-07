@@ -24,12 +24,12 @@ from src.database.processed_fields.processed_multi_checkbox_option import Proces
 from src.database.processed_fields.processed_multiline_text_field import ProcessedMultilineTextField
 from src.database.processed_fields.processed_text_field import ProcessedTextField
 from src.database.processed_region import ProcessedRegion
+from src.database.validation.validation_result import ValidationResult
 from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus
 from src.util.types import FormLinkingMethod
-from src.util.validation import MultiCheckboxValidation
 
 from . import validation
 
@@ -96,6 +96,10 @@ class ProcessWorker(QObject):
                 copied_from_linked = True
                 ocr_result = link_field.text
 
+        # Validate the field
+        validation_result = validation.validate_text_field(field, ocr_result)
+        self.log.info(f'Validation: {validation_result.result}')
+
         field = ProcessedTextField(
             name=field.name,
             roi_path=roi_dest_path,
@@ -103,6 +107,7 @@ class ProcessWorker(QObject):
             ocr_text=ocr_result,
             copied_from_linked=copied_from_linked,
             from_controlled_language=from_controlled_language,
+            validation_result=validation_result,
             text_field=field,
         )
         return ocr_error, field
@@ -135,6 +140,10 @@ class ProcessWorker(QObject):
         # OCR result should not be None even if we had an error
         ocr_result = '' if ocr_error else ocr_result
 
+        # Validate the field
+        validation_result = validation.validate_multiline_text_field(field, ocr_result)
+        self.log.info(f'Validation: {validation_result.result}')
+
         field = ProcessedMultilineTextField(
             name=field.name,
             roi_path=roi_dest_path,
@@ -142,6 +151,7 @@ class ProcessWorker(QObject):
             ocr_text=ocr_result,
             copied_from_linked=None,
             from_controlled_language=None,
+            validation_result=validation_result,
             multiline_text_field=field,
         )
         return ocr_error, field
@@ -160,6 +170,7 @@ class ProcessWorker(QObject):
             roi_path=roi_dest_path,
             checked=checked,
             checkbox_field=field,
+            validation_result=ValidationResult(result=None, explanation=None),
         )
         return False, field
 
@@ -186,8 +197,6 @@ class ProcessWorker(QObject):
                     optional_text = ocr_text_region(session, aligned_image, checkbox.text_region, add_border=True)
                     ocr_error = optional_text is None
                     self.log.info(f'OCR returned: "{optional_text}"')
-
-                    # TODO: What if we did an OCR, but the checkbox was not checked?
                 else:
                     self.log.info(f'Detected mostly white image, skipping OCR')
                     optional_text = ''
@@ -202,6 +211,7 @@ class ProcessWorker(QObject):
 
         # Validate the field
         validation_result = validation.validate_multi_checkbox_field(field, checkboxes)
+        self.log.info(f'Validation: {validation_result.result}')
 
         field = ProcessedMultiCheckboxField(
             name=field.name,

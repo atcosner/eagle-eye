@@ -15,6 +15,24 @@ class MultiCheckboxValidation(Enum):
     OPTIONAL = 4
 
 
+class TextValidatorDatatype(Enum):
+    # Builtin validation datatypes
+
+    RAW_TEXT = 1
+    DATE = 2
+    TIME = 3
+    INTEGER = 4
+    INTEGER_OR_FLOAT = 5
+    LIST_CHOICE = 6
+    CSV_OF_CHOICE = 7
+    GPS_POINT_DD = 8
+
+    # Add custom validation datatypes below
+    # DO NOT CHANGE ANY OF THE NUMBERS ABOVE THIS LINE!!
+
+    KU_GPS_WAYPOINT = 9
+
+
 def validation_result_image(result: bool | None) -> QPixmap:
     match result:
         case True:

@@ -1,7 +1,11 @@
-from PyQt6.QtWidgets import QGridLayout, QCheckBox, QVBoxLayout, QWidget
+from sqlalchemy.orm import Session
 
+from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtWidgets import QGridLayout, QVBoxLayout, QWidget
+
+import src.processing.validation as validation
+from src.database import DB_ENGINE
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
-from src.util.validation import validation_result_image
 
 from .base import BaseField
 from .multi_checkbox_option import MultiCheckboxOption
@@ -19,15 +23,14 @@ class MultiCheckboxField(BaseField):
 
     def load_field(self, field: ProcessedMultiCheckboxField) -> None:
         super().load_field(field)
-
-        result_pixmap = validation_result_image(field.validation_result.result)
-        self.validation_result.setPixmap(result_pixmap)
-        self.validation_result.setToolTip(field.validation_result.explanation)
+        self.update_validation_result(field.validation_result)
 
         # Create a checkbox for each option
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         for name, option in field.checkboxes.items():
             cb = MultiCheckboxOption(option)
+            cb.dataChanged.connect(self.handle_data_changed)
             self.options.append(cb)
 
             layout.addWidget(cb)
@@ -37,3 +40,21 @@ class MultiCheckboxField(BaseField):
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:
         super().add_to_grid(row_idx, grid)
         grid.addWidget(wrap_in_frame(self.container), row_idx, 2)
+
+    @pyqtSlot()
+    def handle_data_changed(self) -> None:
+        # TODO: If DB access is not incredibly fast this probably updates it too much
+
+        with Session(DB_ENGINE) as session:
+            field = session.get(ProcessedMultiCheckboxField, self._field_db_id)
+
+            for option in self.options:
+                option.update_db_state(session)
+
+            field.validation_result = validation.validate_multi_checkbox_field(
+                field.multi_checkbox_field,
+                field.checkboxes,
+            )
+            self.update_validation_result(field.validation_result)
+
+            session.commit()

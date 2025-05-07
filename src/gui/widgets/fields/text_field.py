@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QLineEdit, QGridLayout
 
 from src.database.processed_fields.processed_text_field import ProcessedTextField
+from src.util.validation import validation_result_image
 
 from .base import BaseField
 from .util import wrap_in_frame
@@ -17,8 +18,11 @@ class TextField(BaseField):
 
     def load_field(self, field: ProcessedTextField) -> None:
         super().load_field(field)
-        # TODO: Validation result
         self.text_input.setText(field.text)
+
+        result_pixmap = validation_result_image(field.validation_result.result)
+        self.validation_result.setPixmap(result_pixmap)
+        self.validation_result.setToolTip(field.validation_result.explanation)
 
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:
         super().add_to_grid(row_idx, grid)

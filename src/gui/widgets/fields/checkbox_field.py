@@ -15,7 +15,6 @@ class CheckboxField(BaseField):
 
     def load_field(self, field: ProcessedCheckboxField) -> None:
         super().load_field(field)
-        # TODO: Validation result
         self.checkbox.setChecked(field.checked)
 
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:

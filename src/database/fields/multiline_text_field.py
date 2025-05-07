@@ -6,6 +6,7 @@ from src.util.types import BoxBounds
 from .. import OrmBase
 from ..exporters.text_exporter import TextExporter
 from ..util import DbBoxBounds
+from ..validation.text_validator import TextValidator
 
 
 class MultilineTextField(MappedAsDataclass, OrmBase):
@@ -20,6 +21,7 @@ class MultilineTextField(MappedAsDataclass, OrmBase):
     # Relationships
 
     text_exporter: Mapped[TextExporter] = relationship(default=None, back_populates="multiline_text_field")
+    text_validator: Mapped[TextValidator] = relationship(default=None, back_populates="multiline_text_field")
 
     form_field_id: Mapped[int] = mapped_column(ForeignKey("form_field.id"), init=False)
     form_field: Mapped["FormField"] = relationship(init=False, back_populates="multiline_text_field")

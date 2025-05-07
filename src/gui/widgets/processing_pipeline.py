@@ -35,11 +35,17 @@ class ProcessingPipeline(QTabWidget):
         self.addTab(self.result_export, 'Step 5 - Export')
 
         self._connect_signals()
+        self._initial_state()
 
     def _connect_signals(self) -> None:
         self.picker.filesConfirmed.connect(self.confirm_input_files)
         self.pre_processing.continueToNextStep.connect(self.pre_processing_done)
         self.processing.continueToNextStep.connect(self.processing_done)
+
+    def _initial_state(self) -> None:
+        # Disable tab 4 and 5 until we have completed OCR processing
+        self.setTabEnabled(3, False)
+        self.setTabEnabled(4, False)
 
     def load_job(self, job_id: int) -> None:
         with Session(DB_ENGINE) as session:
@@ -83,6 +89,10 @@ class ProcessingPipeline(QTabWidget):
 
     def gui_move_to_result_check(self) -> None:
         self.processing.set_view_only(True)
+
+        # Enable the tabs for step 4 and 5
+        self.setTabEnabled(3, True)
+        self.setTabEnabled(4, True)
 
         # Set the check results tab to have focus
         self.setCurrentIndex(3)

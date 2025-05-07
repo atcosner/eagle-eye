@@ -13,9 +13,11 @@ from src.database.fields.multiline_text_field import MultilineTextField
 from src.database.fields.text_field import TextField
 from src.database.form_region import FormRegion
 from src.database.reference_form import ReferenceForm
+from src.database.validation.text_choice import TextChoice
+from src.database.validation.text_validator import TextValidator
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds, FormLinkingMethod
-from src.util.validation import MultiCheckboxValidation
+from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype
 
 
 def offset_object(item: object, y_offset: int) -> object | None:
@@ -41,6 +43,18 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
                 strip_value=exporter.strip_value,
             )
 
+        new_validator = None
+        if field.text_field.text_validator is not None:
+            validator = field.text_field.text_validator
+            new_validator = TextValidator(
+                datatype=validator.datatype,
+                text_required=validator.text_required,
+                text_regex=validator.text_regex,
+                reformat_regex=validator.reformat_regex,
+                error_tooltip=validator.error_tooltip,
+                text_choices=[TextChoice(c.choice) for c in validator.text_choices],
+            )
+
         new_field = TextField(
             name=field.text_field.name,
             visual_region=offset_object(field.text_field.visual_region, y_offset),
@@ -49,6 +63,7 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
             checkbox_text=field.text_field.checkbox_text,
             allow_copy=field.text_field.allow_copy,
             text_exporter=new_exporter,
+            text_validator=new_validator,
         )
         return FormField(text_field=new_field)
     elif field.multiline_text_field is not None:
@@ -63,11 +78,24 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
                 strip_value=exporter.strip_value,
             )
 
+        new_validator = None
+        if field.multiline_text_field.text_validator is not None:
+            validator = field.multiline_text_field.text_validator
+            new_validator = TextValidator(
+                datatype=validator.datatype,
+                text_required=validator.text_required,
+                text_regex=validator.text_regex,
+                reformat_regex=validator.reformat_regex,
+                error_tooltip=validator.error_tooltip,
+                text_choices=[TextChoice(c.choice) for c in validator.text_choices],
+            )
+
         new_field = MultilineTextField(
             name=field.multiline_text_field.name,
             visual_region=offset_object(field.multiline_text_field.visual_region, y_offset),
             line_regions=[offset_object(x, y_offset) for x in field.multiline_text_field.line_regions],
             text_exporter=new_exporter,
+            text_validator=new_validator,
         )
         return FormField(multiline_text_field=new_field)
     elif field.checkbox_field is not None:
@@ -131,25 +159,36 @@ with Session(DB_ENGINE) as session:
                 name='KT Number',
                 visual_region=BoxBounds(x=248, y=120, width=120, height=44),
                 text_exporter=TextExporter(prefix='KT_'),
+                text_validator=TextValidator(
+                    text_regex=r'^[0-9]{5}$',
+                    error_tooltip='KT Numbers must be exactly 5 digits',
+                ),
             ),
         ),
 
         FormField(
             text_field=TextField(
                 name='Prep Number',
-                visual_region=BoxBounds(x=441, y=120, width=207, height=46)
-                # validator=PrepNumber)
+                visual_region=BoxBounds(x=441, y=120, width=207, height=46),
+                text_validator=TextValidator(
+                    text_regex=r'^[A-Z]{2,4} [0-9]{3,5}$',
+                    error_tooltip='Prep Number must be 2-4 capital letters followed by a number with 3-5 digits',
+                ),
             ),
         ),
         FormField(
             text_field=TextField(
                 name='KU Number',
-                visual_region=BoxBounds(x=707, y=120, width=207, height=46)) # validator=NoExport)
+                visual_region=BoxBounds(x=707, y=120, width=207, height=46),
+                text_exporter=TextExporter(no_export=True),
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='OT Number',
-                visual_region=BoxBounds(x=972, y=120, width=215, height=46)) # validator=NoExport)
+                visual_region=BoxBounds(x=972, y=120, width=215, height=46),
+                text_exporter=TextExporter(no_export=True),
+            ),
         ),
 
         FormField(
@@ -157,58 +196,109 @@ with Session(DB_ENGINE) as session:
                 name='Locality',
                 visual_region=BoxBounds(x=249, y=183, width=992, height=39),
                 allow_copy=True,
-                # validator=Locality,
                 text_exporter=TextExporter(export_field_name='locality_string'),
+                # This is not using a custom datatype to text the regex functionality
+                # - Something complicated like this should probably be a custom datatype
+                text_validator=TextValidator(
+                    text_regex=(
+                        r"^(?P<state>[a-zA-Z-]{2,}(?:[ ,-]+[a-zA-Z-]{2,})*)"
+                        r" ?: ?(?P<county>[a-zA-Z-]{2,}(?:[ ,-]+[a-zA-Z-]{2,})*)"
+                        r" ?: ?(?P<location>[a-zA-Z-]{2,}(?:[ ,-]+[a-zA-Z-]{2,})*)$"
+                    ),
+                    reformat_regex='{state} : {county} : {location}',
+                    error_tooltip='Locality must be in the format: [STATE] : [COUNTY] : [PLACE]',
+                ),
             ),
         ),
 
         FormField(
             text_field=TextField(
                 name='GPS Waypoint',
-                visual_region=BoxBounds(x=860, y=224, width=164, height=34), allow_copy=True) # validator=GpsWaypoint)
+                visual_region=BoxBounds(x=860, y=224, width=164, height=34),
+                allow_copy=True,
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.KU_GPS_WAYPOINT,
+                    text_required=False,
+                ),
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='Latitude',
-                visual_region=BoxBounds(x=210, y=227, width=250, height=31)) # validator=GpsCoordinatePoint)
+                visual_region=BoxBounds(x=210, y=227, width=250, height=31),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.GPS_POINT_DD,
+                    text_required=False,
+                ),
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='Longitude',
-                visual_region=BoxBounds(x=511, y=225, width=253, height=33)) # validator=GpsCoordinatePoint)
+                visual_region=BoxBounds(x=511, y=225, width=253, height=33),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.GPS_POINT_DD,
+                    text_required=False,
+                ),
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='Error',
-                visual_region=BoxBounds(x=1120, y=225, width=108, height=33)) # validator=OptionalInteger)
+                visual_region=BoxBounds(x=1120, y=225, width=108, height=33),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.INTEGER,
+                    text_required=False,
+                ),
+            ),
         ),
 
         FormField(
             text_field=TextField(
                 name='Species',
-                visual_region=BoxBounds(x=253, y=262, width=594, height=33), allow_copy=True) # validator=Species)
+                visual_region=BoxBounds(x=253, y=262, width=594, height=33),
+                allow_copy=True,
+                # TODO: Validator
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='Coordinate Source',
-                visual_region=BoxBounds(x=997, y=262, width=235, height=33), allow_copy=True) # validator=TextValidationBypass)
+                visual_region=BoxBounds(x=997, y=262, width=235, height=33),
+                allow_copy=True,
+            ),
         ),
 
         FormField(
             text_field=TextField(
                 name='Collection Date',
-                visual_region=BoxBounds(x=274, y=300, width=411, height=32), allow_copy=True) # validator=Date)
+                visual_region=BoxBounds(x=274, y=300, width=411, height=32),
+                allow_copy=True,
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.DATE,
+                ),
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='Collector',
-                visual_region=BoxBounds(x=790, y=299, width=435, height=33), allow_copy=True) # validator=Initials)
+                visual_region=BoxBounds(x=790, y=299, width=435, height=33),
+                allow_copy=True,
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.RAW_TEXT,
+                    text_regex=r'^[A-Z]{2,4}$',
+                    error_tooltip='Initials should be two to four capital letters',
+                ),
+            ),
         ),
 
         FormField(
             text_field=TextField(
                 name='Habitat',
-                visual_region=BoxBounds(x=217, y=336, width=1012, height=32), allow_copy=True) # validator=Habitat)
+                visual_region=BoxBounds(x=217, y=336, width=1012, height=32),
+                allow_copy=True,
+                text_validator=TextValidator(),
+            ),
         ),
 
         FormField(
@@ -239,17 +329,32 @@ with Session(DB_ENGINE) as session:
                 text_region=BoxBounds(x=287, y=411, width=247, height=32),
                 checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
                 checkbox_text='dark brown',
+                text_validator=TextValidator(),
             )
         ),
         FormField(
-            text_field=TextField(name='Bill', visual_region=BoxBounds(x=577, y=412, width=648, height=31), allow_copy=True) # validator=TextValidationBypass)
+            text_field=TextField(
+                name='Bill',
+                visual_region=BoxBounds(x=577, y=412, width=648, height=31),
+                allow_copy=True,
+            ),
         ),
 
         FormField(
-            text_field=TextField(name='Feet/Legs', visual_region=BoxBounds(x=242, y=450, width=726, height=30), allow_copy=True) # validator=TextValidationBypass)
+            text_field=TextField(
+                name='Feet/Legs',
+                visual_region=BoxBounds(x=242, y=450, width=726, height=30),
+                allow_copy=True,
+            ),
         ),
         FormField(
-            text_field=TextField(name='Weight', visual_region=BoxBounds(x=1035, y=447, width=190, height=33)) # , validator=IntegerOrFloat)
+            text_field=TextField(
+                name='Weight',
+                visual_region=BoxBounds(x=1035, y=447, width=190, height=33),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.INTEGER_OR_FLOAT,
+                ),
+            ),
         ),
 
         FormField(
@@ -264,24 +369,52 @@ with Session(DB_ENGINE) as session:
             )
         ),
         FormField(
-            text_field=TextField(name='Time of Death', visual_region=BoxBounds(x=637, y=484, width=161, height=33)) #, validator=Time)
+            text_field=TextField(
+                name='Time of Death',
+                visual_region=BoxBounds(x=637, y=484, width=161, height=33),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.TIME,
+                ),
+            ),
         ),
         FormField(
             text_field=TextField(
                 name='Time of Tissue Preservation',
                 visual_region=BoxBounds(x=797, y=485, width=423, height=40),
-                # validator=TimeOrUnknown,
                 text_region=BoxBounds(x=988, y=486, width=154, height=31),
                 checkbox_region=BoxBounds(x=1150, y=498, width=13, height=13),
                 checkbox_text='unknown',
+                # TODO: Should text with a checkbox be handled differently?
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.TIME,
+                    text_required=False,
+                ),
             )
         ),
 
         FormField(
-            text_field=TextField(name='Tissues', visual_region=BoxBounds(x=251, y=520, width=147, height=35)) #, validator=Tissues)
+            text_field=TextField(
+                name='Tissues',
+                visual_region=BoxBounds(x=251, y=520, width=147, height=35),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.CSV_OF_CHOICE,
+                    text_choices=[
+                        TextChoice(choice='M'),
+                        TextChoice(choice='L'),
+                        TextChoice(choice='G'),
+                        TextChoice(choice='H'),
+                    ],
+                ),
+            ),
         ),
         FormField(
-            text_field=TextField(name='No. Tubes', visual_region=BoxBounds(x=509, y=523, width=56, height=32)) #, validator=Integer)
+            text_field=TextField(
+                name='No. Tubes',
+                visual_region=BoxBounds(x=509, y=523, width=56, height=32),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.INTEGER,
+                ),
+            ),
         ),
         FormField(
             multi_checkbox_field=MultiCheckboxField(
@@ -303,10 +436,24 @@ with Session(DB_ENGINE) as session:
         ),
 
         FormField(
-            text_field=TextField(name='Prep Date', visual_region=BoxBounds(x=279, y=560, width=378, height=32)) #, validator=Date)
+            text_field=TextField(
+                name='Prep Date',
+                visual_region=BoxBounds(x=279, y=560, width=378, height=32),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.DATE,
+                ),
+            ),
         ),
         FormField(
-            text_field=TextField(name='Preparator', visual_region=BoxBounds(x=776, y=562, width=451, height=30)) #, validator=Initials)
+            text_field=TextField(
+                name='Preparator',
+                visual_region=BoxBounds(x=776, y=562, width=451, height=30),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.RAW_TEXT,
+                    text_regex=r'^[A-Z]{2,4}$',
+                    error_tooltip='Initials should be two to four capital letters',
+                ),
+            ),
         ),
 
         FormField(
@@ -330,15 +477,27 @@ with Session(DB_ENGINE) as session:
         ),
 
         FormField(
-            text_field=TextField(name='Molt', visual_region=BoxBounds(x=220, y=634, width=1004, height=32)) # validator=TextRequired)
+            text_field=TextField(
+                name='Molt',
+                visual_region=BoxBounds(x=220, y=634, width=1004, height=32),
+                text_validator=TextValidator(),
+            ),
         ),
 
         FormField(
-            text_field=TextField(name='Gonads', visual_region=BoxBounds(x=255, y=671, width=967, height=31)) # validator=TextRequired)
+            text_field=TextField(
+                name='Gonads',
+                visual_region=BoxBounds(x=255, y=671, width=967, height=31),
+                text_validator=TextValidator(),
+            ),
         ),
 
         FormField(
-            text_field=TextField(name='Skull', visual_region=BoxBounds(x=222, y=706, width=257, height=34)) # validator=TextRequired)
+            text_field=TextField(
+                name='Skull',
+                visual_region=BoxBounds(x=222, y=706, width=257, height=34),
+                text_validator=TextValidator(),
+            ),
         ),
         FormField(
             multi_checkbox_field=MultiCheckboxField(
@@ -355,11 +514,19 @@ with Session(DB_ENGINE) as session:
             )
         ),
         FormField(
-            text_field=TextField(name='Bursa', visual_region=BoxBounds(x=980, y=709, width=243, height=31),) # validator=TextRequired)
+            text_field=TextField(
+                name='Bursa',
+                visual_region=BoxBounds(x=980, y=709, width=243, height=31),
+                text_validator=TextValidator(),
+            ),
         ),
 
         FormField(
-            text_field=TextField(name='Stomach', visual_region=BoxBounds(x=232, y=745, width=992, height=32)) # validator=TextRequired)
+            text_field=TextField(
+                name='Stomach',
+                visual_region=BoxBounds(x=232, y=745, width=992, height=32),
+                text_validator=TextValidator(),
+            ),
         ),
 
         FormField(
@@ -375,7 +542,11 @@ with Session(DB_ENGINE) as session:
             )
         ),
         FormField(
-            text_field=TextField(name='Age', visual_region=BoxBounds(x=579, y=783, width=315, height=31)) # validator=TextRequired)
+            text_field=TextField(
+                name='Age',
+                visual_region=BoxBounds(x=579, y=783, width=315, height=31),
+                text_validator=TextValidator(),
+            ),
         ),
         FormField(
             multi_checkbox_field=MultiCheckboxField(
@@ -393,7 +564,6 @@ with Session(DB_ENGINE) as session:
             multiline_text_field=MultilineTextField(
                 name='Remarks',
                 visual_region=BoxBounds(x=160, y=824, width=1067, height=73),
-                # validator=TextValidationBypass,
                 line_regions=[
                     BoxBounds(x=265, y=816, width=962, height=35),
                     BoxBounds(x=162, y=856, width=937, height=32),

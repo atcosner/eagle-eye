@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from .. import OrmBase
 from ..util import DbPath
+from ..validation.validation_result import ValidationResult
 
 
 class ProcessedTextField(MappedAsDataclass, OrmBase):
@@ -22,6 +23,8 @@ class ProcessedTextField(MappedAsDataclass, OrmBase):
     from_controlled_language: Mapped[bool | None]
 
     # Relationships
+
+    validation_result: Mapped[ValidationResult] = relationship(back_populates="text_field")
 
     processed_field: Mapped["ProcessedField"] = relationship(init=False, back_populates="text_field")
     text_field: Mapped["TextField"] = relationship()

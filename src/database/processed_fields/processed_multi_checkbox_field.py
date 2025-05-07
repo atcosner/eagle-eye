@@ -4,8 +4,8 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from .processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from .. import OrmBase
-from ..validation_result import ValidationResult
 from ..util import DbPath
+from ..validation.validation_result import ValidationResult
 
 
 class ProcessedMultiCheckboxField(MappedAsDataclass, OrmBase):

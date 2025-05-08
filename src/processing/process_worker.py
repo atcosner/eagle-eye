@@ -141,7 +141,7 @@ class ProcessWorker(QObject):
         ocr_result = '' if ocr_error else ocr_result
 
         # Validate the field
-        validation_result = validation.validate_multiline_text_field(field, ocr_result)
+        validation_result = validation.validate_text_field(field, ocr_result)
         self.log.info(f'Validation: {validation_result.result}')
 
         field = ProcessedMultilineTextField(

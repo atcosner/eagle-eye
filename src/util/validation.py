@@ -1,3 +1,4 @@
+import itertools
 from enum import Enum
 
 from PyQt6.QtCore import Qt, QSize
@@ -6,6 +7,16 @@ from PyQt6.QtGui import QPixmap
 from .resources import GENERIC_ICON_PATH
 
 VALIDATION_ICON_SIZE = QSize(30, 30)
+VALID_TIME_FORMATS = ('h:mm', 'hh:mm')
+VALID_DATE_FORMATS = [
+    ' '.join(x) for x in itertools.product(
+        *[
+            ('d', 'dd'),
+            ('MMM', 'MMMM'),
+            ('yy', 'yyyy')
+        ]
+    )
+]
 
 
 class MultiCheckboxValidation(Enum):

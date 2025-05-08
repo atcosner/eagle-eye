@@ -52,7 +52,7 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
                 text_regex=validator.text_regex,
                 reformat_regex=validator.reformat_regex,
                 error_tooltip=validator.error_tooltip,
-                text_choices=[TextChoice(c.choice) for c in validator.text_choices],
+                text_choices=[TextChoice(c.text) for c in validator.text_choices],
             )
 
         new_field = TextField(
@@ -399,10 +399,10 @@ with Session(DB_ENGINE) as session:
                 text_validator=TextValidator(
                     datatype=TextValidatorDatatype.CSV_OF_CHOICE,
                     text_choices=[
-                        TextChoice(choice='M'),
-                        TextChoice(choice='L'),
-                        TextChoice(choice='G'),
-                        TextChoice(choice='H'),
+                        TextChoice(text='M'),
+                        TextChoice(text='L'),
+                        TextChoice(text='G'),
+                        TextChoice(text='H'),
                     ],
                 ),
             ),

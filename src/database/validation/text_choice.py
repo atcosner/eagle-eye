@@ -8,7 +8,7 @@ class TextChoice(MappedAsDataclass, OrmBase):
     __tablename__ = "text_choice"
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
 
-    choice: Mapped[str]
+    text: Mapped[str]
 
     # Relationships
 

@@ -1,13 +1,16 @@
 import logging
+import re
+from typing import Iterable
+
+from PyQt6.QtCore import QDate, QTime
 
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.multiline_text_field import MultilineTextField
 from src.database.fields.text_field import TextField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
-from src.database.processed_fields.processed_multiline_text_field import ProcessedMultilineTextField
-from src.database.processed_fields.processed_text_field import ProcessedTextField
+from src.database.validation.text_validator import TextValidator
 from src.database.validation.validation_result import ValidationResult
-from src.util.validation import MultiCheckboxValidation
+from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype, VALID_TIME_FORMATS, VALID_DATE_FORMATS
 
 logger = logging.getLogger(__name__)
 
@@ -56,21 +59,136 @@ def validate_multi_checkbox_field(
     )
 
 
+def get_explanation(validator: TextValidator, reason: str) -> str:
+    return reason if validator.error_tooltip is None else validator.error_tooltip
+
+
+def check_conversion_from_string(obj: type[QTime | QDate], formats: Iterable[str], text: str) -> bool:
+    match_found = False
+    for str_format in formats:
+        time = obj.fromString(text, str_format)
+        if time.isValid():
+            match_found = True
+            break
+
+    return match_found
+
+
 def validate_text_field(
-        raw_field: TextField,
+        raw_field: TextField | MultilineTextField,
         text: str,
+        force_fail: bool = False,
 ) -> ValidationResult:
-    return ValidationResult(
-        result=None,
-        explanation=None,
-    )
+    validator = raw_field.text_validator
+    if validator is None:
+        return ValidationResult(result=None, explanation=None)
 
+    if force_fail:
+        return ValidationResult(
+            result=False,
+            explanation='Data was in an invalid format',
+        )
 
-def validate_multiline_text_field(
-        raw_field: MultilineTextField,
-        text: str,
-) -> ValidationResult:
-    return ValidationResult(
-        result=None,
-        explanation=None,
-    )
+    if validator.text_required and not text:
+        return ValidationResult(
+            result=False,
+            explanation='Field cannot be blank',
+        )
+
+    # Validate each different type of data separately
+    text = text.strip()
+    if validator.datatype is TextValidatorDatatype.RAW_TEXT:
+        if validator.text_regex is not None:
+            if re.compile(validator.text_regex).match(text) is not None:
+                return ValidationResult(result=True, explanation=None)
+            else:
+                return ValidationResult(
+                    result=False,
+                    explanation=f'Text did not match the regular expression: {validator.text_regex}',
+                )
+        else:
+            return ValidationResult(result=None, explanation=None)
+
+    elif validator.datatype is TextValidatorDatatype.DATE:
+        if check_conversion_from_string(QDate, VALID_DATE_FORMATS, text):
+            return ValidationResult(result=True, explanation=None)
+        else:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(validator, 'Field could not be interpreted as a date'),
+            )
+
+    elif validator.datatype is TextValidatorDatatype.TIME:
+        if check_conversion_from_string(QTime, VALID_TIME_FORMATS, text):
+            return ValidationResult(result=True, explanation=None)
+        else:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(validator, 'Field could not be interpreted as a time'),
+            )
+
+    elif validator.datatype is TextValidatorDatatype.INTEGER:
+        try:
+            int(text)
+            return ValidationResult(result=True, explanation=None)
+        except ValueError:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(validator, 'Field must be an integer'),
+            )
+
+    elif validator.datatype is TextValidatorDatatype.INTEGER_OR_FLOAT:
+        try:
+            int(text)
+            return ValidationResult(result=True, explanation=None)
+        except ValueError:
+            try:
+                float(text)
+                return ValidationResult(result=True, explanation=None)
+            except ValueError:
+                return ValidationResult(
+                    result=False,
+                    explanation=get_explanation(validator, 'Field must be an integer or a float'),
+                )
+
+    elif validator.datatype is TextValidatorDatatype.LIST_CHOICE:
+        possible_choices = [x.text for x in validator.text_choices]
+        if text in possible_choices:
+            return ValidationResult(result=True, explanation=None)
+        else:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(validator, f'Value "{text}" not in the possible choices'),
+            )
+
+    elif validator.datatype is TextValidatorDatatype.CSV_OF_CHOICE:
+        possible_choices = [x.text for x in validator.text_choices]
+        entries = text.split(',')
+        for entry in entries:
+            if entry.split() not in possible_choices:
+                return ValidationResult(
+                    result=False,
+                    explanation=get_explanation(validator, f'Value "{entry}" not in the possible choices'),
+                )
+
+        return ValidationResult(result=True, explanation=None)
+
+    elif validator.datatype is TextValidatorDatatype.GPS_POINT_DD:
+        if re.compile(r'^[+-]?\d{1,3}.\d{4,8}$').match(text) is not None:
+            return ValidationResult(result=True, explanation=None)
+        else:
+            return ValidationResult(
+                result=False,
+                explanation='GPS points must be in decimal degrees format (Min 4 decimal places)',
+            )
+
+    elif validator.datatype is TextValidatorDatatype.KU_GPS_WAYPOINT:
+        if re.compile(r'^[a-zA-Z0-9]{4,}$').match(text) is not None:
+            return ValidationResult(result=True, explanation=None)
+        else:
+            return ValidationResult(
+                result=False,
+                explanation='GPS waypoints must be a string of letters and then numbers',
+            )
+
+    return ValidationResult(result=None, explanation=None)

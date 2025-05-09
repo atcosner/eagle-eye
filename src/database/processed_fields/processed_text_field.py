@@ -19,8 +19,11 @@ class ProcessedTextField(MappedAsDataclass, OrmBase):
 
     text: Mapped[str]  # Text post any user corrections
     ocr_text: Mapped[str]  # Original OCR result
-    copied_from_linked: Mapped[bool | None]
     from_controlled_language: Mapped[bool | None]
+
+    # Linking
+    copied_from_linked: Mapped[bool | None]
+    linked_field_id: Mapped[int | None]
 
     # Relationships
 

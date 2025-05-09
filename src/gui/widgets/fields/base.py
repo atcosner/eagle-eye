@@ -1,3 +1,5 @@
+import abc
+
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QLabel, QGridLayout
 
@@ -36,3 +38,6 @@ class BaseField(QWidget):
         grid.addWidget(wrap_in_frame(self.validation_result, center_horizontal=True), row_idx, 1)
         # Custom entry widget goes in column #2
         grid.addWidget(wrap_in_frame(self.roi_image), row_idx, 3)
+
+    def update_link_data(self) -> None:
+        pass

@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from src.database import DB_ENGINE
 from src.database.processed_region import ProcessedRegion
+from src.gui.widgets.fields.base import BaseField
 from src.gui.widgets.fields.checkbox_field import CheckboxField
 from src.gui.widgets.fields.multi_checkbox_field import MultiCheckboxField
 from src.gui.widgets.fields.multiline_text_field import MultilineTextField
@@ -19,7 +20,7 @@ class RegionOcrResults(QWidget):
         super().__init__(parent)
 
         self.field_grid = QGridLayout()
-        self.field_widgets: dict[int, QWidget] = {}
+        self.field_widgets: dict[int, BaseField] = {}
 
         self._set_up_layout()
 
@@ -71,3 +72,7 @@ class RegionOcrResults(QWidget):
                 # Add the field into the layout and the dictionary
                 field_widget.add_to_grid(row_idx, self.field_grid)
                 self.field_widgets[row_idx] = field_widget
+
+    def handle_tab_shown(self) -> None:
+        for widget in self.field_widgets.values():
+            widget.update_link_data()

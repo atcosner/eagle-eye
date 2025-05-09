@@ -1,4 +1,6 @@
 import logging
+
+from PyQt6.QtGui import QShowEvent
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QTime, QDate
@@ -55,6 +57,12 @@ class TextFieldEntryWidget(QWidget):
         layout.addWidget(self.input_widget)
         self.setLayout(layout)
 
+    def set_read_only(self, read_only: bool) -> None:
+        if hasattr(self.input_widget, 'setReadOnly'):
+            self.input_widget.setReadOnly(read_only)
+        else:
+            self.input_widget.setDisabled(read_only)
+
     def set_data(self, data: str) -> None:
         if self.datatype is TextValidatorDatatype.DATE:
             self.invalid_data = True
@@ -109,19 +117,25 @@ class TextField(BaseField):
 
         self.link_checkbox = QCheckBox('Link', self)
         self.link_checkbox.setVisible(False)
+        self.link_checkbox.checkStateChanged.connect(self.handle_link_change)
 
         self.load_field(field)
         self.data_entry.dataChanged.connect(self.handle_data_changed)
 
     def load_field(self, field: ProcessedTextField) -> None:
         super().load_field(field)
+
         self.data_entry.set_data(field.text)
 
         result_pixmap = validation_result_image(field.validation_result.result)
         self.validation_result.setPixmap(result_pixmap)
         self.validation_result.setToolTip(field.validation_result.explanation)
 
+        # Handle if this field can be linked
         self.link_checkbox.setVisible(field.text_field.allow_copy)
+        if field.copied_from_linked is not None:
+            self.data_entry.set_read_only(field.copied_from_linked)
+            self.link_checkbox.setChecked(field.copied_from_linked)
 
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:
         super().add_to_grid(row_idx, grid)
@@ -130,6 +144,29 @@ class TextField(BaseField):
         layout.addWidget(self.link_checkbox)
         layout.addWidget(self.data_entry)
         grid.addWidget(wrap_in_frame(layout), row_idx, 2)
+
+    def update_link_data(self) -> None:
+        linking = self.link_checkbox.isChecked()
+        self.data_entry.set_read_only(linking)
+
+        with Session(DB_ENGINE) as session:
+            field = session.get(ProcessedTextField, self._field_db_id)
+            field.copied_from_linked = linking
+            session.commit()
+
+            # If linking was turned on, update our data
+            if linking:
+                link_field = session.get(ProcessedTextField, field.linked_field_id)
+                if link_field is None:
+                    logger.error(f'Could not find linked field: {field.linked_field_id}')
+                    return
+
+                self.data_entry.set_data(link_field.text)
+                self.update_validation_result(link_field.validation_result)
+
+    @pyqtSlot()
+    def handle_link_change(self) -> None:
+        self.update_link_data()
 
     @pyqtSlot()
     def handle_data_changed(self) -> None:
@@ -152,5 +189,7 @@ class TextField(BaseField):
                 logger.info(f'Validation correction: "{text}" -> "{correction_text}"')
                 field.text = correction_text
                 self.data_entry.set_data(correction_text)
+
+            # If this field is the identifier, we may need to update other things
 
             session.commit()

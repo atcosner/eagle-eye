@@ -1,4 +1,6 @@
 import logging
+
+from PyQt6.QtCore import pyqtSlot
 from sqlalchemy.orm import Session
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
@@ -19,7 +21,8 @@ class FileOcrResults(QWidget):
         super().__init__(parent)
 
         self.tabs = VerticalTabs()
-        self.region_widgets: dict[str, RegionOcrResults] = {}
+
+        self.region_widgets: dict[int, RegionOcrResults] = {}
 
         self._set_up_layout()
 
@@ -27,6 +30,9 @@ class FileOcrResults(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(self.tabs)
         self.setLayout(layout)
+
+    def _connect_signals(self) -> None:
+        self.tabs.currentChanged.connect(self.handle_current_tab_change)
 
     def load_input_file(self, input_file: InputFile | int | None) -> None:
         self.tabs.clear()
@@ -45,7 +51,14 @@ class FileOcrResults(QWidget):
 
                 scroll_area = SizedScrollArea(region_results)
                 tab_idx = self.tabs.addTab(scroll_area, region.name)
-                self.region_widgets[region.name] = region_results
+                self.region_widgets[tab_idx] = region_results
 
                 # Set the verified icon
                 self.tabs.setTabIcon(tab_idx, get_verified_icon(region.human_verified))
+
+        self._connect_signals()
+
+    @pyqtSlot(int)
+    def handle_current_tab_change(self, new_index: int) -> None:
+        region = self.region_widgets[new_index]
+        region.handle_tab_shown()

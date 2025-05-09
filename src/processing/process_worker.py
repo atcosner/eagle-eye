@@ -55,6 +55,7 @@ class ProcessWorker(QObject):
             aligned_image: np.ndarray,
             roi_dest_path: Path,
             linking_method: FormLinkingMethod,
+            current_region: ProcessedRegion,
             identifier_field: ProcessedTextField | None = None,
     ) -> tuple[bool, ProcessedTextField]:
         # Snip and save off the ROI image
@@ -83,18 +84,22 @@ class ProcessWorker(QObject):
 
         # Check if we should search for a linking field
         copied_from_linked = False if field.allow_copy else None
+        linked_field_id = None
         if field.allow_copy and process_util.should_copy_from_previous(ocr_result):
             link_field = process_util.locate_linked_field(
                 link_method=linking_method,
                 current_field=field,
+                current_region=current_region,
                 identifier_field=identifier_field,
             )
+
             if link_field is None:
                 self.log.warning(f'Failed to locate a field to link to')
             else:
-                self.log.info(f'Located linked field: {link_field.name} -> "{link_field.text}"')
+                self.log.info(f'Located linked field: {link_field.name} ({link_field.id}) -> "{link_field.text}"')
                 copied_from_linked = True
                 ocr_result = link_field.text
+                linked_field_id = link_field.id
 
         # Validate the field
         validation_result = validation.validate_text_field(field, ocr_result, allow_fuzzy=True)
@@ -110,8 +115,9 @@ class ProcessWorker(QObject):
             roi_path=roi_dest_path,
             text=text,
             ocr_text=ocr_result,
-            copied_from_linked=copied_from_linked,
             from_controlled_language=from_controlled_language,
+            copied_from_linked=copied_from_linked,
+            linked_field_id=linked_field_id,
             validation_result=validation_result,
             text_field=field,
         )
@@ -269,7 +275,12 @@ class ProcessWorker(QObject):
             for local_id, page_region in job.reference_form.regions.items():
                 self.log.info('-' * 15)
                 self.log.info(f'Processing region: "{page_region.name}" ({local_id})')
-                processed_region = ProcessedRegion(local_id=page_region.local_id, name=page_region.name)
+                processed_region = ProcessedRegion(
+                    local_id=page_region.local_id,
+                    name=page_region.name,
+                    linking_identifier=None,
+                )
+                result.regions[processed_region.local_id] = processed_region
 
                 # Sort the fields so that we process the identifier field first
                 for field in sorted(page_region.fields, key=lambda f: f.identifier, reverse=True):
@@ -284,12 +295,17 @@ class ProcessWorker(QObject):
                             aligned_image=aligned_image,
                             roi_dest_path=roi_path,
                             linking_method=job.reference_form.linking_method,
+                            current_region=processed_region,
                             identifier_field=identifier_field,
                         )
 
                         # Save off the identifier field for later linking use
                         if field.identifier:
-                            identifier_field = result_field
+                            self.log.info(f'Located identifier field: {field.text_field.name}')
+                            processed_region.linking_identifier = process_util.extract_identifier(
+                                field.identifier_regex,
+                                result_field.text,
+                            )
 
                         processed_field.processing_error = had_error
                         processed_field.text_field = result_field
@@ -332,9 +348,6 @@ class ProcessWorker(QObject):
                     # Add the processed field to our region
                     processing_error = processed_field.processing_error
                     processed_region.fields.append(processed_field)
-
-                # Add the processed region to the result
-                result.regions[processed_region.local_id] = processed_region
 
             # Commit the results to the DB and signal out that our status is changed
             session.commit()

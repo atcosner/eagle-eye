@@ -1,5 +1,5 @@
-from PyQt6.QtGui import QShowEvent
-from PyQt6.QtWidgets import QScrollArea, QWidget
+from PyQt6.QtCore import QSize
+from PyQt6.QtWidgets import QScrollArea, QWidget, QSizePolicy
 
 
 class SizedScrollArea(QScrollArea):
@@ -8,7 +8,12 @@ class SizedScrollArea(QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(widget)
 
-    def showEvent(self, event: QShowEvent) -> None:
-        # Match our minimum width to the size hint of the inner widget
-        self.setMinimumWidth(self.widget().sizeHint().width())
-        event.accept()
+        size_policy = QSizePolicy()
+        size_policy.setHorizontalPolicy(QSizePolicy.Policy.MinimumExpanding)
+        self.setSizePolicy(size_policy)
+
+    def sizeHint(self) -> QSize:
+        # Indicate we would like to display
+        widget_size_hint = self.widget().size()
+        widget_size_hint.setWidth(int(widget_size_hint.width() * 0.8))
+        return widget_size_hint

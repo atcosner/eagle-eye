@@ -10,7 +10,13 @@ from src.database.fields.text_field import TextField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.validation.text_validator import TextValidator
 from src.database.validation.validation_result import ValidationResult
-from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype, VALID_TIME_FORMATS, VALID_DATE_FORMATS
+from src.util.validation import (
+    MultiCheckboxValidation,
+    TextValidatorDatatype,
+    VALID_TIME_FORMATS,
+    VALID_DATE_FORMATS,
+    find_best_string_match,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -74,10 +80,42 @@ def check_conversion_from_string(obj: type[QTime | QDate], formats: Iterable[str
     return match_found
 
 
+def validate_raw_text(validator: TextValidator, text: str) -> ValidationResult:
+    # Check if there is any validation to do
+    if validator.text_regex is None:
+        return ValidationResult(result=None, explanation=None)
+
+    regex_pattern = re.compile(validator.text_regex)
+    regex_match = regex_pattern.match(text)
+    if regex_match is None:
+        return ValidationResult(
+            result=False,
+            explanation=get_explanation(
+                validator,
+                f'Text did not match the regular expression\n{validator.text_regex}',
+            ),
+        )
+
+    # Check if we should reformat
+    if validator.reformat_regex is None:
+        return ValidationResult(result=True, explanation=None)
+
+    # Reformat the text
+    regex_group_names = list(regex_pattern.groupindex.keys())
+    # TODO: Change this to debug level
+    logger.info(f'Found {len(regex_group_names)} groups in the regex: {regex_group_names}')
+
+    groups = {group_name: regex_match.group(group_name) for group_name in regex_group_names}
+    reformatted_text = validator.reformat_regex.format(**groups)
+
+    return ValidationResult(result=True, explanation=None, correction=reformatted_text)
+
+
 def validate_text_field(
         raw_field: TextField | MultilineTextField,
         text: str,
         force_fail: bool = False,
+        allow_fuzzy: bool = False,
 ) -> ValidationResult:
     validator = raw_field.text_validator
     if validator is None:
@@ -89,25 +127,19 @@ def validate_text_field(
             explanation='Data was in an invalid format',
         )
 
-    if validator.text_required and not text:
-        return ValidationResult(
-            result=False,
-            explanation='Field cannot be blank',
-        )
+    if not text:
+        if validator.text_required:
+            return ValidationResult(
+                result=False,
+                explanation='Field cannot be blank',
+            )
+        else:
+            return ValidationResult(result=True, explanation=None)
 
     # Validate each different type of data separately
     text = text.strip()
     if validator.datatype is TextValidatorDatatype.RAW_TEXT:
-        if validator.text_regex is not None:
-            if re.compile(validator.text_regex).match(text) is not None:
-                return ValidationResult(result=True, explanation=None)
-            else:
-                return ValidationResult(
-                    result=False,
-                    explanation=f'Text did not match the regular expression: {validator.text_regex}',
-                )
-        else:
-            return ValidationResult(result=None, explanation=None)
+        return validate_raw_text(validator, text)
 
     elif validator.datatype is TextValidatorDatatype.DATE:
         if check_conversion_from_string(QDate, VALID_DATE_FORMATS, text):
@@ -156,6 +188,16 @@ def validate_text_field(
         if text in possible_choices:
             return ValidationResult(result=True, explanation=None)
         else:
+            # See if we are allowed to find the closest match
+            if allow_fuzzy and validator.allow_closest_match_correction:
+                match = find_best_string_match(text, possible_choices)
+                if match is not None:
+                    return ValidationResult(
+                        result=True,
+                        explanation=f'Correction made: "{text}" -> "{match}"',
+                        correction=match,
+                    )
+
             return ValidationResult(
                 result=False,
                 explanation=get_explanation(validator, f'Value "{text}" not in the possible choices'),
@@ -163,15 +205,22 @@ def validate_text_field(
 
     elif validator.datatype is TextValidatorDatatype.CSV_OF_CHOICE:
         possible_choices = [x.text for x in validator.text_choices]
-        entries = text.split(',')
+        entries = [entry.strip() for entry in text.split(',')]
+
         for entry in entries:
-            if entry.split() not in possible_choices:
+            if entry not in possible_choices:
                 return ValidationResult(
                     result=False,
                     explanation=get_explanation(validator, f'Value "{entry}" not in the possible choices'),
                 )
 
-        return ValidationResult(result=True, explanation=None)
+        # Offer a correction with whitespace stripped
+        correction: str | None = None
+        reformatted_text = ','.join(entries)
+        if reformatted_text != text:
+            correction = reformatted_text
+
+        return ValidationResult(result=True, explanation=None, correction=correction)
 
     elif validator.datatype is TextValidatorDatatype.GPS_POINT_DD:
         if re.compile(r'^[+-]?\d{1,3}.\d{4,8}$').match(text) is not None:
@@ -179,7 +228,10 @@ def validate_text_field(
         else:
             return ValidationResult(
                 result=False,
-                explanation='GPS points must be in decimal degrees format (Min 4 decimal places)',
+                explanation=get_explanation(
+                    validator,
+                    'GPS points must be in decimal degrees format (Min 4 decimal places)',
+                ),
             )
 
     elif validator.datatype is TextValidatorDatatype.KU_GPS_WAYPOINT:
@@ -188,7 +240,10 @@ def validate_text_field(
         else:
             return ValidationResult(
                 result=False,
-                explanation='GPS waypoints must be a string of letters and then numbers',
+                explanation=get_explanation(
+                    validator,
+                    'GPS waypoints must be a string of letters and then numbers',
+                ),
             )
 
     return ValidationResult(result=None, explanation=None)

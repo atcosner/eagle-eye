@@ -1,3 +1,4 @@
+import argparse
 import logging
 import sys
 from PyQt6.QtWidgets import QApplication
@@ -8,13 +9,28 @@ from src.util.logging import configure_root_logger
 
 configure_root_logger(logging.INFO)
 
-app = QApplication(sys.argv)
-app.setQuitOnLastWindowClosed(True)
 
-screen = SplashScreen()
-screen.initial_setup()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--no-splash', action='store_true', help='Skip displaying the splash screen')
+    parser.add_argument('--load-last-job', action='store_true', help='Load the most recent job')
 
-window = MainWindow()
-window.start()
+    return parser.parse_args()
 
-app.exec()
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(True)
+
+    args = parse_args()
+
+    if not args.no_splash:
+        screen = SplashScreen()
+        screen.initial_setup()
+
+    window = MainWindow()
+    window.start(
+        load_latest_job=args.load_last_job,
+    )
+
+    app.exec()

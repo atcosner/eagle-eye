@@ -4,6 +4,7 @@ import uuid
 from PyQt6.QtCore import pyqtSlot
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import func
 
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QHBoxLayout, QLabel, QComboBox, QSizePolicy
 
@@ -29,6 +30,11 @@ def create_job(job_name: str) -> int:
 
         logger.info(f'Created new job with ID: {new_job.id}')
         return new_job.id
+
+
+def get_latest_job_id() -> int:
+    with Session(DB_ENGINE) as session:
+        return session.execute(select(func.max(Job.id))).fetchone()[0]
 
 
 class MainWindow(BaseWindow):
@@ -105,13 +111,19 @@ class MainWindow(BaseWindow):
         if self.reference_form_selector.count() > 0:
             self.reference_form_selector.setCurrentIndex(0)
 
-    def start(self, auto_new_job: bool = False) -> None:
+    def start(
+            self,
+            auto_new_job: bool = False,
+            load_latest_job: bool = False,
+    ) -> None:
         self.reload_reference_forms()
         self.show()
 
         if auto_new_job:
             details = JobDetails(db_id=None, job_name=str(uuid.uuid4()))
             self._toggle_controls(True)
+        elif load_latest_job:
+            details = JobDetails(db_id=get_latest_job_id(), job_name=None)
         else:
             selector = JobSelector(self)
             if not selector.exec():

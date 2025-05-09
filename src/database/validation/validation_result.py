@@ -12,6 +12,10 @@ class ValidationResult(MappedAsDataclass, OrmBase):
     result: Mapped[bool | None]
     explanation: Mapped[str | None]
 
+    # UNMAPPED MEMBER
+    # - A text correction that should not be written to the DB
+    correction: str | None = None
+
     # Relationships
 
     text_field_id: Mapped[int] = mapped_column(

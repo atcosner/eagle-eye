@@ -40,10 +40,10 @@ class TextFieldEntryWidget(QWidget):
             case TextValidatorDatatype.LIST_CHOICE:
                 self.input_widget = QComboBox()
                 self.input_widget.addItem('<NO MATCH>')
-                self.input_widget.addItems([choice.text for choice in validator.text_choices])
+                self.input_widget.addItems(sorted([choice.text for choice in validator.text_choices]))
                 self.input_widget.currentTextChanged.connect(self.dataChanged)
             case _:
-                self.input_widget.textChanged.connect(self.dataChanged)
+                self.input_widget.textEdited.connect(self.dataChanged)
 
         self._set_up_layout()
 
@@ -104,9 +104,9 @@ class TextField(BaseField):
 
         self.data_entry = TextFieldEntryWidget(field.text_field.text_validator)
         self.data_entry.setMinimumWidth(350)
-        self.data_entry.dataChanged.connect(self.handle_data_changed)
 
         self.load_field(field)
+        self.data_entry.dataChanged.connect(self.handle_data_changed)
 
     def load_field(self, field: ProcessedTextField) -> None:
         super().load_field(field)
@@ -122,6 +122,8 @@ class TextField(BaseField):
 
     @pyqtSlot()
     def handle_data_changed(self) -> None:
+        # TODO: If DB access is not incredibly fast this probably updates it too much
+
         with Session(DB_ENGINE) as session:
             field = session.get(ProcessedTextField, self._field_db_id)
 
@@ -133,5 +135,11 @@ class TextField(BaseField):
                 force_fail=invalid_data,
             )
             self.update_validation_result(field.validation_result)
+
+            correction_text = field.validation_result.correction
+            if correction_text is not None and correction_text != text:
+                logger.info(f'Validation correction: "{text}" -> "{correction_text}"')
+                field.text = correction_text
+                self.data_entry.set_data(correction_text)
 
             session.commit()

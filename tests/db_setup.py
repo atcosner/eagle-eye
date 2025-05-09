@@ -142,6 +142,16 @@ for parent in file_path.parents:
 print(f'Project path: {project_path}')
 
 
+def _read_species_list(path: Path) -> set[str]:
+    with path.open('r') as file:
+        return {line.lower().strip() for line in file.readlines()}
+
+
+# Read in the list of species on import
+species_list = project_path / 'src' / 'eagle-eye' / 'validation' / 'ku_orn_taxonomy_reference.csv'
+ORNITHOLOGY_SPECIES_LIST = _read_species_list(species_list)
+
+
 with Session(DB_ENGINE) as session:
     new_form = ReferenceForm(
         name='KU Ornithology Form v8',
@@ -258,7 +268,11 @@ with Session(DB_ENGINE) as session:
                 name='Species',
                 visual_region=BoxBounds(x=253, y=262, width=594, height=33),
                 allow_copy=True,
-                # TODO: Validator
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.LIST_CHOICE,
+                    allow_closest_match_correction=True,
+                    text_choices=[TextChoice(text=t) for t in ORNITHOLOGY_SPECIES_LIST]
+                ),
             ),
         ),
         FormField(

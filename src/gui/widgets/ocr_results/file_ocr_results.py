@@ -7,6 +7,7 @@ from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.gui.widgets.util.sized_scroll_area import SizedScrollArea
 from src.gui.widgets.util.vertical_tabs import VerticalTabs
+from src.util.validation import get_verified_icon
 
 from .region_ocr_results import RegionOcrResults
 
@@ -43,5 +44,8 @@ class FileOcrResults(QWidget):
                 region_results.load_region(region)
 
                 scroll_area = SizedScrollArea(region_results)
-                self.tabs.addTab(scroll_area, region.name)
+                tab_idx = self.tabs.addTab(scroll_area, region.name)
                 self.region_widgets[region.name] = region_results
+
+                # Set the verified icon
+                self.tabs.setTabIcon(tab_idx, get_verified_icon(region.human_verified))

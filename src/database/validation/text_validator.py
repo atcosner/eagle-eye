@@ -17,6 +17,7 @@ class TextValidator(MappedAsDataclass, OrmBase):
     text_regex: Mapped[str | None] = mapped_column(default=None)
     reformat_regex: Mapped[str | None] = mapped_column(default=None)
     error_tooltip: Mapped[str | None] = mapped_column(default=None)
+    allow_closest_match_correction: Mapped[bool] = mapped_column(default=False)
 
     # Relationships
 

@@ -1,8 +1,11 @@
 import itertools
+import logging
 from enum import Enum
+from rapidfuzz import process, fuzz, utils
+from typing import Iterable
 
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QIcon
 
 from .resources import GENERIC_ICON_PATH
 
@@ -17,6 +20,8 @@ VALID_DATE_FORMATS = [
         ]
     )
 ]
+
+logger = logging.getLogger(__name__)
 
 
 class MultiCheckboxValidation(Enum):
@@ -44,6 +49,11 @@ class TextValidatorDatatype(Enum):
     KU_GPS_WAYPOINT = 9
 
 
+def get_verified_icon(verified: bool) -> QIcon:
+    icon = 'good.png' if verified else 'bad.png'
+    return QIcon(str(GENERIC_ICON_PATH / icon))
+
+
 def validation_result_image(result: bool | None) -> QPixmap:
     match result:
         case True:
@@ -61,3 +71,14 @@ def validation_result_image(result: bool | None) -> QPixmap:
         aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio,
         transformMode=Qt.TransformationMode.SmoothTransformation,
     )
+
+
+def find_best_string_match(text: str, options: Iterable[str]) -> str | None:
+    match, ratio, edits = process.extractOne(
+        text,
+        options,
+        scorer=fuzz.WRatio,
+        processor=utils.default_process,
+    )
+    logger.info(f'Best match: "{text}" -> "{match}", ratio: {ratio}, edits: {edits}')
+    return match if ratio > 65 else None

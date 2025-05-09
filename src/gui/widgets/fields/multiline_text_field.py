@@ -1,3 +1,4 @@
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGridLayout, QTextEdit
 
 from src.database.processed_fields.processed_multiline_text_field import ProcessedMultilineTextField
@@ -27,3 +28,10 @@ class MultilineTextField(BaseField):
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:
         super().add_to_grid(row_idx, grid)
         grid.addWidget(wrap_in_frame(self.text_input), row_idx, 2)
+
+    @pyqtSlot()
+    def handle_data_changed(self) -> None:
+        # TODO: If DB access is not incredibly fast this probably updates it too much
+
+        # TODO: Implement this
+        pass

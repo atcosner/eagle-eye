@@ -32,6 +32,9 @@ class RegionOcrResults(QWidget):
         self.field_grid.addWidget(TableHeader('Value'), 0, 2)
         self.field_grid.addWidget(TableHeader('Field Image'), 0, 3)
 
+        # Only stretch the value column
+        self.field_grid.setColumnStretch(2, 1)
+
     def load_region(self, region: ProcessedRegion | int | None) -> None:
         self.field_widgets.clear()
         if region is None:

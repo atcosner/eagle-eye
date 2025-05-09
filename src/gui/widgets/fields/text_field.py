@@ -2,7 +2,9 @@ import logging
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QTime, QDate
-from PyQt6.QtWidgets import QLineEdit, QGridLayout, QWidget, QDateEdit, QTimeEdit, QComboBox, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QLineEdit, QGridLayout, QWidget, QDateEdit, QTimeEdit, QComboBox, QVBoxLayout, QCheckBox, QHBoxLayout,
+)
 
 import src.processing.validation as validation
 from src.database import DB_ENGINE
@@ -105,6 +107,9 @@ class TextField(BaseField):
         self.data_entry = TextFieldEntryWidget(field.text_field.text_validator)
         self.data_entry.setMinimumWidth(350)
 
+        self.link_checkbox = QCheckBox('Link', self)
+        self.link_checkbox.setVisible(False)
+
         self.load_field(field)
         self.data_entry.dataChanged.connect(self.handle_data_changed)
 
@@ -116,9 +121,15 @@ class TextField(BaseField):
         self.validation_result.setPixmap(result_pixmap)
         self.validation_result.setToolTip(field.validation_result.explanation)
 
+        self.link_checkbox.setVisible(field.text_field.allow_copy)
+
     def add_to_grid(self, row_idx: int, grid: QGridLayout) -> None:
         super().add_to_grid(row_idx, grid)
-        grid.addWidget(wrap_in_frame(self.data_entry), row_idx, 2)
+
+        layout = QHBoxLayout()
+        layout.addWidget(self.link_checkbox)
+        layout.addWidget(self.data_entry)
+        grid.addWidget(wrap_in_frame(layout), row_idx, 2)
 
     @pyqtSlot()
     def handle_data_changed(self) -> None:

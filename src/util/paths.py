@@ -77,5 +77,3 @@ class LocalPaths:
         input_file_dir = LocalPaths.input_files_directory(job_uuid)
         logger.info(f'Creating input file directory: {input_file_dir}')
         input_file_dir.mkdir(exist_ok=True)
-
-

@@ -9,6 +9,9 @@ class BoxBounds(NamedTuple):
     width: int
     height: int
 
+    def to_widget(self) -> str:
+        return f'Top Left: ({self.x}, {self.y}) | Width: {self.width} | Height: {self.height}'
+
     def to_db(self) -> str:
         return f'{self.x},{self.y},{self.width},{self.height}'
 

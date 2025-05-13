@@ -1,5 +1,3 @@
-import abc
-
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QLabel, QGridLayout
 

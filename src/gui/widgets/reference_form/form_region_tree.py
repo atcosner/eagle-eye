@@ -8,7 +8,7 @@ from src.database import DB_ENGINE
 from src.database.fields.form_field import FormField
 from src.database.form_region import FormRegion
 from src.database.reference_form import ReferenceForm
-from src.util.fields import get_field_name
+from src.util.fields import get_field_name_and_type
 from src.util.resources import GENERIC_ICON_PATH
 
 from .util import SelectionType
@@ -28,9 +28,11 @@ class FieldItem(TreeItem):
     def __init__(self, field: FormField):
         super().__init__(field.id)
 
-        self.setText(0, get_field_name(field))
+        field_name, field_type = get_field_name_and_type(field)
+        self.setText(0, field_name)
+        self.setText(1, field_type)
         if field.identifier:
-            self.setIcon(1, QIcon(str(GENERIC_ICON_PATH / 'good.png')))
+            self.setIcon(2, QIcon(str(GENERIC_ICON_PATH / 'good.png')))
 
 
 class RegionItem(TreeItem):
@@ -54,7 +56,7 @@ class FormRegionTree(QTreeWidget):
         self._form_db_id: int | None = None
 
         self.setColumnCount(2)
-        self.setHeaderLabels(['Name', 'Identifier?'])
+        self.setHeaderLabels(['Name', 'Field Type', 'Identifier?'])
         self.setIconSize(QSize(10, 10))
 
         self.header().setStretchLastSection(False)
@@ -76,5 +78,5 @@ class FormRegionTree(QTreeWidget):
 
     @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
     def handle_current_item_change(self, current: TreeItem, _: TreeItem) -> None:
-        selection = SelectionType.REGION if isinstance(current, FormRegion) else SelectionType.FIELD
+        selection = SelectionType.REGION if isinstance(current, RegionItem) else SelectionType.FIELD
         self.updateDetails.emit(selection, current.get_db_id())

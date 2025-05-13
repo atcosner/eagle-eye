@@ -5,11 +5,11 @@ from PyQt6.QtWidgets import QWidget, QGridLayout
 
 from src.database import DB_ENGINE
 from src.database.processed_region import ProcessedRegion
-from src.gui.widgets.fields.base import BaseField
-from src.gui.widgets.fields.checkbox_field import CheckboxField
-from src.gui.widgets.fields.multi_checkbox_field import MultiCheckboxField
-from src.gui.widgets.fields.multiline_text_field import MultilineTextField
-from src.gui.widgets.fields.text_field import TextField
+from src.gui.widgets.result_fields.base import BaseField
+from src.gui.widgets.result_fields.checkbox_field import CheckboxField
+from src.gui.widgets.result_fields.multi_checkbox_field import MultiCheckboxField
+from src.gui.widgets.result_fields.multiline_text_field import MultilineTextField
+from src.gui.widgets.result_fields.text_field import TextField
 from src.gui.widgets.util.table_header import TableHeader
 
 logger = logging.getLogger(__name__)

@@ -161,10 +161,20 @@ species_list = project_path / 'src' / 'eagle-eye' / 'validation' / 'ku_orn_taxon
 ORNITHOLOGY_SPECIES_LIST = _read_species_list(species_list)
 
 
+# Copy the reference image into the working diectory
+reference_forms = LocalPaths.reference_forms_directory()
+reference_forms.mkdir(exist_ok=True)
+
+REFERNCE_FORM_FILENAME = 'kt_field_form_v8.png'
+shutil.copy(
+    project_path / 'src' / 'eagle-eye' / 'form_templates' / 'production' / REFERNCE_FORM_FILENAME,
+    reference_forms / REFERNCE_FORM_FILENAME,
+)
+
 with Session(DB_ENGINE) as session:
     new_form = ReferenceForm(
         name='KU Ornithology Form v8',
-        path=Path(r'C:\Users\atcos\AppData\Local\EagleEye\reference_forms\kt_field_form_v8.png'),
+        path=reference_forms / REFERNCE_FORM_FILENAME,
         alignment_mark_count=16,
         linking_method=FormLinkingMethod.PREVIOUS_REGION,
     )

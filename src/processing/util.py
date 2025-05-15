@@ -22,7 +22,7 @@ def grayscale_image(image_path: Path) -> Path:
     return output_path
 
 
-def rotate_image(image: np.array, degrees: int) -> np.array:
+def rotate_image(image: np.array, degrees: float) -> np.array:
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, degrees, 1.0)
     return cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
@@ -43,7 +43,12 @@ def find_alignment_marks(image: np.array) -> list[AlignmentMark]:
         if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
             alignment_marks.append(AlignmentMark(x, y, height, width))
 
-    return alignment_marks
+    # Order the marks in left-to-right and top-to-bottom order
+    marks_x_sort = sorted(alignment_marks, key=lambda m: m.x)
+    left_marks = sorted(marks_x_sort[:len(marks_x_sort)//2], key=lambda m: m.y)
+    right_marks = sorted(marks_x_sort[len(marks_x_sort)//2:], key=lambda m: m.y)
+
+    return left_marks + right_marks
 
 
 def alignment_marks_to_points(marks: list[AlignmentMark]) -> np.array:

@@ -1,5 +1,6 @@
 import cv2
 import logging
+import numpy as np
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Allow for an image to be +/- 6 degrees rotated
 # TODO: Control this with a user setting
-ALLOWED_ROTATIONS = [0] + list(range(1, 6, 1)) + list(range(-1, -6, -1))
+ALLOWED_ROTATIONS = [0] + list(np.arange(0.5, 6.5, 0.5)) + list(np.arange(-0.5, -6.5, -0.5))
 
 
 class PreProcessingWorker(QObject):

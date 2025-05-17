@@ -6,29 +6,35 @@ from src.util.types import BoxBounds
 
 
 class DbBoxBounds(types.TypeDecorator):
-    # Handles both a single value and a list since the data is simple and not worth adding addition
-    # DB complexity (Let's hope I never regret this 😅)
     impl = types.String
 
-    def process_bind_param(self, value: Iterable[BoxBounds] | BoxBounds | None, dialect) -> str | None:
+    def process_bind_param(self, value: BoxBounds | None, dialect) -> str | None:
         if value is not None:
             if isinstance(value, BoxBounds):
                 value = value.to_db()
-            elif isinstance(value, Iterable):
-                value = '|'.join([bounds.to_db() for bounds in value])
             else:
-                raise TypeError(f'Value was not a BoxBounds or an iterable: {type(value)}')
+                raise TypeError(f'Value was not a BoxBounds: {type(value)}')
 
         return value
 
-    def process_result_value(self, value: str | None, dialect) -> list[BoxBounds] | BoxBounds | None:
-        if value is None:
-            return value
+    def process_result_value(self, value: str | None, dialect) -> BoxBounds | None:
+        return value if value is None else BoxBounds.from_db(value)
 
-        if '|' in value:
-            return [BoxBounds.from_db(part) for part in value.split('|')]
-        else:
-            return BoxBounds.from_db(value)
+
+class ListDbBoxBounds(types.TypeDecorator):
+    impl = types.String
+
+    def process_bind_param(self, value: Iterable[BoxBounds] | None, dialect) -> str | None:
+        if value is not None:
+            if isinstance(value, Iterable):
+                value = '|'.join([bounds.to_db() for bounds in value])
+            else:
+                raise TypeError(f'Value was not a iterable: {type(value)}')
+
+        return value
+
+    def process_result_value(self, value: str | None, dialect) -> list[BoxBounds] | None:
+        return value if value is None else [BoxBounds.from_db(part) for part in value.split('|')]
 
 
 class DbPath(types.TypeDecorator):

@@ -9,7 +9,6 @@ from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.form_field import FormField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.multi_checkbox_option import MultiCheckboxOption
-from src.database.fields.multiline_text_field import MultilineTextField
 from src.database.fields.text_field import TextField
 from src.database.form_region import FormRegion
 from src.database.reference_form import ReferenceForm
@@ -60,11 +59,13 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
         if allow_copy:
             field.text_field.allow_copy = False
 
+        text_regions = [offset_object(x, y_offset) for x in field.text_field.text_regions] if field.text_field.text_regions is not None else None
+
         new_field = TextField(
             name=field.text_field.name,
             visual_region=offset_object(field.text_field.visual_region, y_offset),
             checkbox_region=offset_object(field.text_field.checkbox_region, y_offset),
-            text_region=offset_object(field.text_field.text_region, y_offset),
+            text_regions=text_regions,
             checkbox_text=field.text_field.checkbox_text,
             allow_copy=allow_copy,
             text_exporter=new_exporter,
@@ -75,38 +76,7 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
             identifier_regex=field.identifier_regex,
             text_field=new_field,
         )
-    elif field.multiline_text_field is not None:
-        new_exporter = None
-        if field.multiline_text_field.text_exporter is not None:
-            exporter = field.multiline_text_field.text_exporter
-            new_exporter = TextExporter(
-                no_export=exporter.no_export,
-                export_field_name=exporter.export_field_name,
-                prefix=exporter.prefix,
-                suffix=exporter.suffix,
-                strip_value=exporter.strip_value,
-            )
 
-        new_validator = None
-        if field.multiline_text_field.text_validator is not None:
-            validator = field.multiline_text_field.text_validator
-            new_validator = TextValidator(
-                datatype=validator.datatype,
-                text_required=validator.text_required,
-                text_regex=validator.text_regex,
-                reformat_regex=validator.reformat_regex,
-                error_tooltip=validator.error_tooltip,
-                text_choices=[TextChoice(c.choice) for c in validator.text_choices],
-            )
-
-        new_field = MultilineTextField(
-            name=field.multiline_text_field.name,
-            visual_region=offset_object(field.multiline_text_field.visual_region, y_offset),
-            line_regions=[offset_object(x, y_offset) for x in field.multiline_text_field.line_regions],
-            text_exporter=new_exporter,
-            text_validator=new_validator,
-        )
-        return FormField(multiline_text_field=new_field)
     elif field.checkbox_field is not None:
         new_field = CheckboxField(
             name=field.checkbox_field.name,
@@ -114,6 +84,7 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
             checkbox_region=offset_object(field.checkbox_field.checkbox_region, y_offset),
         )
         return FormField(checkbox_field=new_field)
+
     elif field.multi_checkbox_field is not None:
         checkboxes = []
         for checkbox in field.multi_checkbox_field.checkboxes:
@@ -132,6 +103,7 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
             checkboxes=checkboxes,
         )
         return FormField(multi_checkbox_field=new_field)
+
     else:
         return None
 
@@ -165,16 +137,16 @@ ORNITHOLOGY_SPECIES_LIST = _read_species_list(species_list)
 reference_forms = LocalPaths.reference_forms_directory()
 reference_forms.mkdir(exist_ok=True)
 
-REFERNCE_FORM_FILENAME = 'kt_field_form_v8.png'
+REFERENCE_FORM_FILENAME = 'kt_field_form_v8.png'
 shutil.copy(
-    project_path / 'src' / 'eagle-eye' / 'form_templates' / 'production' / REFERNCE_FORM_FILENAME,
-    reference_forms / REFERNCE_FORM_FILENAME,
+    project_path / 'src' / 'eagle-eye' / 'form_templates' / 'production' / REFERENCE_FORM_FILENAME,
+    reference_forms / REFERENCE_FORM_FILENAME,
 )
 
 with Session(DB_ENGINE) as session:
     new_form = ReferenceForm(
         name='KU Ornithology Form v8',
-        path=reference_forms / REFERNCE_FORM_FILENAME,
+        path=reference_forms / REFERENCE_FORM_FILENAME,
         alignment_mark_count=16,
         linking_method=FormLinkingMethod.PREVIOUS_REGION,
     )
@@ -359,7 +331,7 @@ with Session(DB_ENGINE) as session:
                 visual_region=BoxBounds(x=157, y=413, width=379, height=40),
                 allow_copy=True,
                 # validator=Iris,
-                text_region=BoxBounds(x=287, y=411, width=247, height=32),
+                text_regions=[BoxBounds(x=287, y=411, width=247, height=32)],
                 checkbox_region=BoxBounds(x=213, y=424, width=13, height=13),
                 checkbox_text='dark brown',
                 text_validator=TextValidator(),
@@ -414,7 +386,7 @@ with Session(DB_ENGINE) as session:
             text_field=TextField(
                 name='Time of Tissue Preservation',
                 visual_region=BoxBounds(x=797, y=485, width=423, height=40),
-                text_region=BoxBounds(x=988, y=486, width=154, height=31),
+                text_regions=[BoxBounds(x=988, y=486, width=154, height=31)],
                 checkbox_region=BoxBounds(x=1150, y=498, width=13, height=13),
                 checkbox_text='unknown',
                 # TODO: Should text with a checkbox be handled differently?
@@ -594,10 +566,10 @@ with Session(DB_ENGINE) as session:
         ),
 
         FormField(
-            multiline_text_field=MultilineTextField(
+            text_field=TextField(
                 name='Remarks',
                 visual_region=BoxBounds(x=160, y=824, width=1067, height=73),
-                line_regions=[
+                text_regions=[
                     BoxBounds(x=265, y=816, width=962, height=35),
                     BoxBounds(x=162, y=856, width=937, height=32),
                 ],

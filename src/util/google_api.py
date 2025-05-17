@@ -65,18 +65,18 @@ def ocr_text_region(
         session: requests.Session,
         image: np.ndarray | None = None,
         region: BoxBounds | None = None,
-        roi: np.ndarray | None = None,
+        roi_image: np.ndarray | None = None,
         add_border: bool = False,
 ) -> str | None:
-    if roi is None:
+    if roi_image is None:
         assert image is not None
         assert region is not None
-        roi = image[region.y:region.y + region.height, region.x:region.x + region.width]
+        roi_image = image[region.y:region.y + region.height, region.x:region.x + region.width]
 
     if add_border:
-        roi = cv2.copyMakeBorder(roi, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
+        roi_image = cv2.copyMakeBorder(roi_image, 10, 10, 10, 10, cv2.BORDER_CONSTANT, None, (255, 255, 255))
 
-    _, buffer = cv2.imencode('.jpg', roi)
+    _, buffer = cv2.imencode('.jpg', roi_image)
     encoded_bytes = base64.b64encode(buffer.tobytes()).decode('ascii')
 
     # https://cloud.google.com/vision/docs/ocr
@@ -110,7 +110,6 @@ def ocr_text_region(
         )
         try:
             result.raise_for_status()
-            # logger.debug(result.json())
             break
         except requests.exceptions.HTTPError as e:
             attempts += 1

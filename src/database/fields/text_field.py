@@ -5,7 +5,7 @@ from src.util.types import BoxBounds
 
 from .. import OrmBase
 from ..exporters.text_exporter import TextExporter
-from ..util import DbBoxBounds
+from ..util import DbBoxBounds, ListDbBoxBounds
 from ..validation.text_validator import TextValidator
 
 
@@ -15,9 +15,9 @@ class TextField(MappedAsDataclass, OrmBase):
 
     name: Mapped[str]
     visual_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds)
+    text_regions: Mapped[list[BoxBounds]] = mapped_column(ListDbBoxBounds, nullable=True, default=None)
 
     # Support for text fields that have a default checkbox
-    text_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds, nullable=True, default=None)
     checkbox_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds, nullable=True, default=None)
     checkbox_text: Mapped[str] = mapped_column(nullable=True, default=None)
 

@@ -5,7 +5,6 @@ from typing import Iterable
 from PyQt6.QtCore import QDate, QTime
 
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
-from src.database.fields.multiline_text_field import MultilineTextField
 from src.database.fields.text_field import TextField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.validation.text_validator import TextValidator
@@ -112,7 +111,7 @@ def validate_raw_text(validator: TextValidator, text: str) -> ValidationResult:
 
 
 def validate_text_field(
-        raw_field: TextField | MultilineTextField,
+        raw_field: TextField,
         text: str,
         force_fail: bool = False,
         allow_fuzzy: bool = False,

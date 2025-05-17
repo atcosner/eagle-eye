@@ -43,8 +43,9 @@ class OcrResultCheck(QWidget):
                 tab_idx = self.file_tabs.addTab(file_tab, file.path.name)
 
                 # Add an icon to reflect the verification status
-                all_verified = all([region.human_verified for region in file.process_result.regions.values()])
-                self.file_tabs.setTabIcon(tab_idx, get_verified_icon(all_verified))
+                if file.process_result is not None:
+                    all_verified = all([region.human_verified for region in file.process_result.regions.values()])
+                    self.file_tabs.setTabIcon(tab_idx, get_verified_icon(all_verified))
 
     @pyqtSlot(bool, bool)
     def handle_verification_change(self, new_status: bool, continue_check: bool) -> None:

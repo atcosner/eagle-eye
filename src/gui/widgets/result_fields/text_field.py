@@ -1,11 +1,10 @@
 import logging
 
-from PyQt6.QtGui import QShowEvent
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QTime, QDate
 from PyQt6.QtWidgets import (
-    QLineEdit, QGridLayout, QWidget, QDateEdit, QTimeEdit, QComboBox, QVBoxLayout, QCheckBox, QHBoxLayout,
+    QLineEdit, QGridLayout, QWidget, QDateEdit, QTimeEdit, QComboBox, QVBoxLayout, QCheckBox, QHBoxLayout, QTextEdit,
 )
 
 import src.processing.validation as validation
@@ -18,6 +17,7 @@ from .base import BaseField
 from .util import wrap_in_frame
 
 logger = logging.getLogger(__name__)
+WidgetTypeHint = QTextEdit | QLineEdit | QDateEdit | QTimeEdit | QComboBox
 
 
 #
@@ -26,13 +26,19 @@ logger = logging.getLogger(__name__)
 class TextFieldEntryWidget(QWidget):
     dataChanged = pyqtSignal()
 
-    def __init__(self, validator: TextValidator | None):
+    def __init__(self, validator: TextValidator | None, multiline: bool | None):
         super().__init__()
         self.datatype = validator.datatype if validator else TextValidatorDatatype.RAW_TEXT
         self.invalid_data: bool = False
 
         # Figure out what widget we should be
-        self.input_widget: QLineEdit | QDateEdit | QTimeEdit | QComboBox = QLineEdit()
+        self.input_widget: WidgetTypeHint = QTextEdit() if multiline else QLineEdit()
+        if isinstance(self.input_widget, QTextEdit):
+            self.input_widget.setTabChangesFocus(True)
+            self.input_widget.textChanged.connect(self.dataChanged)
+        else:
+            self.input_widget.textEdited.connect(self.dataChanged)
+
         match self.datatype:
             case TextValidatorDatatype.DATE:
                 self.input_widget = QDateEdit()
@@ -46,8 +52,6 @@ class TextFieldEntryWidget(QWidget):
                 self.input_widget.addItem('<NO MATCH>')
                 self.input_widget.addItems(sorted([choice.text for choice in validator.text_choices]))
                 self.input_widget.currentTextChanged.connect(self.dataChanged)
-            case _:
-                self.input_widget.textEdited.connect(self.dataChanged)
 
         self._set_up_layout()
 
@@ -112,7 +116,12 @@ class TextField(BaseField):
     def __init__(self, field: ProcessedTextField):
         super().__init__()
 
-        self.data_entry = TextFieldEntryWidget(field.text_field.text_validator)
+        # Determine if we are a multiline field
+        multiline = False
+        if field.text_field.text_regions is not None:
+            multiline = len(field.text_field.text_regions) > 1
+
+        self.data_entry = TextFieldEntryWidget(field.text_field.text_validator, multiline)
         self.data_entry.setMinimumWidth(350)
 
         self.link_checkbox = QCheckBox('Link', self)

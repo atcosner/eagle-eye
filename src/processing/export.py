@@ -9,7 +9,6 @@ from ..database.exporters.text_exporter import TextExporter
 from ..database.processed_fields.processed_field import ProcessedField
 from ..database.processed_fields.processed_checkbox_field import ProcessedCheckboxField
 from ..database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
-from ..database.processed_fields.processed_multiline_text_field import ProcessedMultilineTextField
 from ..database.processed_fields.processed_text_field import ProcessedTextField
 
 logger = logging.getLogger(__name__)
@@ -55,7 +54,7 @@ def export_bool_to_string(value: bool) -> str:
 
 
 def custom_text_field_export(
-        field: ProcessedTextField | ProcessedMultilineTextField,
+        field: ProcessedTextField,
         exporter: TextExporter,
 ) -> dict[str, str]:
     export_columns = {}
@@ -85,7 +84,7 @@ def custom_text_field_export(
 
 def export_text_field(
         mode: ExportMode,
-        field: ProcessedTextField | ProcessedMultilineTextField,
+        field: ProcessedTextField,
 ) -> dict[str, str]:
     logger.info(f'Exporting text field: {field.name}')
     is_test_field = isinstance(field, ProcessedTextField)
@@ -140,8 +139,6 @@ def export_multi_checkbox_field(
 def export_field(mode: ExportMode, field: ProcessedField) -> dict[str, str]:
     if field.text_field is not None:
         return export_text_field(mode, field.text_field)
-    elif field.multiline_text_field is not None:
-        return export_text_field(mode, field.multiline_text_field)
     elif field.checkbox_field is not None:
         return export_checkbox_field(field.checkbox_field)
     elif field.multi_checkbox_field is not None:
@@ -169,8 +166,5 @@ def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
             for field in region.fields:
                 for export_column, export_value in export_field(mode, field).items():
                     export_data[export_column].append(export_value)
-
-    # for column, values in export_data.items():
-    #     print(f'{column}: {len(values)} : {values}')
 
     return pd.DataFrame(export_data)

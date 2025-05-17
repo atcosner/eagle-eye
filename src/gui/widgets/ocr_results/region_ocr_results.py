@@ -9,7 +9,6 @@ from src.database.processed_region import ProcessedRegion
 from src.gui.widgets.result_fields.base import BaseField
 from src.gui.widgets.result_fields.checkbox_field import CheckboxField
 from src.gui.widgets.result_fields.multi_checkbox_field import MultiCheckboxField
-from src.gui.widgets.result_fields.multiline_text_field import MultilineTextField
 from src.gui.widgets.result_fields.text_field import TextField
 from src.gui.widgets.util.table_header import TableHeader
 
@@ -71,10 +70,6 @@ class RegionOcrResults(QWidget):
                 if field.text_field is not None:
                     logger.debug(f'Adding text field: {field.text_field.name}')
                     field_widget = TextField(field.text_field)
-
-                elif field.multiline_text_field is not None:
-                    logger.debug(f'Adding multi-line text field: {field.multiline_text_field.name}')
-                    field_widget = MultilineTextField(field.multiline_text_field)
 
                 elif field.checkbox_field is not None:
                     logger.debug(f'Adding checkbox field: {field.checkbox_field.name}')

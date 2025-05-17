@@ -20,6 +20,3 @@ class TextExporter(MappedAsDataclass, OrmBase):
 
     text_field_id: Mapped[int] = mapped_column(ForeignKey("text_field.id"), init=False, nullable=True)
     text_field: Mapped["TextField"] = relationship(init=False, back_populates="text_exporter")
-
-    multiline_text_field_id: Mapped[int] = mapped_column(ForeignKey("multiline_text_field.id"), init=False, nullable=True)
-    multiline_text_field: Mapped["MultilineTextField"] = relationship(init=False, back_populates="text_exporter")

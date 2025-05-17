@@ -176,6 +176,7 @@ class TextField(BaseField):
             field = session.get(ProcessedTextField, self._field_db_id)
 
             invalid_data, text = self.data_entry.get_data()
+            super().update_region_verification(field.processed_field, field.text, text)
             field.text = text
             field.validation_result = validation.validate_text_field(
                 field.text_field,
@@ -190,6 +191,6 @@ class TextField(BaseField):
                 field.text = correction_text
                 self.data_entry.set_data(correction_text)
 
-            # If this field is the identifier, we may need to update other things
+            # TODO: If this field is the identifier, we may need to update other things
 
             session.commit()

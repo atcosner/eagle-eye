@@ -1,9 +1,11 @@
 import logging
 from sqlalchemy.orm import Session
 
+from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QTabWidget, QVBoxLayout
 
 from src.database import Job, DB_ENGINE
+from src.util.validation import get_verified_icon
 
 from ..widgets.ocr_results.file_ocr_results import FileOcrResults
 
@@ -11,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class OcrResultCheck(QWidget):
+    continueToExport = pyqtSignal()
+
     def __init__(self):
         super().__init__()
 
@@ -33,5 +37,26 @@ class OcrResultCheck(QWidget):
 
             for file in job.input_files:
                 file_tab = FileOcrResults()
+                file_tab.verificationChange.connect(self.handle_verification_change)
                 file_tab.load_input_file(file)
-                self.file_tabs.addTab(file_tab, file.path.name)
+
+                tab_idx = self.file_tabs.addTab(file_tab, file.path.name)
+
+                # Add an icon to reflect the verification status
+                all_verified = all([region.human_verified for region in file.process_result.regions.values()])
+                self.file_tabs.setTabIcon(tab_idx, get_verified_icon(all_verified))
+
+    @pyqtSlot(bool, bool)
+    def handle_verification_change(self, new_status: bool, continue_check: bool) -> None:
+        current_idx = self.file_tabs.currentIndex()
+
+        # Update the icon for the tab
+        self.file_tabs.setTabIcon(current_idx, get_verified_icon(new_status))
+
+        if continue_check:
+            if current_idx >= self.file_tabs.count() - 1:
+                # Move to result export
+                self.continueToExport.emit()
+            else:
+                # Move to the next tab
+                self.file_tabs.setCurrentIndex(current_idx + 1)

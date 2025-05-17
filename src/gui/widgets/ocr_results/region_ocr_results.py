@@ -1,7 +1,8 @@
 import logging
 from sqlalchemy.orm import Session
 
-from PyQt6.QtWidgets import QWidget, QGridLayout
+from PyQt6.QtCore import pyqtSlot, pyqtSignal
+from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QCheckBox, QHBoxLayout, QVBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.processed_region import ProcessedRegion
@@ -16,16 +17,33 @@ logger = logging.getLogger(__name__)
 
 
 class RegionOcrResults(QWidget):
+    verificationChange = pyqtSignal(bool, bool)
+
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
+        self._region_db_id: int | None = None
 
         self.field_grid = QGridLayout()
         self.field_widgets: dict[int, BaseField] = {}
 
+        self.continue_button = QPushButton("Continue")
+        self.mark_verified_checkbox = QCheckBox('Mark as verified')
+
+        self.continue_button.pressed.connect(self.handle_continue)
+        self.mark_verified_checkbox.setChecked(True)
+
         self._set_up_layout()
 
     def _set_up_layout(self) -> None:
-        self.setLayout(self.field_grid)
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(self.continue_button)
+        button_layout.addWidget(self.mark_verified_checkbox)
+        button_layout.addStretch()
+
+        layout = QVBoxLayout()
+        layout.addLayout(self.field_grid)
+        layout.addLayout(button_layout)
+        self.setLayout(layout)
 
         # Add the headers to our grid
         self.field_grid.addWidget(TableHeader('Field Name'), 0, 0)
@@ -43,6 +61,7 @@ class RegionOcrResults(QWidget):
 
         with Session(DB_ENGINE) as session:
             region = session.get(ProcessedRegion, region) if isinstance(region, int) else region
+            self._region_db_id = region.id
             logger.info(f'Loading region: {region.id} - {region.name}')
 
             for field in region.fields:
@@ -69,6 +88,9 @@ class RegionOcrResults(QWidget):
                     logger.error(f'Processed field ({field.id}) did not have a field we could display')
                     continue
 
+                # Propagate verification removal getting set up
+                field_widget.flagUnverified.connect(lambda: self.verificationChange.emit(False, False))
+
                 # Add the field into the layout and the dictionary
                 field_widget.add_to_grid(row_idx, self.field_grid)
                 self.field_widgets[row_idx] = field_widget
@@ -76,3 +98,14 @@ class RegionOcrResults(QWidget):
     def handle_tab_shown(self) -> None:
         for widget in self.field_widgets.values():
             widget.update_link_data()
+
+    @pyqtSlot()
+    def handle_continue(self) -> None:
+        # Update the DB if we want to mark verification
+        if self.mark_verified_checkbox.isChecked():
+            with Session(DB_ENGINE) as session:
+                region = session.get(ProcessedRegion, self._region_db_id)
+                region.human_verified = True
+                session.commit()
+
+        self.verificationChange.emit(self.mark_verified_checkbox.isChecked(), True)

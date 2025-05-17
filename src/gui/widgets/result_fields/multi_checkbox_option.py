@@ -33,6 +33,9 @@ class MultiCheckboxOption(QWidget):
 
         self.setLayout(layout)
 
+    def to_tuple(self) -> tuple[bool, str]:
+        return self.checkbox.isChecked(), self.text_entry.text()
+
     @pyqtSlot(Qt.CheckState)
     def handle_checkbox_state_changed(self, state: Qt.CheckState) -> None:
         if state == Qt.CheckState.Checked:

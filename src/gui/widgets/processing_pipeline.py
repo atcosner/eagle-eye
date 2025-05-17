@@ -41,6 +41,7 @@ class ProcessingPipeline(QTabWidget):
         self.picker.filesConfirmed.connect(self.confirm_input_files)
         self.pre_processing.continueToNextStep.connect(self.pre_processing_done)
         self.processing.continueToNextStep.connect(self.processing_done)
+        self.result_check.continueToExport.connect(self.result_check_done)
 
     def _initial_state(self) -> None:
         # Disable tab 4 and 5 until we have completed OCR processing
@@ -127,3 +128,7 @@ class ProcessingPipeline(QTabWidget):
     def processing_done(self) -> None:
         self.result_check.load_job(self._job_id)
         self.gui_move_to_result_check()
+
+    @pyqtSlot()
+    def result_check_done(self) -> None:
+        self.setCurrentIndex(4)

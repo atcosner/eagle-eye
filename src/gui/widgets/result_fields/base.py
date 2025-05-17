@@ -1,6 +1,10 @@
+from typing import Any
+
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QLabel, QGridLayout
 
+from src.database.processed_fields.processed_field import ProcessedField
 from src.database.validation.validation_result import ValidationResult
 from src.util.validation import validation_result_image
 
@@ -8,6 +12,8 @@ from .util import wrap_in_frame
 
 
 class BaseField(QWidget):
+    flagUnverified = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self._field_db_id: int | None = None
@@ -39,3 +45,8 @@ class BaseField(QWidget):
 
     def update_link_data(self) -> None:
         pass
+
+    def update_region_verification(self, field: ProcessedField, prev_data: Any, new_data: Any) -> None:
+        if prev_data != new_data:
+            field.processed_region.human_verified = False
+            self.flagUnverified.emit()

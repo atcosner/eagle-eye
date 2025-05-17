@@ -33,4 +33,5 @@ class CheckboxField(BaseField):
 
         with Session(DB_ENGINE) as session:
             field = session.get(ProcessedCheckboxField, self._field_db_id)
+            super().update_region_verification(field.processed_field, field.checked, self.checkbox.isChecked())
             field.checked = self.checkbox.isChecked()

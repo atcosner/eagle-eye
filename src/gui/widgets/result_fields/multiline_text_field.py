@@ -14,6 +14,7 @@ class MultilineTextField(BaseField):
 
         self.text_input = QTextEdit()
         self.text_input.setMinimumWidth(350)
+        self.text_input.setTabChangesFocus(True)
 
         self.load_field(field)
 

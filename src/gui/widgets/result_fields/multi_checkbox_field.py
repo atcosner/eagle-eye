@@ -48,6 +48,10 @@ class MultiCheckboxField(BaseField):
         with Session(DB_ENGINE) as session:
             field = session.get(ProcessedMultiCheckboxField, self._field_db_id)
 
+            prev_data = [(option.checked, option.text) for option in field.checkboxes.values()]
+            new_data = [option.to_tuple() for option in self.options]
+            super().update_region_verification(field.processed_field, prev_data, new_data)
+
             for option in self.options:
                 option.update_db_state(session)
 

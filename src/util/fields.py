@@ -8,8 +8,6 @@ logger = logging.getLogger(__name__)
 def get_field_name_and_type(field: FormField) -> tuple[str | None, str | None]:
     if field.text_field is not None:
         return field.text_field.name, 'Text'
-    elif field.multiline_text_field is not None:
-        return field.multiline_text_field.name, 'Multiline Text'
     elif field.checkbox_field is not None:
         return field.checkbox_field.name, 'Checkbox'
     elif field.multi_checkbox_field is not None:

@@ -32,9 +32,6 @@ class FieldDetails(QWidget):
         if field.text_field is not None:
             pass
 
-        elif field.multiline_text_field is not None:
-            pass
-
         elif field.checkbox_field is not None:
             self.checkbox_details.load_field(field.checkbox_field)
             self.checkbox_details.setVisible(True)

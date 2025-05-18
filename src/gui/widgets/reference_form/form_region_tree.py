@@ -94,6 +94,7 @@ class FormRegionTree(QTreeWidget):
                 region = self.topLevelItem(idx)
                 if (matched_field := region.get_field(db_id)) is not None:
                     self.setCurrentItem(matched_field)
+                    return
 
             logger.warning(f'Did not find a field with ID: {db_id}')
 

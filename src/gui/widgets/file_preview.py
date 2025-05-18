@@ -77,6 +77,7 @@ class ImageViewer(QScrollArea):
 
     def update_cursor(self) -> None:
         if self.mouse_in_widget and self.control_pressed:
+            # TODO: Find a zoom cursor
             self.setCursor(QCursor(Qt.CursorShape.UpArrowCursor))
         else:
             self.setCursor(QCursor(Qt.CursorShape.SizeAllCursor))

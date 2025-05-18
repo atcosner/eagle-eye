@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QWheelEvent
+from PyQt6.QtGui import QWheelEvent, QKeyEvent, QCursor
 from PyQt6.QtWidgets import QGraphicsView
 
 from src.database.reference_form import ReferenceForm
@@ -19,6 +19,10 @@ class FormFieldCanvas(QGraphicsView):
         self.scene.load_reference_form(form)
         self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
+    #
+    # Qt Event Handlers
+    #
+
     def wheelEvent(self, event: QWheelEvent) -> None:
         if not (event.modifiers() & Qt.KeyboardModifier.ControlModifier):
             super().wheelEvent(event)
@@ -31,3 +35,16 @@ class FormFieldCanvas(QGraphicsView):
             self.scale(factor, factor)
 
             self.setTransformationAnchor(current_anchor)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.Key.Key_Control:
+            # TODO: Find a zoom cursor
+            self.setCursor(QCursor(Qt.CursorShape.UpArrowCursor))
+
+        super().keyPressEvent(event)
+
+    def keyReleaseEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.Key.Key_Control:
+            self.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+
+        super().keyReleaseEvent(event)

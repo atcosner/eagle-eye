@@ -6,6 +6,9 @@ from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem
 from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 
+from .fields.base import BaseField, FieldLabel
+from ..util.colors import REGION_COLORS
+
 
 class FormScene(QGraphicsScene):
     def __init__(self):
@@ -24,3 +27,12 @@ class FormScene(QGraphicsScene):
             self._form_db_id = form.id
 
             self.reference_pixmap = self.addPixmap(QPixmap(str(form.path)))
+
+            for region in form.regions.values():
+                region_color = REGION_COLORS[region.local_id]
+
+                for field in region.fields:
+                    qt_field = BaseField(field, region_color)
+                    self.addItem(qt_field)
+
+                    label = FieldLabel(qt_field, field.get_sub_field().name)

@@ -12,6 +12,7 @@ from src.util.fields import get_field_name_and_type
 from src.util.resources import GENERIC_ICON_PATH
 
 from .util import SelectionType
+from ..util.colors import get_icon_for_region
 
 
 class TreeItem(QTreeWidgetItem):
@@ -44,6 +45,7 @@ class RegionItem(TreeItem):
         self._populate(region)
 
     def _populate(self, region: FormRegion) -> None:
+        self.setIcon(0, get_icon_for_region(region.local_id))
         for field in region.fields:
             self.addChild(FieldItem(field))
 

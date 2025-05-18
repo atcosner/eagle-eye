@@ -23,3 +23,16 @@ class FormField(MappedAsDataclass, OrmBase):
     multi_checkbox_field: Mapped[MultiCheckboxField] = relationship(default=None, back_populates="form_field")
 
     form_region: Mapped["FormRegion"] = relationship(init=False, back_populates="fields")
+
+    #
+    # Custom Functions
+    #
+    def get_sub_field(self) -> TextField | CheckboxField | MultiCheckboxField:
+        if self.text_field is not None:
+            return self.text_field
+        elif self.checkbox_field is not None:
+            return self.checkbox_field
+        elif self.multi_checkbox_field is not None:
+            return self.multi_checkbox_field
+        else:
+            raise RuntimeError('FormField is missing subfield')

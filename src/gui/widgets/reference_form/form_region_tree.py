@@ -32,7 +32,7 @@ class FieldItem(TreeItem):
         self.setText(0, field_name)
         self.setText(1, field_type)
         if field.identifier:
-            self.setIcon(2, QIcon(str(GENERIC_ICON_PATH / 'good.png')))
+            self.setIcon(0, QIcon(str(GENERIC_ICON_PATH / 'good.png')))
 
 
 class RegionItem(TreeItem):
@@ -56,7 +56,7 @@ class FormRegionTree(QTreeWidget):
         self._form_db_id: int | None = None
 
         self.setColumnCount(2)
-        self.setHeaderLabels(['Name', 'Field Type', 'Identifier?'])
+        self.setHeaderLabels(['Name', 'Field Type'])
         self.setIconSize(QSize(10, 10))
 
         self.header().setStretchLastSection(False)

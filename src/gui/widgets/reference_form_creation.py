@@ -1,34 +1,33 @@
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QSplitter
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QGraphicsView
 
 from src.database.reference_form import ReferenceForm
 
-from .reference_form.form_region_tree import FormRegionTree
-from .reference_form.selection_details import SelectionDetails
+from .reference_form.field_browser import FieldBrowser
+from .reference_form.form_field_canvas import FormFieldCanvas
+from .util.line_splitter import LineSplitter
 
 
 class ReferenceFormCreation(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.region_tree = FormRegionTree()
-        self.selection_details = SelectionDetails()
+        self.field_canvas = FormFieldCanvas()
+        self.field_browser = FieldBrowser()
 
         self._set_up_layout()
-        self._connect_signals()
 
     def _set_up_layout(self) -> None:
-        splitter = QSplitter()
-        splitter.setOrientation(Qt.Orientation.Vertical)
-        splitter.addWidget(self.region_tree)
-        splitter.addWidget(self.selection_details)
+        splitter = LineSplitter()
+        splitter.addWidget(self.field_canvas)
+        splitter.addWidget(self.field_browser)
+
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 0)
 
         layout = QHBoxLayout()
         layout.addWidget(splitter)
         self.setLayout(layout)
 
-    def _connect_signals(self) -> None:
-        self.region_tree.updateDetails.connect(self.selection_details.load_details)
-
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
-        self.region_tree.load_reference_form(form)
+        self.field_canvas.load_reference_form(form)
+        self.field_browser.load_reference_form(form)

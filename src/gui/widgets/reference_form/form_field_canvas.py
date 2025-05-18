@@ -1,0 +1,33 @@
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QWheelEvent
+from PyQt6.QtWidgets import QGraphicsView
+
+from src.database.reference_form import ReferenceForm
+
+from .form_scene import FormScene
+
+
+class FormFieldCanvas(QGraphicsView):
+    def __init__(self):
+        super().__init__()
+        self.setMinimumWidth(600)
+
+        self.scene = FormScene()
+        self.setScene(self.scene)
+
+    def load_reference_form(self, form: ReferenceForm | int | None) -> None:
+        self.scene.load_reference_form(form)
+        self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        if not (event.modifiers() & Qt.KeyboardModifier.ControlModifier):
+            super().wheelEvent(event)
+        else:
+            # Zoom in/out
+            current_anchor = self.transformationAnchor()
+
+            self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
+            factor = 1.1 if event.angleDelta().y() > 0 else 0.9
+            self.scale(factor, factor)
+
+            self.setTransformationAnchor(current_anchor)

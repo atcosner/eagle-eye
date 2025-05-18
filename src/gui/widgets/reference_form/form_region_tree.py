@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import QSize, pyqtSignal, pyqtSlot
@@ -13,6 +14,8 @@ from src.util.resources import GENERIC_ICON_PATH
 
 from .util import SelectionType
 from ..util.colors import get_icon_for_region
+
+logger = logging.getLogger(__name__)
 
 
 class TreeItem(QTreeWidgetItem):
@@ -39,7 +42,6 @@ class FieldItem(TreeItem):
 class RegionItem(TreeItem):
     def __init__(self, region: FormRegion):
         super().__init__(region.id)
-
         self.setText(0, f'Region: {region.name}')
 
         self._populate(region)
@@ -48,6 +50,14 @@ class RegionItem(TreeItem):
         self.setIcon(0, get_icon_for_region(region.local_id))
         for field in region.fields:
             self.addChild(FieldItem(field))
+
+    def get_field(self, db_id: int) -> FieldItem | None:
+        for idx in range(self.childCount()):
+            child = self.child(idx)
+            if child.get_db_id() == db_id:
+                return child
+
+        return None
 
 
 class FormRegionTree(QTreeWidget):
@@ -77,6 +87,22 @@ class FormRegionTree(QTreeWidget):
 
             for region in form.regions.values():
                 self.addTopLevelItem(RegionItem(region))
+
+    def update_selection(self, selection: SelectionType, db_id: int) -> None:
+        if selection is SelectionType.FIELD:
+            for idx in range(self.topLevelItemCount()):
+                region = self.topLevelItem(idx)
+                if (matched_field := region.get_field(db_id)) is not None:
+                    self.setCurrentItem(matched_field)
+
+            logger.warning(f'Did not find a field with ID: {db_id}')
+
+        elif selection is SelectionType.REGION:
+            # TODO: implement this
+            pass
+
+        else:
+            logger.error(f'Unknown selection type: {selection}')
 
     @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
     def handle_current_item_change(self, current: TreeItem, _: TreeItem) -> None:

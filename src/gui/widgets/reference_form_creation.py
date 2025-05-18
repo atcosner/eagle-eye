@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QGraphicsView
+from PyQt6.QtWidgets import QWidget, QHBoxLayout
 
 from src.database.reference_form import ReferenceForm
 
@@ -15,6 +15,7 @@ class ReferenceFormCreation(QWidget):
         self.field_browser = FieldBrowser()
 
         self._set_up_layout()
+        self._connect_signals()
 
     def _set_up_layout(self) -> None:
         splitter = LineSplitter()
@@ -27,6 +28,10 @@ class ReferenceFormCreation(QWidget):
         layout = QHBoxLayout()
         layout.addWidget(splitter)
         self.setLayout(layout)
+
+    def _connect_signals(self) -> None:
+        self.field_browser.treeSelectionChange.connect(self.field_canvas.handle_tree_selection_change)
+        self.field_canvas.fieldSelected.connect(self.field_browser.handle_canvas_field_selected)
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self.field_canvas.load_reference_form(form)

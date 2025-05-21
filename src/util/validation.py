@@ -12,6 +12,11 @@ from .resources import GENERIC_ICON_PATH
 VALIDATION_ICON_SIZE = QSize(30, 30)
 VALID_TIME_FORMATS = ('h:mm', 'hh:mm')
 VALID_DATE_FORMATS = [
+    # formats produced by the qt widgets
+    'MM/dd/yyyy',
+    'M/d/yyyy',
+] + [
+    # formats we could see from user input
     ' '.join(x) for x in itertools.product(
         *[
             ('d', 'dd'),

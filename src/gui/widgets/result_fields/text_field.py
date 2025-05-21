@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QTime, QDate
 from PyQt6.QtWidgets import (
-    QLineEdit, QGridLayout, QWidget, QDateEdit, QTimeEdit, QComboBox, QVBoxLayout, QCheckBox, QHBoxLayout, QTextEdit,
+    QLineEdit, QGridLayout, QWidget, QVBoxLayout, QCheckBox, QHBoxLayout, QTextEdit,
 )
 
 import src.processing.validation as validation
@@ -15,9 +15,11 @@ from src.util.validation import validation_result_image, TextValidatorDatatype, 
 
 from .base import BaseField
 from .util import wrap_in_frame
+from ..util.search_combo_box import SearchComboBox
+from ..util.strong_focus_widgets import StrongFocusDateEdit, StrongFocusTimeEdit
 
 logger = logging.getLogger(__name__)
-WidgetTypeHint = QTextEdit | QLineEdit | QDateEdit | QTimeEdit | QComboBox
+WidgetTypeHint = QTextEdit | QLineEdit | StrongFocusDateEdit | StrongFocusTimeEdit | SearchComboBox
 
 
 #
@@ -41,18 +43,14 @@ class TextFieldEntryWidget(QWidget):
 
         match self.datatype:
             case TextValidatorDatatype.DATE:
-                self.input_widget = QDateEdit()
-                self.input_widget.setCalendarPopup(True)
+                self.input_widget = StrongFocusDateEdit()
                 self.input_widget.dateChanged.connect(self.dataChanged)
             case TextValidatorDatatype.TIME:
-                self.input_widget = QTimeEdit()
+                self.input_widget = StrongFocusTimeEdit()
                 self.input_widget.timeChanged.connect(self.dataChanged)
             case TextValidatorDatatype.LIST_CHOICE:
-                self.input_widget = QComboBox()
-                self.input_widget.addItem('<NO MATCH>')
+                self.input_widget = SearchComboBox()
                 self.input_widget.addItems(sorted([choice.text for choice in validator.text_choices]))
-                self.input_widget.setEditable(True)
-                self.input_widget.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
                 self.input_widget.currentTextChanged.connect(self.dataChanged)
 
         self._set_up_layout()
@@ -157,6 +155,7 @@ class TextField(BaseField):
         layout = QHBoxLayout()
         layout.addWidget(self.link_checkbox)
         layout.addWidget(self.data_entry)
+        layout.addStretch()
         grid.addWidget(wrap_in_frame(layout), row_idx, 2)
 
     def update_link_data(self) -> None:

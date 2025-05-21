@@ -102,7 +102,7 @@ class ProcessWorker(QObject):
         # Check if we should search for a linking field
         copied_from_linked = False if field.allow_copy else None
         linked_field_id = None
-        if field.allow_copy and process_util.should_copy_from_previous(ocr_result):
+        if field.allow_copy:
             link_field = process_util.locate_linked_field(
                 link_method=linking_method,
                 current_field=field,
@@ -114,9 +114,11 @@ class ProcessWorker(QObject):
                 self.log.warning(f'Failed to locate a field to link to')
             else:
                 self.log.info(f'Located linked field: {link_field.name} ({link_field.id}) -> "{link_field.text}"')
-                copied_from_linked = True
-                ocr_result = link_field.text
                 linked_field_id = link_field.id
+
+                if process_util.should_copy_from_previous(ocr_result):
+                    copied_from_linked = True
+                    ocr_result = link_field.text
 
         # Validate the field
         validation_result = validation.validate_text_field(field, ocr_result, allow_fuzzy=True)

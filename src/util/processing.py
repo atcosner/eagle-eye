@@ -134,8 +134,14 @@ def locate_linked_field(
                 logger.warning(f'PREVIOUS_REGION: Could not locate region with id {linked_region_id}')
                 return None
 
+            logger.info(f'Located region with id {linked_region_id} - {linked_region.name}')
+
             # Find the field that matches us
-            matched_fields = [field for field in linked_region.fields if field.text_field.name == current_field.name]
+            matched_fields = [
+                field
+                for field in linked_region.fields
+                if field.text_field and field.text_field.name == current_field.name
+            ]
             return matched_fields[0].text_field if matched_fields else None
 
         case FormLinkingMethod.PREVIOUS_IDENTIFIER:

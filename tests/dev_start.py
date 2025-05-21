@@ -22,14 +22,14 @@ window.start(auto_new_job=True)
 file_path = Path(__file__)
 project_path = None
 for parent in file_path.parents:
-    if parent.name == 'eagle-eye-qt':
+    if parent.name == 'eagle-eye':
         project_path = parent
         break
 print(f'Project path: {project_path}')
 assert project_path is not None
 
 # Add some files to the selector
-dev_path = project_path / 'src' / 'eagle-eye' / 'form_templates' / 'dev'
+dev_path = project_path / 'tests' / 'misc_files'
 window.processing_pipeline.picker.file_list.file_list.add_items([
     # use forms with real data
     dev_path / '40013-40014.jpg',

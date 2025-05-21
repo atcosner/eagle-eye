@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="db_setup" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-    <module name="eagle-eye-gui" />
+    <module name="eagle-eye" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />

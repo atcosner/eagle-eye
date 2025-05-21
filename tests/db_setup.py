@@ -117,7 +117,7 @@ if LocalPaths.database_file().exists():
 file_path = Path(__file__)
 project_path = None
 for parent in file_path.parents:
-    if parent.name == 'eagle-eye-qt':
+    if parent.name == 'eagle-eye':
         project_path = parent
         break
 print(f'Project path: {project_path}')
@@ -129,17 +129,17 @@ def _read_species_list(path: Path) -> set[str]:
 
 
 # Read in the list of species on import
-species_list = project_path / 'src' / 'eagle-eye' / 'validation' / 'ku_orn_taxonomy_reference.csv'
+species_list = project_path / 'tests' / 'misc_files' / 'ku_orn_taxonomy_reference.csv'
 ORNITHOLOGY_SPECIES_LIST = _read_species_list(species_list)
 
 
-# Copy the reference image into the working diectory
+# Copy the reference image into the working directory
 reference_forms = LocalPaths.reference_forms_directory()
 reference_forms.mkdir(exist_ok=True)
 
 REFERENCE_FORM_FILENAME = 'kt_field_form_v8.png'
 shutil.copy(
-    project_path / 'src' / 'eagle-eye' / 'form_templates' / 'production' / REFERENCE_FORM_FILENAME,
+    project_path / 'tests' / 'misc_files' / REFERENCE_FORM_FILENAME,
     reference_forms / REFERENCE_FORM_FILENAME,
 )
 

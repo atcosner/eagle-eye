@@ -51,6 +51,8 @@ class TextFieldEntryWidget(QWidget):
                 self.input_widget = QComboBox()
                 self.input_widget.addItem('<NO MATCH>')
                 self.input_widget.addItems(sorted([choice.text for choice in validator.text_choices]))
+                self.input_widget.setEditable(True)
+                self.input_widget.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
                 self.input_widget.currentTextChanged.connect(self.dataChanged)
 
         self._set_up_layout()
@@ -109,7 +111,10 @@ class TextFieldEntryWidget(QWidget):
             case TextValidatorDatatype.LIST_CHOICE:
                 return self.invalid_data, self.input_widget.currentText()
             case _:
-                return self.invalid_data, self.input_widget.text()
+                if isinstance(self.input_widget, QTextEdit):
+                    return self.invalid_data, self.input_widget.toPlainText()
+                else:
+                    return self.invalid_data, self.input_widget.text()
 
 
 class TextField(BaseField):
@@ -163,8 +168,14 @@ class TextField(BaseField):
             field.copied_from_linked = linking
             session.commit()
 
+            # TODO: Do not allow linking if we do not have a linked field id
+
             # If linking was turned on, update our data
             if linking:
+                if field.linked_field_id is None:
+                    logger.error(f'Field {field.name} does not have a linked field ID')
+                    return
+
                 link_field = session.get(ProcessedTextField, field.linked_field_id)
                 if link_field is None:
                     logger.error(f'Could not find linked field: {field.linked_field_id}')
@@ -200,6 +211,6 @@ class TextField(BaseField):
                 field.text = correction_text
                 self.data_entry.set_data(correction_text)
 
-            # TODO: If this field is the identifier, we may need to update other things
+            # TODO: If this field is the identifier, we may need to recheck all fields for linking
 
             session.commit()

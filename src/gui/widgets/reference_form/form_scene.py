@@ -5,7 +5,7 @@ from PyQt6.QtCore import pyqtSignal, pyqtSlot
 from sqlalchemy.orm import Session
 
 from PyQt6.QtGui import QPixmap, QColor
-from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItemGroup, QGraphicsItem
+from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItemGroup
 
 from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm

@@ -1,9 +1,9 @@
 from typing import Any
 
 from PyQt6.QtCore import Qt, QRectF
-from PyQt6.QtGui import QColor, QPainter, QCursor
+from PyQt6.QtGui import QColor, QPainter
 from PyQt6.QtWidgets import QGraphicsItem, QGraphicsSimpleTextItem, QWidget, \
-    QStyleOptionGraphicsItem, QStyle, QGraphicsSceneHoverEvent
+    QStyleOptionGraphicsItem, QStyle, QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
 
 from src.database.fields.form_field import FormField
 
@@ -15,33 +15,14 @@ class FieldLabel(QGraphicsSimpleTextItem):
         super().__init__(text, parent=parent)
 
 
-# class BaseField(QGraphicsRectItem):
-#     def __init__(self, field: FormField, color: QColor) -> None:
-#         super().__init__()
-#         self._field_db_id = field.id
-#         sub_field = field.get_sub_field()
-#
-#         location_rect = sub_field.visual_region.to_qt_rect()
-#         self.setRect(location_rect)
-#         self.setPen(QPen(color))
-#         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
-#         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
-#
-#         self.label = FieldLabel(self, sub_field.name)
-#         self.label.setPos(location_rect.topLeft())
-#
-#     def get_db_id(self) -> int:
-#         return self._field_db_id
-
-
 class ResizeBox(QGraphicsItem):
     def __init__(self, parent: QGraphicsItem, color: QColor, anchors: int):
         super().__init__(parent)
         self.color = color
 
         self.setAcceptHoverEvents(True)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
-        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
+        # self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
+        # self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
         # determine our initial position
         parent_rect = parent.boundingRect()
@@ -50,6 +31,20 @@ class ResizeBox(QGraphicsItem):
     #
     # Qt overrides
     #
+
+    def mousePressEvent(self, event) -> None:
+        print('mouse press')
+
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        print('mouse move')
+        x_change = event.scenePos().x() - event.lastScenePos().x()
+        y_change = event.scenePos().y() - event.lastScenePos().y()
+        self.parentItem().handle_child_resize(x_change, y_change)
+
+    def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
+        if change == QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
+            print(f'child selected: {value}')
+        return super().itemChange(change, value)
 
     def boundingRect(self) -> QRectF:
         return self.position_rect
@@ -104,6 +99,11 @@ class ResizableField(QGraphicsItem):
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
 
+    def handle_child_resize(self, delta_x: int, delta_y: int) -> None:
+        self.prepareGeometryChange()
+        self.position_rect.setWidth(self.position_rect.width() + delta_x)
+        self.position_rect.setHeight(self.position_rect.height() + delta_y)
+
     #
     # Qt overrides
     #
@@ -122,7 +122,6 @@ class ResizableField(QGraphicsItem):
         if change == QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.selected = value
             self.update_cursor()
-            print(self.isSelected())
             for anchor in self.resize_anchors:
                 anchor.setSelected(True)
                 anchor.setVisible(value)

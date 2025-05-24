@@ -79,7 +79,7 @@ class JobSelector(QDialog):
                 job_item = QTreeWidgetItem()
                 job_item.setText(0, str(row.Job.id))
                 job_item.setText(1, row.Job.name)
-                job_item.setText(2, '<NO STATUS>')
+                job_item.setText(2, row.Job.get_status_str())
                 self.existing_job_list.addTopLevelItem(job_item)
 
         # Disable the existing job widgets if we loaded no jobs

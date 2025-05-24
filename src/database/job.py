@@ -19,3 +19,33 @@ class Job(MappedAsDataclass, OrmBase):
 
     reference_form: Mapped["ReferenceForm"] = relationship(init=False, back_populates="jobs")
     input_files: Mapped[list[InputFile]] = relationship(init=False, back_populates="job")
+
+    #
+    # Custom Functions
+    #
+    def get_status_str(self) -> str:
+        if not self.input_files:
+            return 'Picking Files'
+
+        all_pre_processed = all([(file.pre_process_result is not None) for file in self.input_files])
+        all_processed = all([(file.process_result is not None) for file in self.input_files])
+
+        all_verified = True
+        for file in self.input_files:
+            if file.process_result is None:
+                all_verified = False
+                continue
+            else:
+                region_statuses = [region.human_verified for region in file.process_result.regions.values()]
+                if not all(region_statuses):
+                    all_verified = False
+                    continue
+
+        if all_verified:
+            return 'Complete'
+        elif all_processed:
+            return 'Checking Results'
+        elif all_pre_processed:
+            return 'Processing'
+        else:
+            return 'Pre-Processing'

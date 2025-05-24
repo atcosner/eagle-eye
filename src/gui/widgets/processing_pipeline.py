@@ -44,11 +44,15 @@ class ProcessingPipeline(QTabWidget):
         self.result_check.continueToExport.connect(self.result_check_done)
 
     def _initial_state(self) -> None:
-        # Disable tab 4 and 5 until we have completed OCR processing
+        self.setCurrentIndex(0)
+
+        # Disable steps 4 and 5 until we have completed OCR processing
         self.setTabEnabled(3, False)
         self.setTabEnabled(4, False)
 
     def load_job(self, job_id: int) -> None:
+        self._initial_state()
+
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job_id)
             self._job_id = job_id

@@ -1,5 +1,7 @@
 import logging
 import uuid
+
+from PyQt6.QtCore import pyqtSlot
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
@@ -9,7 +11,7 @@ from src.database.job import Job
 from src.util.paths import LocalPaths
 
 from .base import BaseWindow
-from .job_selector import JobDetails, JobSelector
+from ..widgets.job.job_selector import JobDetails, JobSelector
 from ..widgets.job_manager import JobManager
 
 logger = logging.getLogger(__name__)
@@ -38,11 +40,35 @@ class MainWindow(BaseWindow):
         self.job_widget = JobManager()
 
         self._set_up_layout()
+        self._create_menu_bar()
 
     def _set_up_layout(self) -> None:
         self.setMinimumHeight(700)
         self.setMinimumWidth(1100)
         self.setCentralWidget(self.job_widget)
+
+    def _create_menu_bar(self) -> None:
+        file_menu = self.menuBar().addMenu('File')
+        file_menu.addAction('New Job').triggered.connect(lambda: self.handle_change_job(True))
+        file_menu.addAction('Open Job').triggered.connect(lambda: self.handle_change_job(False))
+        file_menu.addSeparator()
+        file_menu.addAction('Exit').triggered.connect(self.close)
+
+    @pyqtSlot()
+    def handle_change_job(self, allow_new_jobs: bool) -> None:
+        selector = JobSelector(self, allow_new_jobs=allow_new_jobs)
+        if not selector.exec():
+            return
+
+        self.load_job(selector.get_selected_job())
+
+    def load_job(self, details: JobDetails) -> None:
+        logger.info(f'Loading job: {details}')
+        if details.db_id is None:
+            job_id = create_job(details.job_name)
+            self.job_widget.load_job(job_id)
+        else:
+            self.job_widget.load_job(details.db_id)
 
     def start(
             self,
@@ -56,16 +82,9 @@ class MainWindow(BaseWindow):
         elif load_latest_job:
             details = JobDetails(db_id=get_latest_job_id(), job_name=None)
         else:
-            selector = JobSelector(self)
+            selector = JobSelector(self, allow_new_jobs=True)
             if not selector.exec():
                 return
-
             details = selector.get_selected_job()
 
-        # Determine if we are creating a new job or loading one
-        logger.info(f'Selected job: {details}')
-        if details.db_id is None:
-            job_id = create_job(details.job_name)
-            self.job_widget.load_job(job_id)
-        else:
-            self.job_widget.load_job(details.db_id)
+        self.load_job(details)

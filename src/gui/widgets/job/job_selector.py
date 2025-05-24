@@ -1,16 +1,10 @@
 import uuid
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 from typing import NamedTuple
 
 from PyQt6.QtCore import pyqtSlot, Qt
-from PyQt6.QtWidgets import (
-    QRadioButton, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QPushButton, QDialog,
-    QLineEdit, QTreeWidget, QTreeWidgetItem, QHeaderView,
-)
+from PyQt6.QtWidgets import QRadioButton, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QPushButton, QDialog, QLineEdit
 
-from src.database import DB_ENGINE
-from src.database.job import Job
+from .existing_job_tree import ExistingJobTree
 
 
 class JobDetails(NamedTuple):
@@ -19,7 +13,7 @@ class JobDetails(NamedTuple):
 
 
 class JobSelector(QDialog):
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget, allow_new_jobs: bool = True):
         super().__init__(parent)
         self.setWindowTitle('Job Selection')
         self.setMinimumWidth(450)
@@ -29,14 +23,7 @@ class JobSelector(QDialog):
         self.new_job_name.setPlaceholderText(str(uuid.uuid4()))
 
         self.existing_job_button = QRadioButton('Continue an existing job', self)
-
-        self.existing_job_list = QTreeWidget()
-        self.existing_job_list.setDisabled(True)
-        self.existing_job_list.setColumnCount(3)
-        # self.existing_job_list.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.existing_job_list.setHeaderLabels(['ID', 'Job Name', 'Status'])
-        self.existing_job_list.header().setStretchLastSection(False)
-        self.existing_job_list.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.existing_jobs = ExistingJobTree()
 
         self.start_button = QPushButton('Start')
         self.start_button.pressed.connect(self.accept)
@@ -45,8 +32,17 @@ class JobSelector(QDialog):
         self.new_job_button.toggled.connect(self.toggle_visibility)
         self.existing_job_button.toggled.connect(self.toggle_visibility)
 
+        # Disable selecting existing jobs if there are none loaded
+        if not self.existing_jobs.get_job_count():
+            self.existing_job_button.setDisabled(True)
+            self.existing_jobs.setDisabled(True)
+
+        if not allow_new_jobs:
+            self.new_job_button.setDisabled(True)
+            self.new_job_name.setDisabled(True)
+            self.existing_job_button.setChecked(True)
+
         self._set_up_layout()
-        self._populate_jobs()
 
     def _set_up_layout(self) -> None:
         layout = QVBoxLayout()
@@ -64,7 +60,7 @@ class JobSelector(QDialog):
         layout.addLayout(divider_layout)
 
         layout.addWidget(self.existing_job_button)
-        layout.addWidget(self.existing_job_list)
+        layout.addWidget(self.existing_jobs)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -73,29 +69,10 @@ class JobSelector(QDialog):
 
         self.setLayout(layout)
 
-    def _populate_jobs(self) -> None:
-        with Session(DB_ENGINE) as session:
-            for row in session.execute(select(Job)):
-                job_item = QTreeWidgetItem()
-                job_item.setText(0, str(row.Job.id))
-                job_item.setText(1, row.Job.name)
-                job_item.setText(2, row.Job.get_status_str())
-                self.existing_job_list.addTopLevelItem(job_item)
-
-        # Disable the existing job widgets if we loaded no jobs
-        if self.existing_job_list.topLevelItemCount() == 0:
-            self.existing_job_button.setDisabled(True)
-            self.existing_job_list.setDisabled(True)
-        else:
-            # Select the newest job
-            self.existing_job_list.setCurrentItem(
-                self.existing_job_list.topLevelItem(self.existing_job_list.topLevelItemCount() - 1)
-            )
-
     @pyqtSlot()
     def toggle_visibility(self) -> None:
         self.new_job_name.setDisabled(self.existing_job_button.isChecked())
-        self.existing_job_list.setDisabled(self.new_job_button.isChecked())
+        self.existing_jobs.setDisabled(self.new_job_button.isChecked())
 
     def get_selected_job(self) -> JobDetails:
         if self.new_job_button.isChecked():
@@ -104,8 +81,7 @@ class JobSelector(QDialog):
                 job_name=self.new_job_name.text() if self.new_job_name.text() else self.new_job_name.placeholderText(),
             )
         else:
-            selected_job = self.existing_job_list.selectedItems()[0]
             return JobDetails(
-                db_id=int(selected_job.text(0)),
+                db_id=self.existing_jobs.get_selected_job_id(),
                 job_name=None,
             )

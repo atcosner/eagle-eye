@@ -55,6 +55,7 @@ class FileDropList(QListWidget):
         self._job_db_uuid = job.uuid if job else None
 
         # Load in the input files if we are loading a job
+        self.clear()
         if job is not None:
             for input_file in job.input_files:
                 self.add_item(input_file.path, db_id=input_file.id)

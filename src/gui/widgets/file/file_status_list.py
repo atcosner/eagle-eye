@@ -4,8 +4,6 @@ from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView, QLabel
 
 from typing import Iterable
 
-from numpy.version import git_revision
-
 from src.util.resources import FILE_TYPE_ICON_PATH
 from src.util.status import FileStatus, get_icon_for_status
 from src.util.types import FileDetails

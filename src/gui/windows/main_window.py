@@ -13,6 +13,7 @@ from src.util.paths import LocalPaths
 from .base import BaseWindow
 from ..widgets.job.job_selector import JobDetails, JobSelector
 from ..widgets.job_manager import JobManager
+from ..windows.about_us import AboutUs
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,9 @@ class MainWindow(BaseWindow):
         file_menu.addAction('Open Job').triggered.connect(lambda: self.handle_change_job(False))
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
+
+        help_menu = self.menuBar().addMenu('Help')
+        help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).show())
 
     @pyqtSlot()
     def handle_change_job(self, allow_new_jobs: bool) -> None:

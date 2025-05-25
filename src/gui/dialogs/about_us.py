@@ -1,17 +1,18 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QTextEdit
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QTextEdit, QDialog
 
 from src.util.resources import RESOURCES_PATH
 
-from .base import BaseWindow
-from ..widgets.util.link_label import LinkLabel
+from src.gui.widgets.util.link_label import LinkLabel
 
 
-class AboutUs(BaseWindow):
+class AboutUs(QDialog):
     def __init__(self, parent: QWidget | None):
-        super().__init__(parent, 'About Us')
+        super().__init__(parent)
+        self.setWindowTitle('About Us')
         self.setMinimumWidth(400)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
 
         self.title_label = QLabel('Eagle Eye')
         self.logo_label = QLabel()
@@ -22,7 +23,6 @@ class AboutUs(BaseWindow):
 
         self._initial_setup()
         self._set_up_layout()
-        self.show()
 
     def _initial_setup(self) -> None:
         pixmap = QPixmap(str(RESOURCES_PATH / 'white_icon.png')).scaled(
@@ -66,6 +66,4 @@ class AboutUs(BaseWindow):
         layout.addLayout(github_layout)
         layout.addWidget(self.description)
 
-        widget = QWidget()
-        widget.setLayout(layout)
-        self.setCentralWidget(widget)
+        self.setLayout(layout)

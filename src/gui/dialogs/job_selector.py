@@ -1,10 +1,10 @@
 import uuid
 from typing import NamedTuple
 
-from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QRadioButton, QVBoxLayout, QLabel, QWidget, QHBoxLayout, QPushButton, QDialog, QLineEdit
 
-from .existing_job_tree import ExistingJobTree
+from ..widgets.job.existing_job_tree import ExistingJobTree
 
 
 class JobDetails(NamedTuple):

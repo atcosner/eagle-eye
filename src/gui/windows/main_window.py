@@ -11,9 +11,9 @@ from src.database.job import Job
 from src.util.paths import LocalPaths
 
 from .base import BaseWindow
-from ..widgets.job.job_selector import JobDetails, JobSelector
+from ..dialogs.about_us import AboutUs
+from ..dialogs.job_selector import JobDetails, JobSelector
 from ..widgets.job_manager import JobManager
-from ..windows.about_us import AboutUs
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +55,14 @@ class MainWindow(BaseWindow):
         file_menu.addSeparator()
         file_menu.addAction('Exit').triggered.connect(self.close)
 
+        form_menu = self.menuBar().addMenu('Reference Form')
+        form_menu.addAction('View Reference Forms').triggered.connect(lambda: self.handle_change_job(True))
+        # form_menu.addSeparator()
+        # form_menu.addAction('Create New Reference Form').triggered.connect(lambda: self.handle_change_job(True))
+        form_menu.addAction('Edit Existing Reference Form').triggered.connect(lambda: self.handle_change_job(False))
+
         help_menu = self.menuBar().addMenu('Help')
-        help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).show())
+        help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).exec())
 
     @pyqtSlot()
     def handle_change_job(self, allow_new_jobs: bool) -> None:

@@ -15,6 +15,7 @@ class JobManager(QWidget):
     def __init__(self):
         super().__init__()
         self._job_db_id: int | None = None
+        self._reference_form_db_id: int | None = None
 
         self.job_name = QLineEdit(self)
         self.job_name.setDisabled(True)
@@ -53,12 +54,16 @@ class JobManager(QWidget):
         self.reference_form_selector.setDisabled(not enabled)
         self.processing_pipeline.setDisabled(not enabled)
 
+    def get_current_reference_form_id(self) -> int | None:
+        return self._reference_form_db_id
+
     @pyqtSlot()
     def handle_input_files_confirmed(self) -> None:
         self.reference_form_selector.setDisabled(True)
 
     @pyqtSlot(int)
     def handle_reference_form_change(self, _: int) -> None:
+        self._reference_form_db_id = self.reference_form_selector.currentData()
         self.processing_pipeline.change_reference_form(self.reference_form_selector.currentData())
 
     def load_job(self, job_id: int) -> None:
@@ -67,6 +72,7 @@ class JobManager(QWidget):
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job_id)
             self._job_db_id = job_id
+            self._reference_form_db_id = job.reference_form.id if job.reference_form is not None else None
 
             self.job_name.setText(job.name)
             self.processing_pipeline.load_job(job_id)

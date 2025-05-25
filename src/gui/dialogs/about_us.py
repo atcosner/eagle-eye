@@ -12,7 +12,6 @@ class AboutUs(QDialog):
         super().__init__(parent)
         self.setWindowTitle('About Us')
         self.setMinimumWidth(400)
-        self.setWindowModality(Qt.WindowModality.WindowModal)
 
         self.title_label = QLabel('Eagle Eye')
         self.logo_label = QLabel()

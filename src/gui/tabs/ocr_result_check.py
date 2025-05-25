@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class OcrResultCheck(QWidget):
-    continueToExport = pyqtSignal()
+    continueToNextStep = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -57,7 +57,7 @@ class OcrResultCheck(QWidget):
         if continue_check:
             if current_idx >= self.file_tabs.count() - 1:
                 # Move to result export
-                self.continueToExport.emit()
+                self.continueToNextStep.emit()
             else:
                 # Move to the next tab
                 self.file_tabs.setCurrentIndex(current_idx + 1)

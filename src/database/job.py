@@ -23,6 +23,28 @@ class Job(MappedAsDataclass, OrmBase):
     #
     # Custom Functions
     #
+    def _pre_processing_statuses(self) -> list[bool]:
+        return [(file.pre_process_result is not None) for file in self.input_files]
+
+    def _processing_statuses(self) -> list[bool]:
+        return [(file.process_result is not None) for file in self.input_files]
+
+    def any_pre_processed(self) -> bool:
+        statuses = self._pre_processing_statuses()
+        return statuses and any(statuses)
+
+    def all_pre_processed(self) -> bool:
+        statuses = self._pre_processing_statuses()
+        return statuses and all(statuses)
+
+    def any_processed(self) -> bool:
+        statuses = self._processing_statuses()
+        return statuses and any(statuses)
+
+    def all_processed(self) -> bool:
+        statuses = self._processing_statuses()
+        return statuses and all(statuses)
+
     def get_status_str(self) -> str:
         if not self.input_files:
             return 'Picking Files'

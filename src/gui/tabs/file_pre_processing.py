@@ -19,7 +19,7 @@ class FilePreProcessing(ProcessingStep):
             details_cls=PreProcessingDetails,
         )
 
-    def load_job(self, job: Job | int | None) -> None:
+    def load_job(self, job: Job | int | None, load_all: bool = False) -> None:
         super().load_job(job)
         if job is None:
             return
@@ -29,11 +29,8 @@ class FilePreProcessing(ProcessingStep):
             job = session.get(Job, job) if isinstance(job, int) else job
             self._job_db_id = job.id
 
-            # Check if any of the files have a pre-processing result
-            any_pre_process = any([(input_file.pre_process_result is not None) for input_file in job.input_files])
-
             # If any files had a pre-processing result, add them all
-            if any_pre_process:
+            if load_all or job.any_pre_processed():
                 for input_file in job.input_files:
                     # Determine the initial status
                     initial_status = FileStatus.PENDING

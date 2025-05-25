@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
@@ -12,6 +13,8 @@ from src.gui.tabs.file_processing import FileProcessing
 from src.gui.tabs.ocr_result_check import OcrResultCheck
 from src.gui.tabs.result_export import ResultExport
 from src.util.types import FileDetails
+
+logger = logging.getLogger(__name__)
 
 
 class ProcessingPipeline(QTabWidget):
@@ -38,10 +41,10 @@ class ProcessingPipeline(QTabWidget):
         self._initial_state()
 
     def _connect_signals(self) -> None:
-        self.picker.filesConfirmed.connect(self.confirm_input_files)
+        self.picker.continueToNextStep.connect(self.file_picking_done)
         self.pre_processing.continueToNextStep.connect(self.pre_processing_done)
         self.processing.continueToNextStep.connect(self.processing_done)
-        self.result_check.continueToExport.connect(self.result_check_done)
+        self.result_check.continueToNextStep.connect(self.result_check_done)
 
     def _initial_state(self) -> None:
         self.setCurrentIndex(0)
@@ -54,7 +57,7 @@ class ProcessingPipeline(QTabWidget):
         self._initial_state()
 
         with Session(DB_ENGINE) as session:
-            job = session.get(Job, job_id)
+            job: Job | None = session.get(Job, job_id)
             self._job_id = job_id
 
             self.picker.load_job(job)
@@ -64,17 +67,15 @@ class ProcessingPipeline(QTabWidget):
             self.result_export.load_job(job)
 
             # Check if any of the input files have been pre-processed
-            pre_process_results = [(input_file.pre_process_result is not None) for input_file in job.input_files]
-            if any(pre_process_results):
+            if job.any_pre_processed():
                 self.gui_move_to_pre_processing()
 
             # If all the files have been pre-processed, move to step 3
-            if pre_process_results and all(pre_process_results):
+            if job.all_pre_processed():
                 self.gui_move_to_processing()
 
             # If all the files have been OCR'd, move to step 4
-            process_results = [(input_file.process_result is not None) for input_file in job.input_files]
-            if process_results and all(process_results):
+            if job.all_processed():
                 self.gui_move_to_result_check()
 
     def gui_move_to_pre_processing(self) -> None:
@@ -105,10 +106,12 @@ class ProcessingPipeline(QTabWidget):
     def change_reference_form(self, db_id: int | None) -> None:
         self._reference_form_id = db_id
 
-    @pyqtSlot(list)
-    def confirm_input_files(self, files: list[FileDetails]) -> None:
+    @pyqtSlot()
+    def file_picking_done(self) -> None:
         # Do nothing if we have no reference form selected
         if self._reference_form_id is None:
+            # TODO: warn user
+            logger.error('No reference form selected')
             return
 
         # Add the selected reference form to the job
@@ -118,9 +121,7 @@ class ProcessingPipeline(QTabWidget):
             job.reference_form = reference_form
             session.commit()
 
-        self.pre_processing.add_files(files)
-
-        # Move to pre-processing
+        self.pre_processing.load_job(self._job_id, load_all=True)
         self.gui_move_to_pre_processing()
 
     @pyqtSlot()

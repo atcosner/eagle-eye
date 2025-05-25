@@ -47,7 +47,7 @@ class FileListWithButton(QWidget):
 
 
 class FilePicker(QWidget):
-    filesConfirmed = pyqtSignal(list)  # list[InputFileDetails]
+    continueToNextStep = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -60,7 +60,7 @@ class FilePicker(QWidget):
         self.file_list.file_list.currentItemChanged.connect(self.update_preview)
 
         self.confirm_files_button = QPushButton('Confirm Files')
-        self.confirm_files_button.pressed.connect(self.confirm_files)
+        self.confirm_files_button.pressed.connect(self.continueToNextStep)
 
         self.splitter = QSplitter()
         self.splitter.addWidget(self.file_list)
@@ -92,12 +92,3 @@ class FilePicker(QWidget):
     @pyqtSlot(QListWidgetItem, QListWidgetItem)
     def update_preview(self, current: FileItem, _: FileItem):
         self.file_preview.update_preview(current.path())
-
-    @pyqtSlot()
-    def confirm_files(self) -> None:
-        files = self.file_list.get_files()
-        logger.info('Confirming selected files:')
-        for file in files:
-            logger.info(file)
-
-        self.filesConfirmed.emit(files)

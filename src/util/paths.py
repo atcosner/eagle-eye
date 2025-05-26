@@ -7,6 +7,11 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
+def is_pdf(path: Path) -> bool:
+    # TODO: is there a better way?
+    return path.suffix == '.pdf'
+
+
 def get_user_data_dir() -> Path | None:
     system = platform.system()
 

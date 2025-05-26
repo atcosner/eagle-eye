@@ -7,12 +7,13 @@ from typing import Iterable
 
 from PyQt6.QtCore import QSize, QMimeData, QMimeDatabase, QUrl
 from PyQt6.QtGui import QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
+from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtWidgets import QWidget, QListWidget, QListWidgetItem
 
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.database.job import Job
-from src.util.paths import LocalPaths
+from src.util.paths import LocalPaths, is_pdf
 from src.util.resources import FILE_TYPE_ICON_PATH
 from src.util.types import FileDetails
 
@@ -26,7 +27,7 @@ class FileItem(QListWidgetItem):
         self._path = file_path
 
         self.setText(file_path.name)
-        icon_file_name = 'pdf_icon.png' if file_path.suffix == '.pdf' else 'image_icon.png'
+        icon_file_name = 'pdf_icon.png' if is_pdf(file_path) else 'image_icon.png'
         self.setIcon(QIcon(str(FILE_TYPE_ICON_PATH / icon_file_name)))
 
     def path(self) -> Path:
@@ -58,7 +59,9 @@ class FileDropList(QListWidget):
         self.clear()
         if job is not None:
             for input_file in job.input_files:
-                self.add_item(input_file.path, db_id=input_file.id)
+                # ignore files that are linked to another file
+                if input_file.linked_input_file is None:
+                    self.add_item(input_file.path, db_id=input_file.id)
 
     def check_drag_event(self, data: QMimeData) -> bool:
         if not data.hasUrls():
@@ -83,21 +86,34 @@ class FileDropList(QListWidget):
             # Add it to the job in the DB
             with Session(DB_ENGINE) as session:
                 job = session.get(Job, self._job_db_id)
-                input_file = InputFile(path=file_path)
 
+                input_file = InputFile(path=file_path)
                 job.input_files.append(input_file)
                 session.commit()
-
                 db_id = input_file.id
 
-            # Copy the file into our internal storage
-            input_file_directory = LocalPaths.input_file_directory(self._job_db_uuid, db_id)
-            input_file_directory.mkdir()
-            new_path = input_file_directory / file_path.name
+                # Copy the file into our internal storage
+                input_file_directory = LocalPaths.input_file_directory(self._job_db_uuid, db_id)
+                input_file_directory.mkdir()
+                input_file.path = input_file_directory / file_path.name
 
-            logger.info(f'Copying: "{file_path}" -> "{new_path}"')
-            shutil.copy(file_path, new_path)
-            file_path = new_path
+                logger.info(f'Copying: "{file_path}" -> "{input_file.path}"')
+                shutil.copy(file_path, input_file.path)
+                file_path = input_file.path
+
+                # if this is a PDF, create an input file per-pagae
+                if is_pdf(input_file.path):
+                    document = QPdfDocument(None)
+                    document.load(str(file_path))
+
+                    for idx in range(document.pageCount()):
+                        page_path = input_file.path.with_name(f'{input_file.path.stem}_page{idx+1}.png')
+
+                        page_file = InputFile(path=page_path)
+                        page_file.linked_input_file = input_file.id
+                        job.input_files.append(page_file)
+
+                session.commit()
 
         logger.info(f'Adding file: {file_path}')
         self.addItem(FileItem(db_id, file_path))

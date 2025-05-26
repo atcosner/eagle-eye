@@ -49,6 +49,8 @@ class FileStatusItem(QTreeWidgetItem):
 class FileStatusList(QTreeWidget):
     def __init__(self):
         super().__init__()
+        self._files_by_id: dict[int, FileStatusItem] = {}
+
         self.setIconSize(ICON_SIZE)
         self.setHeaderLabels(('Type', 'Name', 'Status'))
 
@@ -62,7 +64,8 @@ class FileStatusList(QTreeWidget):
     def add_file(self, file: FileDetails, initial_status: FileStatus = FileStatus.PENDING) -> None:
         # Add to the top level through passing the tree widget into the constructor
         # - Allows us to call treeWidget() from the item later
-        FileStatusItem(self, file, initial_status)
+        item = FileStatusItem(self, file, initial_status)
+        self._files_by_id[file.db_id] = item
 
     def add_files(self, files: Iterable[FileDetails]) -> None:
         for file in files:

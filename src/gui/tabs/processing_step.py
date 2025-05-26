@@ -87,7 +87,7 @@ class ProcessingStep(QWidget):
 
     def load_job(self, job: Job | int | None) -> None:
         self.file_list.clear()
-        # TODO: Clear details
+        # TODO: Clear the details widget
         self._job_db_id = None if job is None else job.id if isinstance(job, Job) else job
 
     def all_items_processed(self) -> bool:

@@ -75,6 +75,13 @@ class PreProcessingDetails(QFrame):
                 self.view_result_button.setVisible(False)
                 return
 
+            # remove ourselves from view on container items
+            if file.container_file:
+                self.hide()
+                return
+            else:
+                self.show()
+
             self.status_label.setText('PENDING')
             self.accepted_rotation_label.setText('None')
             self.status_label.setPalette(QPalette())

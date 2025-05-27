@@ -54,14 +54,14 @@ class FileProcessing(ProcessingStep):
                 if not input_file.pre_process_result.successful_alignment:
                     continue
 
-                self.file_list.add_file(
-                    file=FileDetails(
-                        db_id=input_file.id,
-                        path=input_file.path,
-                    ),
-                    # TODO: Failed status?
-                    initial_status=FileStatus.SUCCESS if input_file.process_result is not None else FileStatus.PENDING,
-                )
+                # self.file_list.add_file(
+                #     file=FileDetails(
+                #         db_id=input_file.id,
+                #         path=input_file.path,
+                #     ),
+                #     # TODO: Failed status?
+                #     initial_status=FileStatus.SUCCESS if input_file.process_result is not None else FileStatus.PENDING,
+                # )
 
         # Run GUI updates based if all our items are complete
         self.update_control_state()

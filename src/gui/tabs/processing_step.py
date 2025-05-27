@@ -1,7 +1,9 @@
 from typing import Type
 
 from PyQt6.QtCore import pyqtSlot, QThread, QMutex, pyqtSignal, QObject
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxLayout, QTreeWidgetItem
+from PyQt6.QtWidgets import (
+    QWidget, QVBoxLayout, QPushButton, QCheckBox, QHBoxLayout, QTreeWidgetItem, QTreeWidgetItemIterator,
+)
 
 from src.database.job import Job
 from src.util.status import FileStatus, is_finished
@@ -114,7 +116,14 @@ class ProcessingStep(QWidget):
     @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
     def selected_file_changed(self, current: FileStatusItem, _: FileStatusItem) -> None:
         if self.step_details is not None:
-            self.step_details.load_file(current.get_details().db_id)
+            self.step_details.load_file(current.get_id())
+
+    def _start_item_processing(self, item: FileStatusItem) -> None:
+        if is_finished(item.get_status()):
+            return
+
+        item.set_status(item.get_id(), FileStatus.IN_PROGRESS)
+        self.start_worker(item)
 
     @pyqtSlot()
     def start_processing(self) -> None:
@@ -128,18 +137,14 @@ class ProcessingStep(QWidget):
         if not selected_items and not self.auto_process.isChecked():
             return
 
-        if self.auto_process.isChecked():
-            selected_items = [
-                self.file_list.topLevelItem(idx) for idx in range(self.file_list.topLevelItemCount())
-            ]
-
         self.process_file_button.setDisabled(True)
-        for item in selected_items:
-            if is_finished(item.get_status()):
-                continue
-
-            item.set_status(FileStatus.IN_PROGRESS)
-            self.start_worker(item)
+        if self.auto_process.isChecked():
+            iterator = QTreeWidgetItemIterator(self.file_list)
+            while iterator.value():
+                self._start_item_processing(iterator.value())
+                iterator += 1
+        else:
+            self._start_item_processing(selected_items[0])
 
     #
     # THREAD CODE
@@ -153,16 +158,13 @@ class ProcessingStep(QWidget):
 
     @pyqtSlot(int, FileStatus)
     def worker_status_update(self, db_id: int, status: FileStatus) -> None:
+        # send the new status to all top level items
         for idx in range(self.file_list.topLevelItemCount()):
-            item = self.file_list.topLevelItem(idx)
+            self.file_list.topLevelItem(idx).set_status(db_id, status)
 
-            # Update the status if this item matches the worker
-            if item.get_details().db_id == db_id:
-                item.set_status(status)
-
-            # Update the details of this status matches the details
-            if self.step_details is not None and item.get_details().db_id == self.step_details.loaded_id():
-                self.step_details.load_file(db_id)
+        # update the details of this status matches the details
+        if self.step_details is not None and db_id == self.step_details.loaded_id():
+            self.step_details.load_file(db_id)
 
     @pyqtSlot(int)
     def worker_complete(self, db_id: int) -> None:
@@ -180,4 +182,4 @@ class ProcessingStep(QWidget):
         thread.finished.connect(worker.deleteLater)
 
         thread.start()
-        self.threads[item.get_details().db_id] = (thread, worker)
+        self.threads[item.get_id()] = (thread, worker)

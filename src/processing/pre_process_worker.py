@@ -1,6 +1,7 @@
 import cv2
 import logging
 import numpy as np
+import pymupdf
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
@@ -13,7 +14,6 @@ from src.database.rotation_attempt import RotationAttempt
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus
-from src.util.types import FileDetails
 
 from .util import rotate_image, find_alignment_marks, AlignmentMark, alignment_marks_to_points
 
@@ -28,13 +28,13 @@ class PreProcessingWorker(QObject):
     updateStatus = pyqtSignal(int, FileStatus)
     processingComplete = pyqtSignal(int)
 
-    def __init__(self, job_id: int, file_details: FileDetails, mutex: QMutex):
+    def __init__(self, job_id: int, file_id: int, mutex: QMutex):
         super().__init__()
         self.mutex = mutex
         self.job_id = job_id
-        self.file_details = file_details
+        self.file_id = file_id
 
-        self.log = NamedLoggerAdapter(logger, f'Thread: {file_details.path.name}')
+        self.log = NamedLoggerAdapter(logger, f'Thread: {file_id}')
 
     @pyqtSlot()
     def start(self) -> None:
@@ -43,16 +43,41 @@ class PreProcessingWorker(QObject):
 
         with Session(DB_ENGINE) as session:
             job = session.get(Job, self.job_id)
-            input_file = session.get(InputFile, self.file_details.db_id)
+            input_file = session.get(InputFile, self.file_id)
 
-            assert self.file_details.path.exists(), f'Test image did not exist: {self.file_details.path}'
+            # do not pre-process container files
+            if input_file.container_file:
+                self.log.info('File is marked as a container file, skipping')
+                self.processingComplete.emit(input_file.id)
+                return
+
+            # if we are linked, check if we need to save off our page from the PDF
+            if input_file.linked_input_file_id is not None and not input_file.path.exists():
+                linked_file = session.get(InputFile, input_file.linked_input_file_id)
+                if linked_file is None:
+                    self.log.error(f'Could not find the linked file with ID: {input_file.linked_input_file_id}')
+                    self.updateStatus.emit(input_file.id, FileStatus.FAILED)
+                    self.processingComplete.emit(input_file.id)
+                    return
+
+                self.log.error(f'Extracting page from linked file: {linked_file.path.name}')
+
+                # TODO: could put the page number in the DB?
+                page_number = int(str(input_file.path.stem).split('page')[-1])
+
+                # extract the page from the PDF and save it to our path
+                document = pymupdf.open(linked_file.path)
+                page_pixmap = document.load_page(page_number-1).get_pixmap(dpi=300)
+                page_pixmap.save(input_file.path)
+
+            assert input_file.path.exists(), f'Test image did not exist: {input_file.path}'
             assert job.reference_form.path.exists(), f'Ref image did not exist: {job.reference_form.path}'
 
             self.log.info(f'Using reference: {job.reference_form.name}')
             input_file.pre_process_result = PreProcessResult(successful_alignment=False)
 
             # Build the paths for our output results
-            pre_process_directory = LocalPaths.pre_processing_directory(job.uuid, self.file_details.db_id)
+            pre_process_directory = LocalPaths.pre_processing_directory(job.uuid, input_file.id)
             pre_process_directory.mkdir(exist_ok=True)
 
             matches_path = pre_process_directory / 'matches.png'
@@ -108,6 +133,7 @@ class PreProcessingWorker(QObject):
             self.log.info(f'Best rotation angle: {best_angle} degrees')
             if best_angle is None:
                 self.updateStatus.emit(input_file.id, FileStatus.FAILED)
+                self.processingComplete.emit(input_file.id)
                 return
             input_file.pre_process_result.successful_alignment = True
             input_file.pre_process_result.accepted_rotation_angle = best_angle

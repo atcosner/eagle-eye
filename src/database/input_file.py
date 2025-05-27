@@ -14,7 +14,8 @@ class InputFile(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
 
     path: Mapped[Path] = mapped_column(DbPath)
-    linked_input_file: Mapped[int] = mapped_column(nullable=True, default=None)
+    container_file: Mapped[bool] = mapped_column(default=False)
+    linked_input_file_id: Mapped[int] = mapped_column(nullable=True, default=None)
 
     # Relationships
 

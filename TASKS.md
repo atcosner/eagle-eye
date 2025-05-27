@@ -9,3 +9,5 @@
 - [ ] When updating a text field, validation stripping can prevent the user from typing
   - Add a space at the end of locality
 - [ ] When a file fails to pre-process, the user is prevented from continuing the pipeline
+- [ ] Re-running the pre-processing step on an input file causes a violation on a primary key constraint
+  - I think this is because the old pre-processing result does not get deleted

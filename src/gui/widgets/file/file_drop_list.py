@@ -60,7 +60,7 @@ class FileDropList(QListWidget):
         if job is not None:
             for input_file in job.input_files:
                 # ignore files that are linked to another file
-                if input_file.linked_input_file is None:
+                if input_file.linked_input_file_id is None:
                     self.add_item(input_file.path, db_id=input_file.id)
 
     def check_drag_event(self, data: QMimeData) -> bool:
@@ -89,6 +89,8 @@ class FileDropList(QListWidget):
 
                 input_file = InputFile(path=file_path)
                 job.input_files.append(input_file)
+
+                # commit so that we get a primary key assigned
                 session.commit()
                 db_id = input_file.id
 
@@ -101,8 +103,10 @@ class FileDropList(QListWidget):
                 shutil.copy(file_path, input_file.path)
                 file_path = input_file.path
 
-                # if this is a PDF, create an input file per-pagae
+                # if this is a PDF, create an input file per-page
                 if is_pdf(input_file.path):
+                    input_file.container_file = True
+
                     document = QPdfDocument(None)
                     document.load(str(file_path))
 
@@ -110,8 +114,13 @@ class FileDropList(QListWidget):
                         page_path = input_file.path.with_name(f'{input_file.path.stem}_page{idx+1}.png')
 
                         page_file = InputFile(path=page_path)
-                        page_file.linked_input_file = input_file.id
+                        page_file.linked_input_file_id = input_file.id
                         job.input_files.append(page_file)
+                        session.commit()
+
+                        page_file_directory = LocalPaths.input_file_directory(self._job_db_uuid, page_file.id)
+                        page_file_directory.mkdir()
+                        page_file.path = page_file_directory / page_path.name
 
                 session.commit()
 

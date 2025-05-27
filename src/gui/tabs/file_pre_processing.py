@@ -4,11 +4,10 @@ from sqlalchemy.orm import Session
 from src.database import DB_ENGINE
 from src.database.job import Job
 from src.processing.pre_process_worker import PreProcessingWorker
-from src.util.status import FileStatus
 from src.util.types import FileDetails
 
 from .processing_step import ProcessingStep
-from ..widgets.file.file_status_list import FileStatusItem
+from ..widgets.file.file_status_list import FileStatusItem, ListMode
 from ..widgets.pre_processing_details import PreProcessingDetails
 
 
@@ -31,22 +30,24 @@ class FilePreProcessing(ProcessingStep):
 
             # If any files had a pre-processing result, add them all
             if load_all or job.any_pre_processed():
-                for input_file in job.input_files:
-                    # Determine the initial status
-                    initial_status = FileStatus.PENDING
-                    if input_file.pre_process_result is not None:
-                        if input_file.pre_process_result.successful_alignment:
-                            initial_status = FileStatus.SUCCESS
-                        else:
-                            initial_status = FileStatus.FAILED
+                self.file_list.load_job(ListMode.PRE_PROCESS, job)
 
-                    self.file_list.add_file(
-                        file=FileDetails(
-                            db_id=input_file.id,
-                            path=input_file.path,
-                        ),
-                        initial_status=initial_status,
-                    )
+                # for input_file in job.input_files:
+                #     # Determine the initial status
+                #     initial_status = FileStatus.PENDING
+                #     if input_file.pre_process_result is not None:
+                #         if input_file.pre_process_result.successful_alignment:
+                #             initial_status = FileStatus.SUCCESS
+                #         else:
+                #             initial_status = FileStatus.FAILED
+                #
+                #     self.file_list.add_file(
+                #         file=FileDetails(
+                #             db_id=input_file.id,
+                #             path=input_file.path,
+                #         ),
+                #         initial_status=initial_status,
+                #     )
 
         # Run GUI updates based if all our items are complete
         self.update_control_state()
@@ -57,7 +58,7 @@ class FilePreProcessing(ProcessingStep):
         self.update_control_state()
 
     def start_worker(self, item: FileStatusItem) -> None:
-        worker = PreProcessingWorker(self._job_db_id, item.get_details(), self.thread_mutex)
+        worker = PreProcessingWorker(self._job_db_id, item.get_id(), self.thread_mutex)
         worker.updateStatus.connect(self.worker_status_update)
         worker.processingComplete.connect(self.worker_complete)
         

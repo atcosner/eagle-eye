@@ -24,10 +24,12 @@ class Job(MappedAsDataclass, OrmBase):
     # Custom Functions
     #
     def _pre_processing_statuses(self) -> list[bool]:
-        return [(file.pre_process_result is not None) for file in self.input_files]
+        # ignore container files
+        return [(file.pre_process_result is not None) for file in self.input_files if not file.container_file]
 
     def _processing_statuses(self) -> list[bool]:
-        return [(file.process_result is not None) for file in self.input_files]
+        # ignore container files
+        return [(file.process_result is not None) for file in self.input_files if not file.container_file]
 
     def any_pre_processed(self) -> bool:
         statuses = self._pre_processing_statuses()

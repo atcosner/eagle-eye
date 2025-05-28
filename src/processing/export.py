@@ -152,6 +152,9 @@ def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
     export_data = defaultdict(list)
 
     for input_file in job.input_files:
+        if input_file.container_file:
+            continue
+
         if input_file.process_result is None:
             logger.error(f'Input file ({input_file.path.name}) has not been processed')
             continue

@@ -7,11 +7,9 @@ from src.database.job import Job
 from src.processing.process_worker import ProcessWorker
 from src.util.resources import GENERIC_ICON_PATH
 from src.util.settings import SettingsManager
-from src.util.status import FileStatus
-from src.util.types import FileDetails
 
 from .processing_step import ProcessingStep
-from ..widgets.file.file_status_list import FileStatusItem
+from ..widgets.file.file_status_list import FileStatusItem, ListMode
 
 
 class FileProcessing(ProcessingStep):
@@ -45,30 +43,13 @@ class FileProcessing(ProcessingStep):
             job = session.get(Job, job) if isinstance(job, int) else job
             self._job_db_id = job.id
 
-            for input_file in job.input_files:
-                # Only add files that have been pre-processed successfully
-                if input_file.pre_process_result is None:
-                    continue
-
-                # Only add files that were aligned to their reference
-                if not input_file.pre_process_result.successful_alignment:
-                    continue
-
-                # self.file_list.add_file(
-                #     file=FileDetails(
-                #         db_id=input_file.id,
-                #         path=input_file.path,
-                #     ),
-                #     # TODO: Failed status?
-                #     initial_status=FileStatus.SUCCESS if input_file.process_result is not None else FileStatus.PENDING,
-                # )
+            self.file_list.load_job(ListMode.PROCESS, job)
 
         # Run GUI updates based if all our items are complete
         self.update_control_state()
 
     def start_worker(self, item: FileStatusItem) -> None:
-        details = item.get_details()
-        worker = ProcessWorker(details.path.name, self._job_db_id, details.db_id, self.thread_mutex)
+        worker = ProcessWorker(self._job_db_id, item.get_id(), self.thread_mutex)
         worker.updateStatus.connect(self.worker_status_update)
         worker.processingComplete.connect(self.worker_complete)
 

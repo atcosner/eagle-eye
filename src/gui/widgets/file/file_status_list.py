@@ -127,6 +127,18 @@ class FileStatusList(QTreeWidget):
                         initial_status = FileStatus.SUCCESS
                     else:
                         initial_status = FileStatus.FAILED
+            elif mode is ListMode.PROCESS:
+                if not file.container_file:
+                    # skip files that were not pre-processed
+                    if file.pre_process_result is None:
+                        continue
+
+                    # skip files that were not aligned
+                    if not file.pre_process_result.successful_alignment:
+                        continue
+
+                if file.process_result is not None:
+                    initial_status = FileStatus.SUCCESS
 
             item = FileStatusItem(parent_item, file, initial_status)
             self._files_by_id[file.id] = item

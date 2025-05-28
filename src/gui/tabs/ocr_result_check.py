@@ -36,6 +36,10 @@ class OcrResultCheck(QWidget):
             job = session.get(Job, job) if isinstance(job, int) else job
 
             for file in job.input_files:
+                # skip container files
+                if file.container_file:
+                    continue
+
                 file_tab = FileOcrResults()
                 file_tab.verificationChange.connect(self.handle_verification_change)
                 file_tab.load_input_file(file)

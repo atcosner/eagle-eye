@@ -33,7 +33,7 @@ dev_path = project_path / 'tests' / 'misc_files'
 window.job_widget.processing_pipeline.picker.file_list.file_list.add_items([
     # use forms with real data
     dev_path / '40013-40014.jpg',
-    dev_path / '40013-40018.pdf',
+    dev_path / '40015-40018.pdf',
 
     # # fake testing forms
     # project_path / r'src\eagle-eye\form_templates\dev\test_kt_form__filled.jpg',
@@ -42,6 +42,6 @@ window.job_widget.processing_pipeline.picker.file_list.file_list.add_items([
 
 # Pre-process
 window.job_widget.processing_pipeline.picker.continueToNextStep.emit()
-# window.job_widget.processing_pipeline.pre_processing.start_processing()
+window.job_widget.processing_pipeline.pre_processing.start_processing()
 
 app.exec()

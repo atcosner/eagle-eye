@@ -38,13 +38,13 @@ class ProcessWorker(QObject):
     updateStatus = pyqtSignal(int, FileStatus)
     processingComplete = pyqtSignal(int)
 
-    def __init__(self, name: str, job_id: int, input_file_id: int, mutex: QMutex):
+    def __init__(self, job_id: int, file_id: int, mutex: QMutex):
         super().__init__()
         self.mutex = mutex
         self._job_id = job_id
-        self._input_file_id = input_file_id
+        self._file_id = file_id
 
-        self.log = NamedLoggerAdapter(logger, f'Thread: {name}')
+        self.log = NamedLoggerAdapter(logger, f'Thread: {file_id}')
 
     def process_text_field(
             self,
@@ -215,7 +215,13 @@ class ProcessWorker(QObject):
 
         with Session(DB_ENGINE) as session:
             job = session.get(Job, self._job_id)
-            input_file = session.get(InputFile, self._input_file_id)
+            input_file = session.get(InputFile, self._file_id)
+
+            # do not process container files
+            if input_file.container_file:
+                self.log.info('File is marked as a container file, skipping')
+                self.processingComplete.emit(input_file.id)
+                return
 
             assert input_file.pre_process_result.aligned_image_path.exists(), \
                 f'Path does not exist: {input_file.pre_process_result.aligned_image_path}'

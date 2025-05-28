@@ -19,9 +19,11 @@ from .util import rotate_image, find_alignment_marks, AlignmentMark, alignment_m
 
 logger = logging.getLogger(__name__)
 
-# Allow for an image to be +/- 6 degrees rotated
+# Allow for an image to be +/- 4 degrees rotated
 # TODO: Control this with a user setting
-ALLOWED_ROTATIONS = [0] + list(np.arange(0.5, 6.5, 0.5)) + list(np.arange(-0.5, -6.5, -0.5))
+ALLOWED_ROTATIONS = [0] \
+                    + list(np.arange(0.5, 4.0, 0.5)) \
+                    + list(np.arange(-0.5, -4.0, -0.5))
 
 
 class PreProcessingWorker(QObject):
@@ -108,12 +110,19 @@ class PreProcessingWorker(QObject):
                 if rotation_angle != 0:
                     rotated_image = rotate_image(rotated_image, rotation_angle)
 
-                rotated_path = pre_process_directory / f'rotation_{rotation_angle}.png'
-                cv2.imwrite(str(rotated_path), rotated_image)
-
                 alignment_marks = find_alignment_marks(rotated_image)
                 self.log.info(f'Rotation Result: {rotation_angle} degrees, {len(alignment_marks)} alignment marks')
                 detected_marks[rotation_angle] = alignment_marks
+
+                # draw found alignment marks on the file
+                color_rotation_image = cv2.cvtColor(rotated_image, cv2.COLOR_GRAY2BGR)
+                for mark in alignment_marks:
+                    start = (mark.x, mark.y)
+                    end = (mark.x + mark.width, mark.y + mark.height)
+                    cv2.rectangle(color_rotation_image, start, end, (0, 0, 255), 2)
+
+                rotated_path = pre_process_directory / f'rotation_{rotation_angle}.png'
+                cv2.imwrite(str(rotated_path), color_rotation_image)
 
                 # Save the attempt in the DB
                 input_file.pre_process_result.rotation_attempts[rotation_angle] = RotationAttempt(

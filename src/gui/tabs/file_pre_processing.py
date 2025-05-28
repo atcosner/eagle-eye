@@ -32,23 +32,6 @@ class FilePreProcessing(ProcessingStep):
             if load_all or job.any_pre_processed():
                 self.file_list.load_job(ListMode.PRE_PROCESS, job)
 
-                # for input_file in job.input_files:
-                #     # Determine the initial status
-                #     initial_status = FileStatus.PENDING
-                #     if input_file.pre_process_result is not None:
-                #         if input_file.pre_process_result.successful_alignment:
-                #             initial_status = FileStatus.SUCCESS
-                #         else:
-                #             initial_status = FileStatus.FAILED
-                #
-                #     self.file_list.add_file(
-                #         file=FileDetails(
-                #             db_id=input_file.id,
-                #             path=input_file.path,
-                #         ),
-                #         initial_status=initial_status,
-                #     )
-
         # Run GUI updates based if all our items are complete
         self.update_control_state()
 

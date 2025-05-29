@@ -2,21 +2,23 @@ from PyQt6.QtWidgets import QWidget, QLabel
 
 from src.database.form_region import FormRegion
 
-from ..util.details_table import DetailsTable
+from ..util.details_tree import DetailsTree, TextItem
 
 
-class RegionDetails(DetailsTable):
-    def __init__(self, parent: QWidget):
-        super().__init__(parent)
+class RegionDetails(DetailsTree):
+    def __init__(self, parent: QWidget, region: FormRegion):
+        super().__init__()
+        self.setParent(parent)
 
-        self.region_name = QLabel()
-        self.add_row('Name', self.region_name)
+        self.name = None
+        self.region_name = TextItem(self, 'Name')
+        self.region_id = TextItem(self, 'Local ID')
+        self._load_region(region)
 
-        self.region_id = QLabel()
-        self.add_row('Local ID', self.region_id)
+    def _load_region(self, region: FormRegion) -> None:
+        self.name = region.name
+        self.region_name.load(region.name)
+        self.region_id.load(region.id)
 
-    def load_region(self, region: FormRegion) -> str:
-        self.region_name.setText(region.name)
-        self.region_id.setText(str(region.id))
-
-        return region.name
+    def get_name(self) -> str:
+        return self.name

@@ -1,3 +1,5 @@
+from typing import Any
+
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
 
 from src.util.types import BoxBounds
@@ -9,6 +11,15 @@ class DetailsTree(QTreeWidget):
 
         self.setColumnCount(2)
         self.setHeaderLabels(['Setting', 'Value'])
+
+
+class TextItem(QTreeWidgetItem):
+    def __init__(self, parent: DetailsTree, name: str):
+        super().__init__(parent)
+        self.setText(0, name)
+
+    def load(self, value: Any) -> None:
+        self.setText(1, str(value))
 
 
 class BoundsPart(QTreeWidgetItem):

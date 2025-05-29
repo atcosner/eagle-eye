@@ -1,13 +1,11 @@
 import logging
-
-from PyQt6.QtCore import pyqtSlot
 from sqlalchemy.orm import Session
 
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
 from src.database import DB_ENGINE
-from src.database.fields.form_field import FormField
-from src.database.form_region import FormRegion
+from src.database.reference_form import ReferenceForm
 
 from .field_details import FieldDetails
 from .region_details import RegionDetails
@@ -21,44 +19,53 @@ class SelectionDetails(QGroupBox):
         self._base_title = 'Details'
         super().__init__(self._base_title)
 
-        self.region_details = RegionDetails(self)
-        self.field_details = FieldDetails(self)
+        self._current_widget: RegionDetails | FieldDetails | None = None
+        self.region_details: dict[int, RegionDetails] = {}
+        self.field_details: dict[int, FieldDetails] = {}
 
-        self._set_up_layout()
-        self._update_visibility(True)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
 
-    def _set_up_layout(self) -> None:
-        layout = QVBoxLayout()
-        layout.addWidget(self.region_details)
-        layout.addWidget(self.field_details)
-        self.setLayout(layout)
-
-    def _update_visibility(self, is_region: bool) -> None:
-        self.region_details.setVisible(is_region)
-        self.field_details.setVisible(not is_region)
-
-    def _update_title(self, prefix: str, suffix: str) -> None:
+    def _update_title(self, suffix: str) -> None:
+        prefix = 'Region' if isinstance(self._current_widget, RegionDetails) else 'Field'
         self.setTitle(f'{prefix} {self._base_title}: {suffix}')
+
+    def load_reference_form(self, form: ReferenceForm | int | None) -> None:
+        if form is None:
+            self.region_details.clear()
+            self.field_details.clear()
+            self._current_widget = None
+            return
+
+        with Session(DB_ENGINE) as session:
+            form = session.get(ReferenceForm, form) if isinstance(form, int) else form
+
+            for region in form.regions.values():
+                region_details = RegionDetails(self, region)
+                region_details.setVisible(False)
+                self.region_details[region.id] = region_details
+                self.layout.addWidget(region_details)
+
+                for field in region.fields:
+                    field_details = FieldDetails(self, field)
+                    field_details.setVisible(False)
+                    self.field_details[field.id] = field_details
+                    self.layout.addWidget(field_details)
 
     @pyqtSlot(SelectionType, int)
     def load_details(self, selection: SelectionType, db_id: int) -> None:
-        with Session(DB_ENGINE) as session:
-            match selection:
-                case SelectionType.REGION:
-                    logger.info(f'Loading details for region: {db_id}')
-                    region = session.get(FormRegion, db_id)
-                    name = self.region_details.load_region(region)
+        match selection:
+            case SelectionType.REGION:
+                widget = self.region_details[db_id]
+            case SelectionType.FIELD:
+                widget = self.field_details[db_id]
+            case _:
+                logger.error(f'Unknown selection type: {selection}')
+                return
 
-                    self._update_visibility(True)
-                    self._update_title(prefix='Region', suffix=name)
-
-                case SelectionType.FIELD:
-                    logger.info(f'Loading details for field: {db_id}')
-                    field = session.get(FormField, db_id)
-                    name = self.field_details.load_field(field)
-
-                    self._update_visibility(False)
-                    self._update_title(prefix='Field', suffix=name)
-
-                case _:
-                    logger.error(f'Unknown selection type: {selection}')
+        if self._current_widget is not widget:
+            if self._current_widget:
+                self._current_widget.setVisible(False)
+            widget.setVisible(True)
+            self._current_widget = widget
+            self._update_title(self._current_widget.get_name())

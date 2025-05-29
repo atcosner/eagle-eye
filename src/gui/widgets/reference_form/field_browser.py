@@ -30,6 +30,7 @@ class FieldBrowser(LineSplitter):
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self.region_tree.load_reference_form(form)
+        self.selection_details.load_reference_form(form)
 
     @pyqtSlot(int)
     def handle_canvas_field_selected(self, db_id: int) -> None:

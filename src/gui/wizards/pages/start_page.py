@@ -1,7 +1,7 @@
-from PyQt6.QtCore import pyqtSlot
 from sqlalchemy.orm import Session
 
-from PyQt6.QtWidgets import QLineEdit, QVBoxLayout, QLabel, QHBoxLayout, QGroupBox, QRadioButton
+from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtWidgets import QLineEdit, QVBoxLayout, QLabel, QHBoxLayout, QGroupBox, QRadioButton, QWidget, QCheckBox
 
 from src.database import DB_ENGINE
 from src.gui.widgets.reference_form.form_details_tree import FormDetailsTree
@@ -15,11 +15,18 @@ class StartPage(BasePage):
         self.setSubTitle('Specify a form name and determine the initial state')
 
         self.form_name = QLineEdit()
+        self.registerField('form.name*', self.form_name)
 
         self.options_box = QGroupBox()
         self.new_form_button = QRadioButton('Start with an empty form')
         self.existing_form_button = QRadioButton('Copy the settings and fields from an existing form')
         self.existing_forms = FormDetailsTree()
+
+        self.registerField('form.start_new', self.new_form_button)
+        self.registerField('form.copy_existing', self.existing_form_button)
+
+        self.dummy = QCheckBox()
+        self.registerField('form.existing_id', self.dummy)
 
         self.new_form_button.toggled.connect(self.handle_radio_state_change)
         self.existing_form_button.toggled.connect(self.handle_radio_state_change)
@@ -58,3 +65,11 @@ class StartPage(BasePage):
     @pyqtSlot()
     def handle_radio_state_change(self) -> None:
         self.existing_forms.setDisabled(self.new_form_button.isChecked())
+
+    #
+    # Qt overrides
+    #
+    def validatePage(self) -> bool:
+        selected = self.existing_forms.selectedItems()[0]
+        self.setField('form.existing_id', selected.data(0, Qt.ItemDataRole.UserRole))
+        return True

@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWizard, QWidget
 
+from .pages.regions_page import RegionsPage
 from .pages.start_page import StartPage
 
 
@@ -10,3 +11,4 @@ class ReferenceFormWizard(QWizard):
         self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
 
         self.addPage(StartPage())
+        self.addPage(RegionsPage())

@@ -42,35 +42,59 @@ class RegionGroup(QGraphicsItemGroup):
         super().paint(painter, option, widget)
 
 
-class AnchorPoint(IntEnum):
-    TOP = 0x1
-    BOTTOM = 0x2
-    V_CENTER = 0x20
-    LEFT = 0x4
-    RIGHT = 0x8
-    H_CENTER = 0x10
+class AnchorPoint(Enum):
+    TOP_LEFT = object()
+    TOP_MIDDLE = object()
+    TOP_RIGHT = object()
+    LEFT_MIDDLE = object()
+    RIGHT_MIDDLE = object()
+    BOTTOM_LEFT = object()
+    BOTTOM_MIDDLE = object()
+    BOTTOM_RIGHT = object()
 
 
-def get_position_with_anchor(inside_rect: QRectF, anchors: int, width: int) -> QRectF:
+def get_position_with_anchor(inside_rect: QRectF, anchor: AnchorPoint, width: int) -> QRectF:
     top_left_point = QPointF()
-    if anchors & AnchorPoint.TOP:
-        top_left_point.setY(inside_rect.topLeft().y() - width)
-    elif anchors & AnchorPoint.BOTTOM:
-        top_left_point.setY(inside_rect.bottomRight().y())
-    elif anchors & AnchorPoint.V_CENTER:
-        offset = (inside_rect.height() - width) // 2
-        top_left_point.setY(inside_rect.topLeft().y() + offset)
-    else:
-        raise RuntimeError('No vertical anchor specified')
-
-    if anchors & AnchorPoint.LEFT:
-        top_left_point.setX(inside_rect.topLeft().x() - width)
-    elif anchors & AnchorPoint.RIGHT:
-        top_left_point.setX(inside_rect.bottomRight().x())
-    elif anchors & AnchorPoint.H_CENTER:
-        offset = (inside_rect.width() - width) // 2
-        top_left_point.setX(inside_rect.topLeft().x() + offset)
-    else:
-        raise RuntimeError('No vertical anchor specified')
+    match anchor:
+        case AnchorPoint.TOP_LEFT:
+            top_left_point.setX(inside_rect.topLeft().x() - width)
+            top_left_point.setY(inside_rect.topLeft().y() - width)
+        case AnchorPoint.TOP_MIDDLE:
+            top_left_point.setX(inside_rect.topLeft().x() + ((inside_rect.width() - width) // 2))
+            top_left_point.setY(inside_rect.topLeft().y() - width)
+        case AnchorPoint.TOP_RIGHT:
+            top_left_point.setX(inside_rect.bottomRight().x())
+            top_left_point.setY(inside_rect.topLeft().y() - width)
+        case AnchorPoint.LEFT_MIDDLE:
+            top_left_point.setX(inside_rect.topLeft().x() - width)
+            top_left_point.setY(inside_rect.topLeft().y() + ((inside_rect.height() - width) // 2))
+        case AnchorPoint.RIGHT_MIDDLE:
+            top_left_point.setX(inside_rect.bottomRight().x())
+            top_left_point.setY(inside_rect.topLeft().y() + ((inside_rect.height() - width) // 2))
+        case AnchorPoint.BOTTOM_LEFT:
+            top_left_point.setX(inside_rect.topLeft().x() - width)
+            top_left_point.setY(inside_rect.bottomRight().y())
+        case AnchorPoint.BOTTOM_MIDDLE:
+            top_left_point.setX(inside_rect.topLeft().x() + ((inside_rect.width() - width) // 2))
+            top_left_point.setY(inside_rect.bottomRight().y())
+        case AnchorPoint.BOTTOM_RIGHT:
+            top_left_point.setX(inside_rect.bottomRight().x())
+            top_left_point.setY(inside_rect.bottomRight().y())
 
     return QRectF(top_left_point, QSizeF(width, width))
+
+
+def get_movement_restrictions(anchor: AnchorPoint) -> tuple[bool, bool]:
+    x_restricted = False
+    y_restricted = False
+
+    if anchor in [AnchorPoint.TOP_MIDDLE, AnchorPoint.BOTTOM_MIDDLE]:
+        x_restricted = True
+    if anchor in [AnchorPoint.LEFT_MIDDLE, AnchorPoint.RIGHT_MIDDLE]:
+        y_restricted = True
+
+    return x_restricted, y_restricted
+
+
+def get_irregular_change(anchor: AnchorPoint) -> bool:
+    return False if anchor in [AnchorPoint.RIGHT_MIDDLE, AnchorPoint.BOTTOM_MIDDLE, AnchorPoint.BOTTOM_RIGHT] else True

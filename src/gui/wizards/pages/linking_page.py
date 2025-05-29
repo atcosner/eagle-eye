@@ -1,13 +1,14 @@
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QRadioButton, QGroupBox, QTextEdit
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QRadioButton, QGroupBox, QTextEdit, QCheckBox
 
 from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 from src.util.types import FormLinkingMethod, get_link_explanation
 
 from .base import BasePage
+from .util import DummyField
 
 
 class LinkingPage(BasePage):
@@ -19,6 +20,9 @@ class LinkingPage(BasePage):
         self.option_explanation = QTextEdit()
         self.option_explanation.setReadOnly(True)
         self.option_explanation.setAcceptRichText(True)
+
+        self.dummy = DummyField()
+        self.registerField('form.link_method', self.dummy, property='custom_value')
 
         self.options: list[QRadioButton] = []
         for value in FormLinkingMethod:
@@ -54,7 +58,9 @@ class LinkingPage(BasePage):
 
     @pyqtSlot()
     def handle_method_toggle(self) -> None:
-        self.option_explanation.setText(get_link_explanation(self.get_link_method()))
+        method = self.get_link_method()
+        self.option_explanation.setText(get_link_explanation(method))
+        self.setField('form.link_method', str(method.name))
 
     #
     # Qt overrides
@@ -67,3 +73,7 @@ class LinkingPage(BasePage):
                     value = FormLinkingMethod[option.text().replace(' ', '_').upper()]
                     if value == form.linking_method:
                         option.setChecked(True)
+
+    def validatePage(self) -> bool:
+        self.setField('form.link_method', str(self.get_link_method().name))
+        return True

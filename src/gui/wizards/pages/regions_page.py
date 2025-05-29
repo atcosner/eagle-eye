@@ -45,7 +45,7 @@ class RegionsPage(BasePage):
         options_layout.addWidget(QLabel('One Region (one page = one specimen)'), 0, 2)
         options_layout.addWidget(self.two_region_button, 1, 0)
         options_layout.addWidget(self.two_region_label, 1, 1)
-        options_layout.addWidget(QLabel('Two Regions (one page = two specimen)'), 1, 2)
+        options_layout.addWidget(QLabel('Two Regions (one page = two specimens)'), 1, 2)
         self.options.setLayout(options_layout)
 
         layout = QVBoxLayout()

@@ -7,6 +7,7 @@ from src.database import DB_ENGINE
 from src.gui.widgets.reference_form.form_details_tree import FormDetailsTree
 
 from .base import BasePage
+from .util import DummyField
 
 
 class StartPage(BasePage):
@@ -25,8 +26,8 @@ class StartPage(BasePage):
         self.registerField('form.start_new', self.new_form_button)
         self.registerField('form.copy_existing', self.existing_form_button)
 
-        self.dummy = QCheckBox()
-        self.registerField('form.existing_id', self.dummy)
+        self.dummy = DummyField()
+        self.registerField('form.existing_id', self.dummy, property='custom_value')
 
         self.new_form_button.toggled.connect(self.handle_radio_state_change)
         self.existing_form_button.toggled.connect(self.handle_radio_state_change)
@@ -71,5 +72,5 @@ class StartPage(BasePage):
     #
     def validatePage(self) -> bool:
         selected = self.existing_forms.selectedItems()[0]
-        self.setField('form.existing_id', selected.data(0, Qt.ItemDataRole.UserRole))
+        self.setField('form.existing_id', str(selected.data(0, Qt.ItemDataRole.UserRole)))
         return True

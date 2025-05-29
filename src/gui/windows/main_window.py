@@ -1,5 +1,6 @@
 import logging
 import uuid
+from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
@@ -7,8 +8,11 @@ from sqlalchemy.sql.expression import func
 from PyQt6.QtCore import pyqtSlot, Qt
 
 from src.database import DB_ENGINE
+from src.database.copy import copy_reference_form
 from src.database.job import Job
+from src.database.reference_form import ReferenceForm
 from src.util.paths import LocalPaths
+from src.util.types import FormLinkingMethod
 
 from .base import BaseWindow
 from .reference_form_editor import ReferenceFormEditor
@@ -106,7 +110,28 @@ class MainWindow(BaseWindow):
     @pyqtSlot()
     def handle_create_reference_form(self) -> None:
         wizard = ReferenceFormWizard(self)
-        wizard.exec()
+        if not wizard.exec():
+            return
+
+        # create a new reference form
+        logger.info(f'Creating new reference form: {wizard.field("form.name")}')
+        with Session(DB_ENGINE) as session:
+            new_form = ReferenceForm(
+                name=wizard.field('form.name'),
+                path=Path(wizard.field('form.file_path')),
+                alignment_mark_count=1,
+                linking_method=FormLinkingMethod[wizard.field('form.link_method')],
+            )
+
+            # if we are copying another form, copy in all the regions and fields
+            if wizard.field('form.copy_existing'):
+                copy_form = session.get(ReferenceForm, wizard.field('form.existing_id'))
+                copy_reference_form(new_form, copy_form)
+
+            session.add(new_form)
+            session.commit()
+
+        self.job_widget.reload_reference_forms()
 
     def load_job(self, details: JobDetails) -> None:
         logger.info(f'Loading job: {details}')

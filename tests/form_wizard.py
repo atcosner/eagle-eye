@@ -12,6 +12,4 @@ app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(True)
 
 form_wizard = ReferenceFormWizard()
-form_wizard.show()
-
-app.exec()
+form_wizard.exec()

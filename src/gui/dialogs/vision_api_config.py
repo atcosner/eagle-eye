@@ -3,20 +3,20 @@ import subprocess
 
 from PyQt6.QtCore import pyqtSlot, QSize
 from PyQt6.QtGui import QIcon, QCloseEvent
-from PyQt6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox
+from PyQt6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox, QDialog
 
 from src.util.google_api import save_api_settings
 from src.util.resources import GENERIC_ICON_PATH
 
-from .base import BaseWindow
 from ..widgets.util.link_label import LinkLabel
 
 logger = logging.getLogger(__name__)
 
 
-class VisionApiConfig(BaseWindow):
+class VisionApiConfig(QDialog):
     def __init__(self, parent: QWidget | None = None):
-        super().__init__(parent, 'Google Vision API Config')
+        super().__init__(parent)
+        self.setWindowTitle('Google Vision API Config')
         self._gcloud_installed: bool = False
         self._gcloud_initialized: bool = False
 
@@ -109,9 +109,7 @@ class VisionApiConfig(BaseWindow):
         main_layout.addWidget(self.step_three_box)
         main_layout.addLayout(button_layout)
 
-        widget = QWidget()
-        widget.setLayout(main_layout)
-        self.setCentralWidget(widget)
+        self.setLayout(main_layout)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self._gcloud_installed and self._gcloud_initialized:

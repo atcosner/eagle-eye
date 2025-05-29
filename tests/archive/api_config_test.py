@@ -2,7 +2,7 @@ import logging
 import sys
 from PyQt6.QtWidgets import QApplication
 
-from src.gui.windows.vision_api_config import VisionApiConfig
+from src.gui.dialogs.vision_api_config import VisionApiConfig
 from src.util.logging import configure_root_logger
 
 configure_root_logger(logging.INFO)

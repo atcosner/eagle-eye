@@ -7,7 +7,7 @@ from .reference_form.form_field_canvas import FormFieldCanvas
 from .util.line_splitter import LineSplitter
 
 
-class ReferenceFormCreation(QWidget):
+class ReferenceFormViewer(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -32,6 +32,10 @@ class ReferenceFormCreation(QWidget):
     def _connect_signals(self) -> None:
         self.field_browser.treeSelectionChange.connect(self.field_canvas.handle_tree_selection_change)
         self.field_canvas.fieldSelected.connect(self.field_browser.handle_canvas_field_selected)
+
+    def set_edit_mode(self, allow_edits: bool) -> None:
+        # TODO: restrict changes if we are not in edit mode
+        pass
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self.field_canvas.load_reference_form(form)

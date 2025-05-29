@@ -51,6 +51,7 @@ def create_field_with_offset(field: FormField, y_offset: int) -> FormField:
                 text_regex=validator.text_regex,
                 reformat_regex=validator.reformat_regex,
                 error_tooltip=validator.error_tooltip,
+                allow_closest_match_correction=validator.allow_closest_match_correction,
                 text_choices=[TextChoice(c.text) for c in validator.text_choices],
             )
 

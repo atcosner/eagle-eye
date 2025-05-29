@@ -13,7 +13,9 @@ from src.util.paths import LocalPaths
 from .base import BaseWindow
 from ..dialogs.about_us import AboutUs
 from ..dialogs.job_selector import JobDetails, JobSelector
-from ..dialogs.reference_form_selctor import ReferenceFormSelector
+from ..dialogs.reference_form_builder import ReferenceFormBuilder
+from ..dialogs.reference_form_selector import ReferenceFormSelector
+from ..dialogs.vision_api_config import VisionApiConfig
 from ..widgets.job_manager import JobManager
 
 logger = logging.getLogger(__name__)
@@ -57,10 +59,15 @@ class MainWindow(BaseWindow):
         file_menu.addAction('Exit').triggered.connect(self.close)
 
         form_menu = self.menuBar().addMenu('Reference Form')
-        form_menu.addAction('View Reference Forms').triggered.connect(lambda: ReferenceFormSelector(self).exec())
+        form_menu.addAction('View Reference Forms').triggered.connect(self.handle_view_reference_form)
         form_menu.addSeparator()
         form_menu.addAction('Create New Reference Form').triggered.connect(self.handle_create_reference_form)
         form_menu.addAction('Edit Current Reference Form').triggered.connect(self.handle_edit_current_reference_form)
+
+        settings_menu = self.menuBar().addMenu('Settings')
+        settings_menu.addAction('Check Google API Config').triggered.connect(lambda: VisionApiConfig(self).exec())
+        settings_menu.addSeparator()
+        settings_menu.addAction('Edit Settings').triggered.connect(self.handle_create_reference_form)
 
         help_menu = self.menuBar().addMenu('Help')
         help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).exec())
@@ -72,6 +79,16 @@ class MainWindow(BaseWindow):
             return
 
         self.load_job(selector.get_selected_job())
+
+    @pyqtSlot()
+    def handle_view_reference_form(self) -> None:
+        form_selector = ReferenceFormSelector(self)
+        if not form_selector.exec():
+            return
+
+        form_id = form_selector.get_selected_form()
+        form_builder = ReferenceFormBuilder(self, False, form_id)
+        form_builder.exec()
 
     @pyqtSlot()
     def handle_edit_current_reference_form(self) -> None:

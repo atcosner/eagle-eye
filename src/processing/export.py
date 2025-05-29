@@ -39,7 +39,7 @@ def get_mode_explanation(mode: ExportMode) -> str:
             return """
                 <u>Full Mode</u><br>
                 <br>
-                Full mode will export all forms, regions, and fields irregardless of their verification status.
+                Full mode will export all forms, regions, and fields regardless of their verification status.
             """
         case _:
             raise RuntimeError(f"Unknown export mode: {mode}")

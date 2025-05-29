@@ -20,9 +20,12 @@ class FormFieldCanvas(QGraphicsView):
 
         self.scene.fieldSelected.connect(self.fieldSelected)
 
+    def fit_form(self) -> None:
+        self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self.scene.load_reference_form(form)
-        self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+        self.fit_form()
 
     @pyqtSlot(SelectionType, int)
     def handle_tree_selection_change(self, selection: SelectionType, db_id: int) -> None:

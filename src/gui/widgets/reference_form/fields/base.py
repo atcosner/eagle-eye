@@ -184,3 +184,7 @@ class BaseField(ResizableField):
 
     def get_db_id(self) -> int:
         return self._field_db_id
+
+    def handle_child_resize(self, point: AnchorPoint, delta_x: int, delta_y: int) -> None:
+        super().handle_child_resize(point, delta_x, delta_y)
+        self.label.setPos(self.position_rect.topLeft())

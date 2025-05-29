@@ -1,19 +1,19 @@
 import logging
 import uuid
-
-from PyQt6.QtCore import pyqtSlot
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
+
+from PyQt6.QtCore import pyqtSlot, Qt
 
 from src.database import DB_ENGINE
 from src.database.job import Job
 from src.util.paths import LocalPaths
 
 from .base import BaseWindow
+from .reference_form_editor import ReferenceFormEditor
 from ..dialogs.about_us import AboutUs
 from ..dialogs.job_selector import JobDetails, JobSelector
-from ..dialogs.reference_form_builder import ReferenceFormBuilder
 from ..dialogs.reference_form_selector import ReferenceFormSelector
 from ..dialogs.vision_api_config import VisionApiConfig
 from ..widgets.job_manager import JobManager
@@ -87,14 +87,19 @@ class MainWindow(BaseWindow):
             return
 
         form_id = form_selector.get_selected_form()
-        form_builder = ReferenceFormBuilder(self, False, form_id)
-        form_builder.exec()
+        form_builder = ReferenceFormEditor(self, False, form_id)
+        form_builder.setWindowModality(Qt.WindowModality.ApplicationModal)
+        form_builder.show()
 
     @pyqtSlot()
     def handle_edit_current_reference_form(self) -> None:
         form_id = self.job_widget.get_current_reference_form_id()
         if form_id is not None:
-            # TODO: open the form editor
+            form_builder = ReferenceFormEditor(self, True, form_id)
+            form_builder.setWindowModality(Qt.WindowModality.ApplicationModal)
+            form_builder.show()
+        else:
+            # TODO: show an error
             pass
 
     @pyqtSlot()

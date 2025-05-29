@@ -33,6 +33,9 @@ class ReferenceFormViewer(QWidget):
         self.field_browser.treeSelectionChange.connect(self.field_canvas.handle_tree_selection_change)
         self.field_canvas.fieldSelected.connect(self.field_browser.handle_canvas_field_selected)
 
+    def fit_form(self) -> None:
+        self.field_canvas.fit_form()
+
     def set_edit_mode(self, allow_edits: bool) -> None:
         # TODO: restrict changes if we are not in edit mode
         pass

@@ -12,5 +12,3 @@ app.setQuitOnLastWindowClosed(True)
 
 form_builder = ReferenceFormBuilder(None, True, 1)
 form_builder.exec()
-
-app.exec()

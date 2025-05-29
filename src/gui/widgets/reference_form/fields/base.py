@@ -20,17 +20,24 @@ class ResizeBox(QGraphicsItem):
         super().__init__(parent)
         self.setAcceptHoverEvents(True)
 
+        self.position_rect: QRectF = QRectF()
         self.anchor_point = anchor_point
         self.color = color
         self.x_restricted, self.y_restricted = get_movement_restrictions(anchor_point)
 
         # determine our initial position
-        parent_rect = parent.boundingRect()
-        self.position_rect = get_position_with_anchor(parent_rect, anchor_point, 10)
+        self.update_position()
+
+    def update_position(self) -> None:
+        self.prepareGeometryChange()
+        self.position_rect = get_position_with_anchor(self.parentItem().boundingRect(), self.anchor_point, 10)
 
     #
     # Qt overrides
     #
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+        # swallow these events to not take focus from parent
+        pass
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
         x_change = 0 if self.x_restricted else event.scenePos().x() - event.lastScenePos().x()
@@ -117,6 +124,9 @@ class ResizableField(QGraphicsItem):
                 if delta_y:
                     # TODO: this only changes the bottom edge
                     self.position_rect.setHeight(self.position_rect.height() + delta_y)
+
+        for anchor in self.resize_anchors:
+            anchor.update_position()
 
     #
     # Qt overrides

@@ -14,7 +14,7 @@ class DetailsTree(QTreeWidget):
 
 
 class TextItem(QTreeWidgetItem):
-    def __init__(self, parent: DetailsTree, name: str):
+    def __init__(self, parent: DetailsTree | QTreeWidgetItem, name: str):
         super().__init__(parent)
         self.setText(0, name)
 
@@ -70,7 +70,7 @@ class BoundsPart(QTreeWidgetItem):
 
 
 class BoxBoundsDetails(QTreeWidgetItem):
-    def __init__(self, parent: DetailsTree, name: str):
+    def __init__(self, parent: DetailsTree | QTreeWidgetItem, name: str):
         super().__init__(parent)
         self._is_dirty: bool = False
         self._initial_bounds: BoxBounds | None = None

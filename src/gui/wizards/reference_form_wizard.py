@@ -1,5 +1,7 @@
 from PyQt6.QtWidgets import QWizard, QWidget
 
+from .pages.file_page import FilePage
+from .pages.linking_page import LinkingPage
 from .pages.regions_page import RegionsPage
 from .pages.start_page import StartPage
 
@@ -12,3 +14,5 @@ class ReferenceFormWizard(QWizard):
 
         self.addPage(StartPage())
         self.addPage(RegionsPage())
+        self.addPage(LinkingPage())
+        self.addPage(FilePage())

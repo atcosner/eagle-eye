@@ -41,3 +41,29 @@ class FormLinkingMethod(Enum):
     NO_LINKING = 1
     PREVIOUS_IDENTIFIER = 2
     PREVIOUS_REGION = 3
+
+
+def get_link_explanation(method: FormLinkingMethod) -> str:
+    match method:
+        case FormLinkingMethod.NO_LINKING:
+            return """
+                <u>No Linking</u><br>
+                <br>
+                Fields will not be allowed to copy values from fields on other regions/forms.
+            """
+        case FormLinkingMethod.PREVIOUS_IDENTIFIER:
+            return """
+                <u>Previous Identifier</u><br>
+                <br>
+                Fields will be allowed to link to the fields on the previous identifier.<br>
+                For example, if the current form has an ID of 100, fields will be allowed to link to the form with ID 99.
+            """
+        case FormLinkingMethod.PREVIOUS_REGION:
+            return """
+                <u>Previous Region</u><br>
+                <br>
+                Fields will only be allowed to link to fields on the previous region.<br>
+                For example, fields in the bottom region of a page will only be allowed to link to fields in the top region of the page.
+            """
+        case _:
+            raise RuntimeError(f"Unknown export mode: {method}")

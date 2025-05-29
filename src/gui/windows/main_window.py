@@ -17,6 +17,7 @@ from ..dialogs.job_selector import JobDetails, JobSelector
 from ..dialogs.reference_form_selector import ReferenceFormSelector
 from ..dialogs.vision_api_config import VisionApiConfig
 from ..widgets.job_manager import JobManager
+from ..wizards.reference_form_wizard import ReferenceFormWizard
 
 logger = logging.getLogger(__name__)
 
@@ -104,8 +105,8 @@ class MainWindow(BaseWindow):
 
     @pyqtSlot()
     def handle_create_reference_form(self) -> None:
-        # TODO: open the form creation wizard
-        pass
+        wizard = ReferenceFormWizard(self)
+        wizard.exec()
 
     def load_job(self, details: JobDetails) -> None:
         logger.info(f'Loading job: {details}')

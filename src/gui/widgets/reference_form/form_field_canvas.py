@@ -31,6 +31,10 @@ class FormFieldCanvas(QGraphicsView):
     def handle_tree_selection_change(self, selection: SelectionType, db_id: int) -> None:
         self.scene.handle_tree_selection_change(selection, db_id)
 
+    @pyqtSlot(SelectionType, int)
+    def handle_deletion(self, selection: SelectionType, db_id: int) -> None:
+        self.scene.handle_deletion(selection, db_id)
+
     #
     # Qt Event Handlers
     #

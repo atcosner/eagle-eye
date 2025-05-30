@@ -59,6 +59,20 @@ class FormScene(QGraphicsScene):
                     self.fields_by_region[region.id].append(qt_field)
                     self.fields_by_id[field.id] = qt_field
 
+    def handle_deletion(self, selection: SelectionType, db_id: int) -> None:
+        if selection is SelectionType.REGION:
+            fields = self.fields_by_region.pop(db_id)
+            for field in fields:
+                self.removeItem(field)
+
+            self.destroyItemGroup(self.region_group)
+            self.region_group = None
+        elif selection is SelectionType.FIELD:
+            field = self.fields_by_id.pop(db_id)
+            self.removeItem(field)
+        else:
+            raise RuntimeError(f'Unknown selection type: {selection}')
+
     def handle_tree_selection_change(self, selection: SelectionType, db_id: int) -> None:
         self.clearSelection()
         if self.region_group is not None:

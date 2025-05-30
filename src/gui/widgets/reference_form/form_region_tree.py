@@ -109,3 +109,20 @@ class FormRegionTree(QTreeWidget):
     def handle_current_item_change(self, current: TreeItem, _: TreeItem) -> None:
         selection = SelectionType.REGION if isinstance(current, RegionItem) else SelectionType.FIELD
         self.updateDetails.emit(selection, current.get_db_id())
+
+    def delete_selected_item(self) -> tuple[SelectionType, int] | None:
+        selected_items = self.selectedItems()
+        if not selected_items:
+            return None
+
+        current = selected_items[0]
+        selection_type = SelectionType.REGION if isinstance(current, RegionItem) else SelectionType.FIELD
+        db_id = current.get_db_id()
+
+        # remove the item from the tree
+        if parent := current.parent():
+            parent.takeChild(parent.indexOfChild(current))
+        else:
+            self.takeTopLevelItem(self.indexOfTopLevelItem(current))
+
+        return selection_type, db_id

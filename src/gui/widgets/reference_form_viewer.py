@@ -33,6 +33,8 @@ class ReferenceFormViewer(QWidget):
         self.field_browser.treeSelectionChange.connect(self.field_canvas.handle_tree_selection_change)
         self.field_canvas.fieldSelected.connect(self.field_browser.handle_canvas_field_selected)
 
+        self.field_browser.deleteSelection.connect(self.field_canvas.handle_deletion)
+
     def fit_form(self) -> None:
         self.field_canvas.fit_form()
 

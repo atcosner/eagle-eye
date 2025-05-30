@@ -18,6 +18,7 @@ class SelectionDetails(QGroupBox):
     def __init__(self):
         self._base_title = 'Details'
         super().__init__(self._base_title)
+        self.setMinimumHeight(300)
 
         self._current_widget: RegionDetails | FieldDetails | None = None
         self.region_details: dict[int, RegionDetails] = {}

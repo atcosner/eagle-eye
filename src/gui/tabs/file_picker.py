@@ -90,5 +90,8 @@ class FilePicker(QWidget):
         self.file_list.load_job(job)
 
     @pyqtSlot(QListWidgetItem, QListWidgetItem)
-    def update_preview(self, current: FileItem, _: FileItem):
-        self.file_preview.update_preview(current.path())
+    def update_preview(self, current: FileItem | None, _: FileItem | None):
+        if current:
+            self.file_preview.update_preview(current.path())
+        else:
+            self.file_preview.clear()

@@ -3,7 +3,7 @@
 # Set variables - modify these paths as needed
 $VenvPath = "..\.venv"  # Path to your virtual environment
 $PythonScript = "full_start.py"  # Name of your Python script
-$env:PYTHONPATH = "$env:PYTHONPATH;D:\Documents\PycharmProjects\eagle-eye"
+$env:PYTHONPATH = "$env:PYTHONPATH;C:\Users\atcos\Documents\Pycharm Projects\eagle-eye"
 
 # Check if virtual environment exists
 if (-Not (Test-Path $VenvPath)) {

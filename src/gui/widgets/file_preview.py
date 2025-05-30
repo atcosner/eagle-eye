@@ -150,6 +150,10 @@ class PdfViewer(QPdfView):
         self.setZoomMode(QPdfView.ZoomMode.FitInView)
         self.setPageMode(QPdfView.PageMode.MultiPage)
 
+    def clear(self) -> None:
+        self.document = QPdfDocument(None)
+        self.setDocument(self.document)
+
     def load_document(self, file_path: str) -> None:
         self.document.load(file_path)
         self.reset_zoom()
@@ -202,6 +206,11 @@ class FilePreview(QWidget):
         layout.addWidget(self.pdf_viewer)
         layout.addWidget(self.image_viewer)
         self.setLayout(layout)
+
+    def clear(self) -> None:
+        self.pdf_viewer.setVisible(True)
+        self.pdf_viewer.clear()
+        self.image_viewer.setVisible(False)
 
     def update_scale(self, factor: float) -> None:
         self.image_viewer.adjust_scale(factor)

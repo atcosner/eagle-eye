@@ -20,6 +20,22 @@ Optical Character Recognition (OCR) is supported by the [Google Vision API](http
 * Export of data into Excel or CSV formats for further processing
 
 
+## Timeline For Completion
+Eagle Eye is currently in an Alpha stage with large portions of functionality missing or buggy. As a solo developer
+working on this in my spare time, I plan to work on this sporadically. I have laid out a rough timeline below but if
+there is a feature you are particularly interested in please reach out to me at atcosner@gmail.com.
+
+* SPNHC 2025 (May 30th, 2025)
+  * Working processing pipeline demo
+  * Basic reference form creation
+* End of Summer 2025
+  * Full reference form creation
+  * Beta release
+* End of 2025
+  * Production Release
+    * Binaries available for Windows, and Mac
+    * Export/Import from a DB file
+
 ## Acknowledgements
 This project would not have been possible without the support of the staff of the [KU Biodiversity Institute](https://biodiversity.ku.edu/)
 with special thanks to the following people:

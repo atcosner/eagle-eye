@@ -2,12 +2,13 @@ import logging
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
-from PyQt6.QtWidgets import QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.gui.widgets.util.sized_scroll_area import SizedScrollArea
 from src.gui.widgets.util.vertical_tabs import VerticalTabs
+from src.gui.windows.file_viewer import FileViewer
 from src.util.validation import get_verified_icon
 
 from .region_ocr_results import RegionOcrResults
@@ -20,8 +21,12 @@ class FileOcrResults(QWidget):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
+        self._input_file_db_id: int | None = None
         self._result_db_id: int | None = None
         self._initial_show = False
+
+        self.view_original_button = QPushButton('View Form')
+        self.view_original_button.pressed.connect(self.handle_view_original_button)
 
         self.tabs = VerticalTabs()
         self.tabs.currentChanged.connect(self.handle_current_tab_change)
@@ -32,7 +37,13 @@ class FileOcrResults(QWidget):
         self._set_up_layout()
 
     def _set_up_layout(self) -> None:
+        button_layout = QHBoxLayout()
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.addWidget(self.view_original_button)
+        button_layout.addStretch()
+
         layout = QVBoxLayout()
+        layout.addLayout(button_layout)
         layout.addWidget(self.tabs)
         self.setLayout(layout)
 
@@ -47,6 +58,7 @@ class FileOcrResults(QWidget):
             if input_file.process_result is None:
                 return
 
+            self._input_file_db_id = input_file.id
             self._result_db_id = input_file.process_result.id
             for region in input_file.process_result.regions.values():
                 region_results = RegionOcrResults()
@@ -88,3 +100,21 @@ class FileOcrResults(QWidget):
                 self.tabs.setCurrentIndex(current_idx + 1)
 
         self.verificationChange.emit(all(self.region_validation.values()), move_to_next_file)
+
+    @pyqtSlot()
+    def handle_view_original_button(self) -> None:
+        with Session(DB_ENGINE) as session:
+            input_file = session.get(InputFile, self._input_file_db_id)
+            if input_file is None:
+                return
+
+            if input_file.pre_process_result is None:
+                return
+
+            pre_process = input_file.pre_process_result
+            if not pre_process.successful_alignment:
+                return
+
+            rotation = pre_process.rotation_attempts[pre_process.accepted_rotation_angle]
+            self.viewer = FileViewer(self, rotation.path)
+            self.viewer.show()

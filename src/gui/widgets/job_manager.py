@@ -1,14 +1,15 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QWidget, QComboBox, QSizePolicy, QLineEdit, QHBoxLayout, QLabel, QVBoxLayout
+from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtWidgets import QWidget, QComboBox, QSizePolicy, QLineEdit, QHBoxLayout, QLabel, QVBoxLayout, QPushButton
 
 from src.database import DB_ENGINE
 from src.database.job import Job
 from src.database.reference_form import ReferenceForm
 
 from .processing_pipeline import ProcessingPipeline
+from ..windows.reference_form_editor import ReferenceFormEditor
 
 
 class JobManager(QWidget):
@@ -27,6 +28,9 @@ class JobManager(QWidget):
         self.reference_form_selector.setSizePolicy(size_policy)
         self.reference_form_selector.currentIndexChanged.connect(self.handle_reference_form_change)
 
+        self.view_button = QPushButton('View')
+        self.view_button.pressed.connect(self.handle_view_reference_form)
+
         self.processing_pipeline = ProcessingPipeline(self)
         self.processing_pipeline.inputFilesConfirmed.connect(self.handle_input_files_confirmed)
 
@@ -42,6 +46,7 @@ class JobManager(QWidget):
         job_reference_layout = QHBoxLayout()
         job_reference_layout.addWidget(QLabel('Reference Form: '))
         job_reference_layout.addWidget(self.reference_form_selector)
+        job_reference_layout.addWidget(self.view_button)
 
         layout = QVBoxLayout()
         layout.addLayout(job_name_layout)
@@ -65,6 +70,16 @@ class JobManager(QWidget):
     def handle_reference_form_change(self, _: int) -> None:
         self._reference_form_db_id = self.reference_form_selector.currentData()
         self.processing_pipeline.change_reference_form(self.reference_form_selector.currentData())
+
+    @pyqtSlot()
+    def handle_view_reference_form(self) -> None:
+        # TODO: this is broken
+        # if self._reference_form_db_id is None:
+        #     return
+
+        form_viewer = ReferenceFormEditor(self, False, 1)
+        form_viewer.setWindowModality(Qt.WindowModality.ApplicationModal)
+        form_viewer.show()
 
     def load_job(self, job_id: int) -> None:
         self._toggle_controls(True)

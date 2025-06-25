@@ -1,10 +1,7 @@
 on:
   push:
-    # run the installer build in release branches and version tags
     branches:
       - 'release/**'
-    tags:
-      - v*.*
 
 jobs:
   test-installer-matrix:

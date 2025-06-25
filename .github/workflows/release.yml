@@ -4,7 +4,7 @@ on:
       - v*.*
 
 jobs:
-  build-installer-matrix:
+  publish-installer-matrix:
     strategy:
       matrix:
         os: ['windows-latest'] # , 'macos-latest']
@@ -12,7 +12,6 @@ jobs:
     steps:
       - name: Build Eagle Eye Executable
         uses: sayyid5416/pyinstaller@v1
-        if: github.ref == 'refs/heads/main'
         with:
           python_ver: '3.12'
           spec: 'eagle_eye.spec'

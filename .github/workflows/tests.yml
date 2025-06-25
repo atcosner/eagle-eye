@@ -1,0 +1,21 @@
+on:
+  push:
+    # run the installer build in release branches and version tags
+    branches:
+      - 'release/**'
+    tags:
+      - v*.*
+
+jobs:
+  test-installer-matrix:
+    strategy:
+      matrix:
+        os: ['windows-latest'] # , 'macos-latest']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Build Eagle Eye Executable
+        uses: sayyid5416/pyinstaller@v1
+        with:
+          python_ver: '3.12'
+          spec: 'eagle_eye.spec'
+          requirements: 'requirements.txt'

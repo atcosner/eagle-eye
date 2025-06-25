@@ -10,7 +10,7 @@ jobs:
   build-installer-matrix:
     strategy:
       matrix:
-        os: ['windows-latest', 'macos-latest']
+        os: ['windows-latest'] # , 'macos-latest']
     runs-on: ${{ matrix.os }}
     steps:
       - name: Build Eagle Eye Executable

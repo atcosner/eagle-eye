@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+import shutil
 import uuid
 from pathlib import Path
 
@@ -27,6 +28,13 @@ def get_working_dir() -> Path | None:
     work_dir.mkdir(exist_ok=True)
 
     return work_dir
+
+
+def safe_dir_delete(path: Path) -> None:
+    try:
+        shutil.rmtree(path)
+    except (shutil.Error, FileNotFoundError):
+        logger.exception(f'Failed to remove {path}')
 
 
 class LocalPaths:

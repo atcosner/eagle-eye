@@ -64,7 +64,9 @@ class LocalPaths:
 
     @staticmethod
     def logs_directory() -> Path:
-        return get_working_dir() / 'logs'
+        log_dir = get_working_dir() / 'logs'
+        log_dir.mkdir(exist_ok=True)
+        return log_dir
 
     @staticmethod
     def reference_forms_directory() -> Path:

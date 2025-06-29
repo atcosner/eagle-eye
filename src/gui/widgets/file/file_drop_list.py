@@ -2,10 +2,11 @@ import logging
 import shutil
 import uuid
 from pathlib import Path
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import Iterable
 
-from PyQt6.QtCore import QSize, QMimeData, QMimeDatabase, QUrl
+from PyQt6.QtCore import QSize, QMimeData, QMimeDatabase, QUrl, pyqtSlot
 from PyQt6.QtGui import QIcon, QDragEnterEvent, QDragMoveEvent, QDropEvent
 from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtWidgets import QWidget, QListWidget, QListWidgetItem
@@ -13,7 +14,7 @@ from PyQt6.QtWidgets import QWidget, QListWidget, QListWidgetItem
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.database.job import Job
-from src.util.paths import LocalPaths, is_pdf
+from src.util.paths import LocalPaths, is_pdf, safe_dir_delete
 from src.util.resources import FILE_TYPE_ICON_PATH
 from src.util.types import FileDetails
 
@@ -32,6 +33,9 @@ class FileItem(QListWidgetItem):
 
     def path(self) -> Path:
         return self._path
+
+    def db_id(self) -> int:
+        return self._db_id
 
     def file_details(self) -> FileDetails:
         return FileDetails(
@@ -75,6 +79,35 @@ class FileDropList(QListWidget):
                 invalid_file = True
 
         return not invalid_file
+
+    @pyqtSlot()
+    def remove_selected_item(self) -> None:
+        # ensure something is actually selected
+        if self.currentRow() == -1:
+            logger.warning('Attempted to remove selected item, but no item was selected!')
+            return
+
+        # get and remove the item from the list
+        selected_item: FileItem = self.takeItem(self.currentRow())  # type: ignore
+        logger.info(f'Removing input file item with DB id: {selected_item.db_id()}')
+        selected_item.setSelected(False)
+
+        # remove the item from the DB and the filesystem
+        with Session(DB_ENGINE) as session:
+            input_file = session.get(InputFile, selected_item.db_id())
+
+            # remove any linked files
+            result = session.scalars(select(InputFile).where(InputFile.linked_input_file_id == input_file.id))
+            for linked_file in result.all():
+                logger.info(f'Removing linked file with ID: {linked_file.id}')
+                safe_dir_delete(LocalPaths.input_file_directory(self._job_db_uuid, linked_file.id))
+                session.delete(linked_file)
+
+            # remove the parent file
+            safe_dir_delete(LocalPaths.input_file_directory(self._job_db_uuid, input_file.id))
+            session.delete(input_file)
+
+            session.commit()
 
     def add_item(self, file_path: QUrl | Path | str, db_id: int | None = None) -> None:
         if isinstance(file_path, QUrl):

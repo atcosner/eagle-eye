@@ -66,4 +66,29 @@ def get_link_explanation(method: FormLinkingMethod) -> str:
                 For example, fields in the bottom region of a page will only be allowed to link to fields in the top region of the page.
             """
         case _:
+            raise RuntimeError(f"Unknown linking mode: {method}")
+
+
+class FormAlignmentMethod(Enum):
+    AUTOMATIC = 1
+    ALIGNMENT_MARKS = 2
+
+
+def get_alignment_explanation(method: FormAlignmentMethod) -> str:
+    match method:
+        case FormAlignmentMethod.AUTOMATIC:
+            return """
+                <u>Automatic Alignment</u><br>
+                <br>
+                Eagle Eye will attempt to automatically align the scanned for to the reference form.<br>
+                This method is only recommended on forms that have one region (i.e. one form = one specimen).
+            """
+        case FormAlignmentMethod.ALIGNMENT_MARKS:
+            return """
+                <u>Alignment Marks</u><br>
+                <br>
+                This method will use black squares present in the reference form to align the scanned form.<br>
+                Please enter the number of expected alignment marks.
+            """
+        case _:
             raise RuntimeError(f"Unknown export mode: {method}")

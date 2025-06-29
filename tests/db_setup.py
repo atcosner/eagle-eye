@@ -15,7 +15,7 @@ from src.database.reference_form import ReferenceForm
 from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
 from src.util.paths import LocalPaths
-from src.util.types import BoxBounds, FormLinkingMethod
+from src.util.types import BoxBounds, FormLinkingMethod, FormAlignmentMethod
 from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype
 
 
@@ -148,6 +148,7 @@ with Session(DB_ENGINE) as session:
     new_form = ReferenceForm(
         name='KU Ornithology Form v8',
         path=reference_forms / REFERENCE_FORM_FILENAME,
+        alignment_method=FormAlignmentMethod.ALIGNMENT_MARKS,
         alignment_mark_count=16,
         linking_method=FormLinkingMethod.PREVIOUS_REGION,
     )

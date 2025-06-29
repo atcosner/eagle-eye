@@ -1,8 +1,11 @@
 import logging
 import sys
 from contextlib import contextmanager
+from datetime import datetime
 from types import TracebackType
 from typing import Any, Type, Callable
+
+from .paths import LocalPaths
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +32,15 @@ def log_block(log_func: Callable, block_name: str) -> None:
 
 
 def configure_root_logger(min_level: int) -> None:
+    log_file = LocalPaths.logs_directory() / f'eagle_eye_{datetime.now():%Y%m%d_%H%M%S}.log'
+
     logging.basicConfig(
         format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
         level=min_level,
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(log_file),
+        ],
     )
 
 

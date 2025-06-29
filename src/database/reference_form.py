@@ -1,7 +1,7 @@
 from pathlib import Path
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship, attribute_keyed_dict
 
-from src.util.types import FormLinkingMethod
+from src.util.types import FormLinkingMethod, FormAlignmentMethod
 
 from . import OrmBase
 from .form_region import FormRegion
@@ -16,7 +16,9 @@ class ReferenceForm(MappedAsDataclass, OrmBase):
     name: Mapped[str]
     path: Mapped[Path] = mapped_column(DbPath)
 
-    alignment_mark_count: Mapped[int]
+    alignment_method: Mapped[FormAlignmentMethod]
+    alignment_mark_count: Mapped[int | None] = mapped_column(nullable=True)
+
     linking_method: Mapped[FormLinkingMethod]
 
     # Relationships
@@ -27,3 +29,9 @@ class ReferenceForm(MappedAsDataclass, OrmBase):
         collection_class=attribute_keyed_dict("local_id"),
         back_populates="reference_form",
     )
+
+    def alignment_description(self) -> str:
+        str_name = self.alignment_method.name.replace('_', ' ').title()
+        if self.alignment_method is FormAlignmentMethod.ALIGNMENT_MARKS:
+            str_name += f' ({self.alignment_mark_count})'
+        return str_name

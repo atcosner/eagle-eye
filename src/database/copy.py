@@ -107,7 +107,13 @@ def duplicate_field(field: FormField) -> FormField:
         raise RuntimeError(f'Field had no sub-fields: {field.id}')
 
 
-def copy_reference_form(new_form: ReferenceForm, old_form: ReferenceForm) -> None:
+def copy_reference_form(new_form: ReferenceForm, old_form: ReferenceForm, copy_details: bool = False) -> None:
+    if copy_details:
+        new_form.name = old_form.name
+        new_form.path = old_form.path
+        new_form.alignment_mark_count = old_form.alignment_mark_count
+        new_form.linking_method = old_form.linking_method
+
     for region in old_form.regions.values():
         new_region = FormRegion(local_id=region.local_id, name=region.name)
         for field in region.fields:

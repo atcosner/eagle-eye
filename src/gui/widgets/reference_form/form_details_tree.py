@@ -7,8 +7,10 @@ from src.database.reference_form import ReferenceForm
 
 
 class FormDetailsTree(QTreeWidget):
-    def __init__(self):
+    def __init__(self, add_checkboxes: bool = False):
         super().__init__()
+        self._add_checkboxes = add_checkboxes
+
         self.setColumnCount(5)
         self.setHeaderLabels(['Name', 'Alignment Marks', 'Link Method', 'Regions', 'Fields'])
         self.setRootIsDecorated(False)
@@ -36,6 +38,8 @@ class FormDetailsTree(QTreeWidget):
                 ],
             )
             item.setData(0, Qt.ItemDataRole.UserRole, form.id)
+            if self._add_checkboxes:
+                item.setCheckState(0, Qt.CheckState.Unchecked)
             self.addTopLevelItem(item)
 
         # if we loaded any forms, select the first one
@@ -43,3 +47,13 @@ class FormDetailsTree(QTreeWidget):
             self.setCurrentItem(self.topLevelItem(self.topLevelItemCount() - 1))
 
         self.resize_columns()
+
+    def get_checked_items(self) -> list[QTreeWidgetItem]:
+        checked_items = []
+
+        for idx in range(self.topLevelItemCount()):
+            item = self.topLevelItem(idx)
+            if item.checkState(0) == Qt.CheckState.Checked:
+                checked_items.append(item)
+
+        return checked_items

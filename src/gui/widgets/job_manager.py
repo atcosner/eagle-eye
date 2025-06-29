@@ -62,22 +62,30 @@ class JobManager(QWidget):
     def get_current_reference_form_id(self) -> int | None:
         return self._reference_form_db_id
 
+    def update_current_reference_form(self, form_id: int | None) -> None:
+        print('update', self._reference_form_db_id, form_id)
+        self._reference_form_db_id = form_id
+        self.processing_pipeline.change_reference_form(form_id)
+
+        # select the reference form in the combo box
+        for index in range(self.reference_form_selector.count()):
+            if self.reference_form_selector.itemData(index) == form_id:
+                self.reference_form_selector.setCurrentIndex(index)
+
     @pyqtSlot()
     def handle_input_files_confirmed(self) -> None:
         self.reference_form_selector.setDisabled(True)
 
     @pyqtSlot(int)
     def handle_reference_form_change(self, _: int) -> None:
-        self._reference_form_db_id = self.reference_form_selector.currentData()
-        self.processing_pipeline.change_reference_form(self.reference_form_selector.currentData())
+        self.update_current_reference_form(self.reference_form_selector.currentData())
 
     @pyqtSlot()
     def handle_view_reference_form(self) -> None:
-        # TODO: this is broken
-        # if self._reference_form_db_id is None:
-        #     return
+        if self._reference_form_db_id is None:
+            return
 
-        form_viewer = ReferenceFormEditor(self, False, 1)
+        form_viewer = ReferenceFormEditor(self, False, self._reference_form_db_id)
         form_viewer.setWindowModality(Qt.WindowModality.ApplicationModal)
         form_viewer.show()
 
@@ -87,7 +95,10 @@ class JobManager(QWidget):
         with Session(DB_ENGINE) as session:
             job = session.get(Job, job_id)
             self._job_db_id = job_id
-            self._reference_form_db_id = job.reference_form.id if job.reference_form is not None else None
+
+            # update the current reference form if the job has one selected
+            if job.reference_form is not None:
+                self.update_current_reference_form(job.reference_form.id)
 
             self.job_name.setText(job.name)
             self.processing_pipeline.load_job(job_id)

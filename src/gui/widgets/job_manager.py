@@ -63,7 +63,6 @@ class JobManager(QWidget):
         return self._reference_form_db_id
 
     def update_current_reference_form(self, form_id: int | None) -> None:
-        print('update', self._reference_form_db_id, form_id)
         self._reference_form_db_id = form_id
         self.processing_pipeline.change_reference_form(form_id)
 

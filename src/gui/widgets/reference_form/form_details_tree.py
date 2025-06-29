@@ -12,7 +12,7 @@ class FormDetailsTree(QTreeWidget):
         self._add_checkboxes = add_checkboxes
 
         self.setColumnCount(5)
-        self.setHeaderLabels(['Name', 'Alignment Marks', 'Link Method', 'Regions', 'Fields'])
+        self.setHeaderLabels(['Name', 'Alignment', 'Link Method', 'Regions', 'Fields'])
         self.setRootIsDecorated(False)
 
         # set column 0 (form name) to consume all extra space
@@ -31,7 +31,7 @@ class FormDetailsTree(QTreeWidget):
                 None,
                 [
                     form.name,
-                    str(form.alignment_mark_count),
+                    form.alignment_description(),
                     form.linking_method.name,
                     str(len(form.regions)),
                     str(sum([len(region.fields) for region in form.regions.values()])),

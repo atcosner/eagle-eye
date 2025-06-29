@@ -12,7 +12,7 @@ from src.database.copy import copy_reference_form
 from src.database.job import Job
 from src.database.reference_form import ReferenceForm
 from src.util.paths import LocalPaths
-from src.util.types import FormLinkingMethod
+from src.util.types import FormLinkingMethod, FormAlignmentMethod
 
 from .base import BaseWindow
 from .reference_form_editor import ReferenceFormEditor
@@ -74,8 +74,8 @@ class MainWindow(BaseWindow):
 
         settings_menu = self.menuBar().addMenu('Settings')
         settings_menu.addAction('Check Google API Config').triggered.connect(lambda: VisionApiConfig(self).exec())
-        settings_menu.addSeparator()
-        settings_menu.addAction('Edit Settings').triggered.connect(self.handle_create_reference_form)
+        # settings_menu.addSeparator()
+        # settings_menu.addAction('Edit Settings').triggered.connect(self.handle_create_reference_form)
 
         help_menu = self.menuBar().addMenu('Help')
         help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).exec())
@@ -127,17 +127,20 @@ class MainWindow(BaseWindow):
         # create a new reference form
         logger.info(f'Creating new reference form: {wizard.field("form.name")}')
         with Session(DB_ENGINE) as session:
+            alignment_enum = FormAlignmentMethod[wizard.field('form.align_method')]
+
             new_form = ReferenceForm(
                 name=wizard.field('form.name'),
                 path=Path(wizard.field('form.file_path')),
-                alignment_mark_count=1,
+                alignment_method=alignment_enum,
+                alignment_mark_count=wizard.field('form.align_marks'),
                 linking_method=FormLinkingMethod[wizard.field('form.link_method')],
             )
 
             # if we are copying another form, copy in all the regions and fields
             if wizard.field('form.copy_existing'):
                 copy_form = session.get(ReferenceForm, wizard.field('form.existing_id'))
-                copy_reference_form(new_form, copy_form)
+                copy_reference_form(new_form, copy_form, copy_details=False)
 
             session.add(new_form)
             session.commit()

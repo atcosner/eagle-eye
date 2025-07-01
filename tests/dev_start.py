@@ -12,8 +12,8 @@ configure_root_logger(logging.INFO)
 app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(True)
 
-screen = SplashScreen()
-screen.initial_setup()
+# screen = SplashScreen()
+# screen.initial_setup()
 
 window = MainWindow()
 window.start(auto_new_job=True)
@@ -35,8 +35,8 @@ window.job_widget.processing_pipeline.picker.file_list.file_list.add_items([
     # dev_path / '40013-40014.jpg',
     # dev_path / '40015-40018.pdf',
 
-    # pdf with alignment errors
-    dev_path / '40013-40018.pdf',
+    # image with alignment errors
+    dev_path / '40013-40014 [misalign].png',
 
     # # fake testing forms
     # project_path / r'src\eagle-eye\form_templates\dev\test_kt_form__filled.jpg',

@@ -29,19 +29,41 @@ def rotate_image(image: np.array, degrees: float) -> np.array:
 
 
 def find_alignment_marks(image: np.array) -> list[AlignmentMark]:
-    alignment_marks = []
-    contours, _ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for c in contours:
-        x, y, width, height = cv2.boundingRect(c)
-        side_ratio = height / width
+    # Invert the image (black becomes white)
+    _, thresh = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
 
-        contour_roi = image[y:y + height, x:x + width]
+    # Apply morphological operations to clean up noise
+    kernel = np.ones((3, 3), np.uint8)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+
+    alignment_marks = []
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours:
+        # Filter out small contours
+        area = cv2.contourArea(c)
+        if area < 100:  # Skip very small contours
+            continue
+
+        # Approximate contour to polygon
+        epsilon = 0.02 * cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, epsilon, True)
+
+        # Determine a bounding box and the aspect ratio
+        x, y, width, height = cv2.boundingRect(approx)
+        aspect_ratio = float(height) / width
+
+        contour_roi = thresh[y:y + height, x:x + width]
         white_pixels = cv2.countNonZero(contour_roi)
         color_ratio = white_pixels / (height * width)
 
-        # Check that the mark is mostly square and contains almost all black pixels
-        if (0.9 < side_ratio < 1.1) and (color_ratio < 0.2):
+        # Check that the mark is mostly square and contains almost all white pixels
+        if (0.9 < aspect_ratio < 1.1) and (color_ratio > 0.8):
             alignment_marks.append(AlignmentMark(x, y, height, width))
+
+    if alignment_marks:
+        cv2.imshow('Detected Squares', thresh)
+        cv2.waitKey(0)
 
     # Order the marks in left-to-right and top-to-bottom order
     marks_x_sort = sorted(alignment_marks, key=lambda m: m.x)

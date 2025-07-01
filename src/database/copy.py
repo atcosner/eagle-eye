@@ -111,6 +111,7 @@ def copy_reference_form(new_form: ReferenceForm, old_form: ReferenceForm, copy_d
     if copy_details:
         new_form.name = old_form.name
         new_form.path = old_form.path
+        new_form.alignment_method = old_form.alignment_method
         new_form.alignment_mark_count = old_form.alignment_mark_count
         new_form.linking_method = old_form.linking_method
 

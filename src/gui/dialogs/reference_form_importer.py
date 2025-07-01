@@ -106,7 +106,13 @@ class ReferenceFormImporter(QDialog):
             for old_form_id in import_ids:
                 old_form = self._db_session.get(ReferenceForm, old_form_id)
 
-                new_form = ReferenceForm('', None, 0, None)
+                new_form = ReferenceForm(
+                    name='',
+                    path=None,
+                    alignment_method=None,
+                    alignment_mark_count=0,
+                    linking_method=None,
+                )
                 # TODO: the DB does not have the reference image file only a path to it
                 copy_reference_form(new_form, old_form, copy_details=True)
                 new_session.add(new_form)

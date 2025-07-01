@@ -92,8 +92,13 @@ class PreProcessingDetails(QFrame):
             if file.pre_process_result is not None:
                 palette = QPalette()
                 if file.pre_process_result.successful_alignment:
-                    self.status_label.setText('SUCCESS')
-                    palette.setColor(QPalette.ColorRole.Window, QColor('green'))
+                    if file.pre_process_result.fully_aligned:
+                        self.status_label.setText('SUCCESS')
+                        palette.setColor(QPalette.ColorRole.Window, QColor('green'))
+                    else:
+                        self.status_label.setText('WARNING (Partial Alignment)')
+                        palette.setColor(QPalette.ColorRole.WindowText, QColor('black'))
+                        palette.setColor(QPalette.ColorRole.Window, QColor('yellow'))
                 else:
                     self.status_label.setText('FAILED')
                     palette.setColor(QPalette.ColorRole.Window, QColor('red'))

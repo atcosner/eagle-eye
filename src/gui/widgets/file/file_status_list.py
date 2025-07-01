@@ -71,6 +71,8 @@ class FileStatusItem(QTreeWidgetItem):
                 child_statuses = [self.child(idx).get_status() for idx in range(self.childCount())]
                 if any([(status == FileStatus.FAILED) for status in child_statuses]):
                     self._set_own_status(FileStatus.FAILED)
+                elif any([(status == FileStatus.WARNING) for status in child_statuses]):
+                    self._set_own_status(FileStatus.WARNING)
                 elif all([(status == FileStatus.SUCCESS) for status in child_statuses]):
                     self._set_own_status(FileStatus.SUCCESS)
         else:

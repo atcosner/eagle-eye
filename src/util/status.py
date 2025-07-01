@@ -10,6 +10,7 @@ class FileStatus(Enum):
     IN_PROGRESS = object()
     SUCCESS = object()
     FAILED = object()
+    WARNING = object()
 
 
 def get_icon_for_status(status: FileStatus) -> QIcon | QMovie:
@@ -22,9 +23,11 @@ def get_icon_for_status(status: FileStatus) -> QIcon | QMovie:
             return QIcon(str(FILE_STATUS_ICON_PATH / 'file_success.png'))
         case FileStatus.FAILED:
             return QIcon(str(FILE_STATUS_ICON_PATH / 'file_error.png'))
+        case FileStatus.WARNING:
+            return QIcon(str(FILE_STATUS_ICON_PATH / 'file_warning.png'))
         case _:
             raise Exception(f'Unknown status: {status}')
 
 
 def is_finished(status: FileStatus) -> bool:
-    return status in (FileStatus.SUCCESS, FileStatus.FAILED)
+    return status in (FileStatus.SUCCESS, FileStatus.FAILED, FileStatus.WARNING)

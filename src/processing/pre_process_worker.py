@@ -15,7 +15,9 @@ from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus
 
-from .util import rotate_image, find_alignment_marks, AlignmentMark, alignment_marks_to_points
+from .util import (
+    rotate_image, find_alignment_marks, AlignmentMark, alignment_marks_to_points, group_by_normalized_position,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +78,7 @@ class PreProcessingWorker(QObject):
             assert job.reference_form.path.exists(), f'Ref image did not exist: {job.reference_form.path}'
 
             self.log.info(f'Using reference: {job.reference_form.name}')
-            input_file.pre_process_result = PreProcessResult(successful_alignment=False)
+            input_file.pre_process_result = PreProcessResult(successful_alignment=False, fully_aligned=False)
 
             # Build the paths for our output results
             pre_process_directory = LocalPaths.pre_processing_directory(job.uuid, input_file.id)
@@ -134,12 +136,16 @@ class PreProcessingWorker(QObject):
 
             # Chose the best rotation that found all the alignment marks
             best_angle: int | None = None
+            best_angle_marks: list[AlignmentMark] | None = None
             for angle, marks in detected_marks.items():
-                if len(marks) == job.reference_form.alignment_mark_count:
-                    best_angle = angle
-                    break
+                if best_angle is None or len(marks) >= len(best_angle_marks):
+                    # only accept equal marks if the angle is closer to 0
+                    if best_angle_marks is None or len(marks) != len(best_angle_marks) or abs(angle) < abs(best_angle):
+                        self.log.info(f'New best angle: {angle} ({len(marks)} marks)')
+                        best_angle = angle
+                        best_angle_marks = marks
 
-            self.log.info(f'Best rotation angle: {best_angle} degrees')
+            self.log.info(f'Best rotation angle: {best_angle} degrees ({len(best_angle_marks)} marks)')
             if best_angle is None:
                 self.updateStatus.emit(input_file.id, FileStatus.FAILED)
                 self.processingComplete.emit(input_file.id)
@@ -147,8 +153,19 @@ class PreProcessingWorker(QObject):
             input_file.pre_process_result.successful_alignment = True
             input_file.pre_process_result.accepted_rotation_angle = best_angle
 
+            # Filter down the reference alignment marks if we didn't find them all in the test image
+            if len(best_angle_marks) != job.reference_form.alignment_mark_count:
+                match_result = group_by_normalized_position(
+                    best_angle_marks,
+                    reference_alignment_marks
+                )
+                # print(match_result)
+                test_points, ref_points = zip(*match_result['matched_pairs'])
+                best_angle_marks = list(test_points)
+                reference_alignment_marks = list(ref_points)
+
             # Convert the alignment marks to matchpoints
-            input_matchpoints = alignment_marks_to_points(detected_marks[best_angle])
+            input_matchpoints = alignment_marks_to_points(best_angle_marks)
             ref_matchpoints = alignment_marks_to_points(reference_alignment_marks)
 
             # Save an image of the matches
@@ -180,6 +197,15 @@ class PreProcessingWorker(QObject):
             cv2.imwrite(str(overlaid_path), overlaid_image)
             input_file.pre_process_result.overlaid_image_path = overlaid_path
 
+            # Determine if this was a full or partial success
+            if len(best_angle_marks) != job.reference_form.alignment_mark_count:
+                status = FileStatus.WARNING
+                input_file.pre_process_result.fully_aligned = False
+            else:
+                status = FileStatus.SUCCESS
+                input_file.pre_process_result.fully_aligned = True
+
+            # commit to the DB and signal out we are done
             session.commit()
-            self.updateStatus.emit(input_file.id, FileStatus.SUCCESS)
+            self.updateStatus.emit(input_file.id, status)
             self.processingComplete.emit(input_file.id)

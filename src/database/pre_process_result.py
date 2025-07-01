@@ -14,7 +14,9 @@ class PreProcessResult(MappedAsDataclass, OrmBase):
     input_file_id: Mapped[int] = mapped_column(ForeignKey("input_file.id"), init=False)
 
     successful_alignment: Mapped[bool]
+    fully_aligned: Mapped[bool]
     accepted_rotation_angle: Mapped[int] = mapped_column(init=False, default=None, nullable=True)
+
     matches_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)
     aligned_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)
     overlaid_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)

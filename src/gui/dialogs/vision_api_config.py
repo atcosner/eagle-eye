@@ -20,7 +20,7 @@ class VisionApiConfig(QDialog):
         self._gcloud_installed: bool = False
         self._gcloud_initialized: bool = False
 
-        self.step_one_box = QGroupBox('Step 1 - Create a Google Could Project and Enable Billing')
+        self.step_one_box = QGroupBox('Step 1 - Create a Google Cloud Project and Enable Billing')
 
         self.step_two_box = QGroupBox('Step 2 - Install Google Cloud CLI')
         self.cli_status_icon = QLabel()
@@ -46,12 +46,12 @@ class VisionApiConfig(QDialog):
     def _set_up_step_one(self) -> None:
         project_label = LinkLabel(
             r'1. Ensure you have created a '
-            r'<a href="https://developers.google.com/workspace/guides/create-project">Google Could Project</a>'
+            r'<a href="https://developers.google.com/workspace/guides/create-project">Google Cloud Project</a>'
         )
         billing_label = LinkLabel(
             '2. Ensure you have enabled '
             '<a href="https://cloud.google.com/billing/docs/how-to/modify-project#enable_billing_for_a_project">Billing</a> '
-            'in your Google Could Project'
+            'in your Google Cloud Project'
         )
 
         step_one_layout = QVBoxLayout()
@@ -62,7 +62,7 @@ class VisionApiConfig(QDialog):
     def _set_up_step_two(self) -> None:
         download_label = LinkLabel(
             r'1. Download and install the '
-            r'<a href="https://cloud.google.com/sdk/docs/install-sdk">Google Could CLI</a>'
+            r'<a href="https://cloud.google.com/sdk/docs/install-sdk">Google Cloud CLI</a>'
         )
 
         status_layout = QHBoxLayout()

@@ -5,6 +5,8 @@ from datetime import datetime
 from types import TracebackType
 from typing import Any, Type, Callable
 
+from PyQt6.QtWidgets import QMessageBox
+
 from .paths import LocalPaths
 
 logger = logging.getLogger(__name__)
@@ -51,5 +53,14 @@ def log_uncaught_exception(
 ) -> None:
     logger.critical('Uncaught exception', exc_info=(exc_type, exc_value, exc_traceback))
 
-    # Pass the exception to the default handler
-    sys.__excepthook__(exc_type, exc_value, exc_traceback)
+    # show a dialog to the user indicating we need to close
+    # TODO: missing the Eagle Eye window icon
+    QMessageBox.critical(
+        None,
+        'Critical Error',
+        f'Eagle Eye has encountered an unexpected error and must exit',
+    )
+
+    # TODO: report this crash as a GitHub issue
+
+    sys.exit(1)

@@ -35,4 +35,9 @@ body:
     id: logs
     attributes:
       label: Upload Log File
-      description: Please upload the log file referenced in the Eagle Eye bug reporter
+      description: Please upload the log file referenced in the Eagle Eye bug reporter (Step 2)
+  - type: textarea
+    id: job_files
+    attributes:
+      label: Upload Job Files
+      description: If chosen in the bug reporter, please upload the zipped job files here (Step 3)

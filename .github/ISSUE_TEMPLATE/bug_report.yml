@@ -1,5 +1,5 @@
 name: Bug Report
-description: File a bug report.
+description: Used to report an issue with the program.
 title: "[Bug]: "
 labels: ["bug"]
 assignees:
@@ -26,6 +26,11 @@ body:
       value: "A bug happened!"
     validations:
       required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Upload Screenshots
+      description: Please upload screenshots of the program if you believe they would assist in debugging the issue.
   - type: textarea
     id: logs
     attributes:

@@ -73,6 +73,12 @@ class LocalPaths:
         return get_working_dir() / 'reference_forms'
 
     @staticmethod
+    def bug_reports_directory() -> Path:
+        reports_dir = get_working_dir() / 'bug_reports'
+        reports_dir.mkdir(exist_ok=True)
+        return reports_dir
+
+    @staticmethod
     def settings_file() -> Path:
         return get_working_dir() / 'settings.json'
 

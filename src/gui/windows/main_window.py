@@ -17,6 +17,7 @@ from src.util.types import FormLinkingMethod, FormAlignmentMethod
 from .base import BaseWindow
 from .reference_form_editor import ReferenceFormEditor
 from ..dialogs.about_us import AboutUs
+from ..dialogs.bug_reporter import BugReporter
 from ..dialogs.job_selector import JobDetails, JobSelector
 from ..dialogs.reference_form_importer import ReferenceFormImporter
 from ..dialogs.reference_form_selector import ReferenceFormSelector
@@ -78,6 +79,8 @@ class MainWindow(BaseWindow):
         # settings_menu.addAction('Edit Settings').triggered.connect(self.handle_create_reference_form)
 
         help_menu = self.menuBar().addMenu('Help')
+        help_menu.addAction('Report A Bug').triggered.connect(lambda: BugReporter(self).exec())
+        help_menu.addSeparator()
         help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).exec())
 
     @pyqtSlot()

@@ -2,6 +2,7 @@ import logging
 import sys
 from contextlib import contextmanager
 from datetime import datetime
+from pathlib import Path
 from types import TracebackType
 from typing import Any, Type, Callable
 
@@ -12,6 +13,7 @@ from .paths import LocalPaths
 logger = logging.getLogger(__name__)
 
 LOG_WIDTH = 120
+CURRENT_LOG_FILE: Path = None
 
 
 class NamedLoggerAdapter(logging.LoggerAdapter):
@@ -34,16 +36,21 @@ def log_block(log_func: Callable, block_name: str) -> None:
 
 
 def configure_root_logger(min_level: int) -> None:
-    log_file = LocalPaths.logs_directory() / f'eagle_eye_{datetime.now():%Y%m%d_%H%M%S}.log'
+    global CURRENT_LOG_FILE
+    CURRENT_LOG_FILE = LocalPaths.logs_directory() / f'eagle_eye_{datetime.now():%Y%m%d_%H%M%S}.log'
 
     logging.basicConfig(
         format='%(asctime)s | %(levelname)s | %(name)s | %(message)s',
         level=min_level,
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler(log_file),
+            logging.FileHandler(CURRENT_LOG_FILE),
         ],
     )
+
+
+def get_current_logfile() -> Path:
+    return CURRENT_LOG_FILE
 
 
 def log_uncaught_exception(

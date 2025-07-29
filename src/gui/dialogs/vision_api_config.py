@@ -53,10 +53,16 @@ class VisionApiConfig(QDialog):
             '<a href="https://cloud.google.com/billing/docs/how-to/modify-project#enable_billing_for_a_project">Billing</a> '
             'in your Google Cloud Project'
         )
+        enable_vision = LinkLabel(
+            '3. Ensure you have enabled the '
+            '<a href="https://cloud.google.com/vision/docs/setup#api">Cloud Vision</a> '
+            'API in your Google Cloud Project'
+        )
 
         step_one_layout = QVBoxLayout()
         step_one_layout.addWidget(project_label)
         step_one_layout.addWidget(billing_label)
+        step_one_layout.addWidget(enable_vision)
         self.step_one_box.setLayout(step_one_layout)
 
     def _set_up_step_two(self) -> None:

@@ -38,50 +38,62 @@ class PreProcessingWorker(QObject):
         self.job_id = job_id
         self.file_id = file_id
 
+        self.job: Job | None = None
+        self.input_file: InputFile | None = None
+
         self.log = NamedLoggerAdapter(logger, f'Thread: {file_id}')
 
-    @pyqtSlot()
-    def start(self) -> None:
-        locker = QMutexLocker(self.mutex)
-        self.log.info('Staring thread')
+    def finish_fail(self, session: Session) -> None:
+        session.commit()
+        self.updateStatus.emit(self.input_file.id, FileStatus.FAILED)
+        self.processingComplete.emit(self.input_file.id)
 
+    def process(self) -> None:
         with Session(DB_ENGINE) as session:
-            job = session.get(Job, self.job_id)
-            input_file = session.get(InputFile, self.file_id)
+            self.job = session.get(Job, self.job_id)
+            self.input_file = session.get(InputFile, self.file_id)
 
             # do not pre-process container files
-            if input_file.container_file:
+            if self.input_file.container_file:
                 self.log.info('File is marked as a container file, skipping')
-                self.processingComplete.emit(input_file.id)
+                self.processingComplete.emit(self.input_file.id)
                 return
 
             # if we are linked, check if we need to save off our page from the PDF
-            if input_file.linked_input_file_id is not None and not input_file.path.exists():
-                linked_file = session.get(InputFile, input_file.linked_input_file_id)
+            if self.input_file.linked_input_file_id is not None and not self.input_file.path.exists():
+                linked_file = session.get(InputFile, self.input_file.linked_input_file_id)
                 if linked_file is None:
-                    self.log.error(f'Could not find the linked file with ID: {input_file.linked_input_file_id}')
-                    self.updateStatus.emit(input_file.id, FileStatus.FAILED)
-                    self.processingComplete.emit(input_file.id)
+                    self.log.error(f'Could not find the linked file with ID: {self.input_file.linked_input_file_id}')
+                    self.updateStatus.emit(self.input_file.id, FileStatus.FAILED)
+                    self.processingComplete.emit(self.input_file.id)
                     return
 
                 self.log.error(f'Extracting page from linked file: {linked_file.path.name}')
 
                 # TODO: could put the page number in the DB?
-                page_number = int(str(input_file.path.stem).split('page')[-1])
+                page_number = int(str(self.input_file.path.stem).split('page')[-1])
 
                 # extract the page from the PDF and save it to our path
                 document = pymupdf.open(linked_file.path)
                 page_pixmap = document.load_page(page_number-1).get_pixmap(dpi=300)
-                page_pixmap.save(input_file.path)
+                page_pixmap.save(self.input_file.path)
 
-            assert input_file.path.exists(), f'Test image did not exist: {input_file.path}'
-            assert job.reference_form.path.exists(), f'Ref image did not exist: {job.reference_form.path}'
+            self.log.info(f'Using reference: {self.job.reference_form.name}')
+            self.input_file.pre_process_result = PreProcessResult(successful_alignment=False, fully_aligned=False)
 
-            self.log.info(f'Using reference: {job.reference_form.name}')
-            input_file.pre_process_result = PreProcessResult(successful_alignment=False, fully_aligned=False)
+            # check that we have valid files
+            if not self.input_file.path.exists():
+                self.log.error(f'Test image did not exist: {self.input_file.path}')
+                self.finish_fail(session)
+                return
+
+            if not self.job.reference_form.path.exists():
+                self.log.error(f'Ref image did not exist: {self.job.reference_form.path}')
+                self.finish_fail(session)
+                return
 
             # Build the paths for our output results
-            pre_process_directory = LocalPaths.pre_processing_directory(job.uuid, input_file.id)
+            pre_process_directory = LocalPaths.pre_processing_directory(self.job.uuid, self.input_file.id)
             pre_process_directory.mkdir(exist_ok=True)
 
             matches_path = pre_process_directory / 'matches.png'
@@ -89,20 +101,24 @@ class PreProcessingWorker(QObject):
             overlaid_path = pre_process_directory / 'overlaid.png'
 
             # Load and grayscale both images
-            input_image = cv2.imread(str(input_file.path))
+            input_image = cv2.imread(str(self.input_file.path))
             input_image_gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
             _, input_image_threshold = cv2.threshold(input_image_gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-            reference_image = cv2.imread(str(job.reference_form.path))
+            reference_image = cv2.imread(str(self.job.reference_form.path))
             reference_image_gray = cv2.cvtColor(reference_image, cv2.COLOR_BGR2GRAY)
 
             # Find the alignment marks in the reference image
             reference_alignment_marks = find_alignment_marks(reference_image_gray)
             self.log.info(
                 f'Reference Image: Found {len(reference_alignment_marks)} marks, '
-                f'expected {job.reference_form.alignment_mark_count}'
+                f'expected {self.job.reference_form.alignment_mark_count}'
             )
-            assert len(reference_alignment_marks) == job.reference_form.alignment_mark_count
+            if len(reference_alignment_marks) != self.job.reference_form.alignment_mark_count:
+                self.log.error(f'Failed to find the correct number of alignment marks in the reference form')
+                self.log.error(f'Found {len(reference_alignment_marks)}, expected {self.job.reference_form.alignment_mark_count}')
+                self.finish_fail(session)
+                return
 
             # Work through each rotation angle and check for alignment marks
             detected_marks: dict[int, list[AlignmentMark]] = {}
@@ -127,7 +143,7 @@ class PreProcessingWorker(QObject):
                 cv2.imwrite(str(rotated_path), color_rotation_image)
 
                 # Save the attempt in the DB
-                input_file.pre_process_result.rotation_attempts[rotation_angle] = RotationAttempt(
+                self.input_file.pre_process_result.rotation_attempts[rotation_angle] = RotationAttempt(
                     rotation_angle=rotation_angle,
                     path=rotated_path,
                 )
@@ -147,14 +163,15 @@ class PreProcessingWorker(QObject):
 
             self.log.info(f'Best rotation angle: {best_angle} degrees ({len(best_angle_marks)} marks)')
             if best_angle is None:
-                self.updateStatus.emit(input_file.id, FileStatus.FAILED)
-                self.processingComplete.emit(input_file.id)
+                self.updateStatus.emit(self.input_file.id, FileStatus.FAILED)
+                self.processingComplete.emit(self.input_file.id)
                 return
-            input_file.pre_process_result.successful_alignment = True
-            input_file.pre_process_result.accepted_rotation_angle = best_angle
+
+            self.input_file.pre_process_result.successful_alignment = True
+            self.input_file.pre_process_result.accepted_rotation_angle = best_angle
 
             # Filter down the reference alignment marks if we didn't find them all in the test image
-            if len(best_angle_marks) != job.reference_form.alignment_mark_count:
+            if len(best_angle_marks) != self.job.reference_form.alignment_mark_count:
                 match_result = group_by_normalized_position(
                     best_angle_marks,
                     reference_alignment_marks
@@ -180,7 +197,7 @@ class PreProcessingWorker(QObject):
             )
             self.log.info(f'Writing matches image: {matches_path}')
             cv2.imwrite(str(matches_path), matched_image)
-            input_file.pre_process_result.matches_image_path = matches_path
+            self.input_file.pre_process_result.matches_image_path = matches_path
 
             # Compute the homography matrix and align the images using it
             (matrix_h, _) = cv2.findHomography(input_matchpoints, ref_matchpoints, method=cv2.RANSAC)
@@ -188,24 +205,37 @@ class PreProcessingWorker(QObject):
             aligned_image = cv2.warpPerspective(input_image_rotated, matrix_h, (w, h))
             self.log.info(f'Writing aligned image: {aligned_path}')
             cv2.imwrite(str(aligned_path), aligned_image)
-            input_file.pre_process_result.aligned_image_path = aligned_path
+            self.input_file.pre_process_result.aligned_image_path = aligned_path
 
             # Save an overlaid image to assist in debugging
             overlaid_image = aligned_image.copy()
             cv2.addWeighted(reference_image_gray, 0.5, aligned_image, 0.5, 0, overlaid_image)
             self.log.info(f'Writing overlaid image: {overlaid_path}')
             cv2.imwrite(str(overlaid_path), overlaid_image)
-            input_file.pre_process_result.overlaid_image_path = overlaid_path
+            self.input_file.pre_process_result.overlaid_image_path = overlaid_path
 
             # Determine if this was a full or partial success
-            if len(best_angle_marks) != job.reference_form.alignment_mark_count:
+            if len(best_angle_marks) != self.job.reference_form.alignment_mark_count:
                 status = FileStatus.WARNING
-                input_file.pre_process_result.fully_aligned = False
+                self.input_file.pre_process_result.fully_aligned = False
             else:
                 status = FileStatus.SUCCESS
-                input_file.pre_process_result.fully_aligned = True
+                self.input_file.pre_process_result.fully_aligned = True
 
             # commit to the DB and signal out we are done
             session.commit()
-            self.updateStatus.emit(input_file.id, status)
-            self.processingComplete.emit(input_file.id)
+            self.updateStatus.emit(self.input_file.id, status)
+            self.processingComplete.emit(self.input_file.id)
+
+    @pyqtSlot()
+    def start(self) -> None:
+        locker = QMutexLocker(self.mutex)
+        self.log.info('Staring thread')
+
+        try:
+            self.process()
+        except Exception:
+            # don't let unhandled exceptions cause issues with threads
+            self.log.exception('Unhandled exception during pre-processing')
+            self.updateStatus.emit(self.input_file.id, FileStatus.FAILED)
+            self.processingComplete.emit(self.input_file.id)

@@ -51,6 +51,9 @@ class SettingsManager:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.save()
 
+    def valid_api_config(self) -> bool:
+        return self.google_project_id is not None and self.google_access_token is not None
+
     def api_needs_update(self) -> bool:
         if self.google_api_update_date is None:
             return True

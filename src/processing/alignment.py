@@ -19,6 +19,10 @@ ALLOWED_ROTATIONS = [0] \
                     + list(np.arange(0.5, 4.0, 0.5)) \
                     + list(np.arange(-0.5, -4.0, -0.5))
 
+# configuration for automatic alignment
+MAX_FEATURES = 500
+KEYPOINT_KEEP_THRESHOLD = 0.2  # top 20% of keypoints
+
 
 class AlignmentError(Exception):
     pass
@@ -26,6 +30,10 @@ class AlignmentError(Exception):
 
 class AlignmentFailed(Exception):
     pass
+
+
+def build_image_paths(directory: Path) -> tuple[Path, Path, Path]:
+    return directory / 'matches.png', directory / 'aligned.png', directory / 'overlaid.png'
 
 
 def reference_mark_alignment(
@@ -37,9 +45,7 @@ def reference_mark_alignment(
         alignment_mark_count: int,
         result: PreProcessResult,
 ) -> FileStatus:
-    matches_path = working_directory / 'matches.png'
-    aligned_path = working_directory / 'aligned.png'
-    overlaid_path = working_directory / 'overlaid.png'
+    matches_path, aligned_path, overlaid_path = build_image_paths(working_directory)
 
     # Find the alignment marks in the reference image
     reference_alignment_marks = find_alignment_marks(reference_image)
@@ -155,3 +161,73 @@ def reference_mark_alignment(
     # commit to the DB and signal out we are done
     session.commit()
     return status
+
+
+def automatic_alignment(
+        logger: logging.Logger | NamedLoggerAdapter,
+        session: Session,
+        working_directory: Path,
+        reference_image: np.ndarray,
+        test_image: np.ndarray,
+        result: PreProcessResult,
+) -> FileStatus:
+    matches_path, aligned_path, overlaid_path = build_image_paths(working_directory)
+
+    # detect keypoints and extract features
+    orb = cv2.ORB_create(MAX_FEATURES)
+    ref_keypoints, ref_descriptors = orb.detectAndCompute(reference_image, None)
+    test_keypoints, test_descriptors = orb.detectAndCompute(test_image, None)
+    logger.info(f'Found {len(ref_keypoints)} reference keypoints and {len(test_keypoints)} test keypoints')
+
+    # match the features
+    matcher = cv2.DescriptorMatcher_create(cv2.DESCRIPTOR_MATCHER_BRUTEFORCE_HAMMING)
+    matches = matcher.match(test_descriptors, ref_descriptors, None)
+    matches = sorted(matches, key=lambda x:x.distance)
+    logger.info(f'Found {len(matches)} matches')
+
+    # keep only the top matches
+    keep = int(len(matches) * KEYPOINT_KEEP_THRESHOLD)
+    matches = matches[:keep]
+    logger.info(f'Truncated matches to {len(matches)} ({KEYPOINT_KEEP_THRESHOLD:.2%})')
+
+    # save off an image of the matches
+    matched_image = cv2.drawMatches(
+        test_image,
+        test_keypoints,
+        reference_image,
+        ref_keypoints,
+        matches,
+        None,
+    )
+    logger.info(f'Writing matches image: {matches_path}')
+    cv2.imwrite(str(matches_path), matched_image)
+    result.matches_image_path = matches_path
+
+    # prep the keypoints to compute a homography matrix
+    test_points = np.zeros((len(matches), 2), dtype="float")
+    ref_points = np.zeros((len(matches), 2), dtype="float")
+    for (idx, match) in enumerate(matches):
+        test_points[idx] = test_keypoints[match.queryIdx].pt
+        ref_points[idx] = ref_keypoints[match.trainIdx].pt
+
+    # compute the homography matrix and align the images using it
+    (matrix_h, _) = cv2.findHomography(test_points, ref_points, method=cv2.RANSAC)
+    (h, w) = reference_image.shape[:2]
+    aligned_image = cv2.warpPerspective(test_image, matrix_h, (w, h))
+    logger.info(f'Writing aligned image: {aligned_path}')
+    cv2.imwrite(str(aligned_path), aligned_image)
+    result.aligned_image_path = aligned_path
+
+    # Save an overlaid image to assist in debugging
+    overlaid_image = aligned_image.copy()
+    cv2.addWeighted(reference_image, 0.5, aligned_image, 0.5, 0, overlaid_image)
+    logger.info(f'Writing overlaid image: {overlaid_path}')
+    cv2.imwrite(str(overlaid_path), overlaid_image)
+    result.overlaid_image_path = overlaid_path
+
+    # update the pre-process result
+    result.successful_alignment = True
+    result.fully_aligned = True
+    session.commit()
+
+    return FileStatus.SUCCESS

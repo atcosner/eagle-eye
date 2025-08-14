@@ -10,24 +10,14 @@ from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.database.job import Job
 from src.database.pre_process_result import PreProcessResult
-from src.database.rotation_attempt import RotationAttempt
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus
 from src.util.types import FormAlignmentMethod
 
-from .alignment import AlignmentError, AlignmentFailed, reference_mark_alignment
-from .util import (
-    rotate_image, find_alignment_marks, AlignmentMark, alignment_marks_to_points, group_by_normalized_position,
-)
+from .alignment import AlignmentError, AlignmentFailed, reference_mark_alignment, automatic_alignment
 
 logger = logging.getLogger(__name__)
-
-# Allow for an image to be +/- 4 degrees rotated
-# TODO: Control this with a user setting
-ALLOWED_ROTATIONS = [0] \
-                    + list(np.arange(0.5, 4.0, 0.5)) \
-                    + list(np.arange(-0.5, -4.0, -0.5))
 
 
 class PreProcessingWorker(QObject):
@@ -123,14 +113,26 @@ class PreProcessingWorker(QObject):
                             result=self.input_file.pre_process_result,  # noqa
                         )
                         self.finish(session, status)
-                        return
 
                     except (AlignmentError, AlignmentFailed):
                         self.finish(session, FileStatus.FAILED)
-                        return
 
                 case FormAlignmentMethod.AUTOMATIC:
                     self.log.info('Aligning images using automatic alignment')
+
+                    try:
+                        status = automatic_alignment(
+                            logger=self.log,
+                            session=session,
+                            working_directory=pre_process_directory,
+                            reference_image=reference_image_gray,
+                            test_image=input_image_threshold,
+                            result=self.input_file.pre_process_result,  # noqa
+                        )
+                        self.finish(session, status)
+
+                    except (AlignmentError, AlignmentFailed):
+                        self.finish(session, FileStatus.FAILED)
 
                 case _:
                     raise RuntimeError(f'Unknown alignment method: {self.job.reference_form.alignment_method}')

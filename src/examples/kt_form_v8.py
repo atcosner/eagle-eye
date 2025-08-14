@@ -21,10 +21,10 @@ from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype
 logger = logging.getLogger(__name__)
 
 BOTTOM_HALF_Y_OFFSET = 842
-V8_BLANK_IMAGE_PATH = Path(__file__).parent / 'kt_field_form_v8.png'
-assert V8_BLANK_IMAGE_PATH.exists(), f'KT Form v8 reference image does not exist: {V8_BLANK_IMAGE_PATH}'
+FORM_BLANK_IMAGE_PATH = Path(__file__).parent / 'kt_field_form_v8.png'
+assert FORM_BLANK_IMAGE_PATH.exists(), f'Form blank reference image does not exist: {FORM_BLANK_IMAGE_PATH}'
 SPECIES_LIST_PATH = Path(__file__).parent / 'ku_orn_taxonomy_reference.csv'
-assert SPECIES_LIST_PATH.exists(), f'KT Form species list does not exist: {SPECIES_LIST_PATH}'
+assert SPECIES_LIST_PATH.exists(), f'Species list does not exist: {SPECIES_LIST_PATH}'
 
 
 def _read_species_list(path: Path) -> set[str]:
@@ -36,13 +36,17 @@ def add_kt_form_v8(session: Session) -> None:
     # read in the KT form species list
     species_list = _read_species_list(SPECIES_LIST_PATH)
 
-    new_form = ReferenceForm(
-        name='KU Ornithology Form v8',
-        path=LocalPaths.reference_forms_directory() / V8_BLANK_IMAGE_PATH.name,
+    form = ReferenceForm(
+        name='KU Ornithology - KT Form v8',
+        path=LocalPaths.reference_forms_directory() / FORM_BLANK_IMAGE_PATH.name,
         alignment_method=FormAlignmentMethod.ALIGNMENT_MARKS,
         alignment_mark_count=16,
         linking_method=FormLinkingMethod.PREVIOUS_REGION,
     )
+
+    # copy the reference form into our working dir
+    if not form.path.exists():
+        shutil.copy(FORM_BLANK_IMAGE_PATH, form.path)
 
     top_region = FormRegion(local_id=0, name='Top')
     top_region.fields = [
@@ -514,7 +518,7 @@ def add_kt_form_v8(session: Session) -> None:
             )
         ),
     ]
-    new_form.regions[top_region.local_id] = top_region
+    form.regions[top_region.local_id] = top_region
     session.commit()
 
     # Duplicate with an offset for the bottom region
@@ -522,11 +526,7 @@ def add_kt_form_v8(session: Session) -> None:
     bottom_region.fields = [
         duplicate_field(field, remove_copy=True, y_offset=BOTTOM_HALF_Y_OFFSET) for field in top_region.fields
     ]
-    new_form.regions[bottom_region.local_id] = bottom_region
+    form.regions[bottom_region.local_id] = bottom_region
 
-    session.add(new_form)
+    session.add(form)
     session.commit()
-
-    # Copy the reference form into our working dir
-    if not new_form.path.exists():
-        shutil.copy(V8_BLANK_IMAGE_PATH, new_form.path)

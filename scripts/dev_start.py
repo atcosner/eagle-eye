@@ -32,18 +32,18 @@ print(f'Project path: {project_path}')
 assert project_path is not None
 
 # Add some files to the selector
-dev_path = project_path / 'tests' / 'misc_files'
+dev_path = project_path / 'scripts' / 'test_files'
 window.job_widget.processing_pipeline.picker.file_list.file_list.add_items([
     # # use forms with real data
-    # dev_path / '40013-40014.jpg',
-    # dev_path / '40015-40018.pdf',
+    # dev_path / 'kt' / '40013-40014.jpg',
+    # dev_path / 'kt' / '40015-40018.pdf',
 
     # pdf with alignment errors
-    dev_path / '40013-40018.pdf',
+    dev_path / 'kt' / '40013-40018.pdf',
 
     # # fake testing forms
-    # project_path / r'src\eagle-eye\form_templates\dev\test_kt_form__filled.jpg',
-    # project_path / r'src\eagle-eye\form_templates\dev\test_kt_form__filled_errors.jpg',
+    # dev_path / 'kt' / 'test_kt_form__filled.jpg',
+    # dev_path / 'kt' / 'test_kt_form__filled_errors.jpg',
 ])
 
 # Pre-process

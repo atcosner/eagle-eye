@@ -12,7 +12,7 @@ class RotationAttempt(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     pre_process_result_id: Mapped[int] = mapped_column(ForeignKey("pre_process_result.id"), init=False)
 
-    rotation_angle: Mapped[int]
+    rotation_angle: Mapped[float]
     path: Mapped[Path] = mapped_column(DbPath)
 
     # Relationships

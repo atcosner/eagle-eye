@@ -15,7 +15,7 @@ class PreProcessResult(MappedAsDataclass, OrmBase):
 
     successful_alignment: Mapped[bool]
     fully_aligned: Mapped[bool]
-    accepted_rotation_angle: Mapped[int] = mapped_column(init=False, default=None, nullable=True)
+    accepted_rotation_angle: Mapped[float] = mapped_column(init=False, default=None, nullable=True)
 
     matches_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)
     aligned_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)
@@ -24,7 +24,7 @@ class PreProcessResult(MappedAsDataclass, OrmBase):
     # Relationships
 
     input_file: Mapped["InputFile"] = relationship(init=False, back_populates="pre_process_result")
-    rotation_attempts: Mapped[dict[int, RotationAttempt]] = relationship(
+    rotation_attempts: Mapped[dict[float, RotationAttempt]] = relationship(
         init=False,
         collection_class=attribute_keyed_dict("rotation_angle"),
         back_populates="pre_process_result",

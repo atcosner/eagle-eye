@@ -19,18 +19,23 @@ from src.util.types import BoxBounds
 OptionalBoundsType = BoxBounds | Iterable[BoxBounds] | None
 
 
-def copy_bounds(bounds: OptionalBoundsType) -> OptionalBoundsType:
+def copy_bounds(bounds: OptionalBoundsType, y_offset: int) -> OptionalBoundsType:
     if isinstance(bounds, BoxBounds):
-        return copy.copy(bounds)
+        new_bounds = copy.copy(bounds)
+        return new_bounds._replace(y=bounds.y + y_offset)
     elif isinstance(bounds, Iterable):
-        return [copy_bounds(part) for part in bounds]
+        return [copy_bounds(part, y_offset) for part in bounds]
     elif bounds is None:
         return None
     else:
         raise RuntimeError(f'Unknown type: {type(bounds)}')
 
 
-def duplicate_field(field: FormField) -> FormField:
+def duplicate_field(
+        field: FormField,
+        remove_copy: bool = False,
+        y_offset: int = 0,
+) -> FormField:
     if field.text_field is not None:
         new_exporter = None
         if field.text_field.text_exporter is not None:
@@ -56,14 +61,17 @@ def duplicate_field(field: FormField) -> FormField:
                 text_choices=[TextChoice(c.text) for c in validator.text_choices],
             )
 
+        if remove_copy:
+            field.text_field.allow_copy = False
+
         text_regions = None
         if field.text_field.text_regions is not None:
-            text_regions = [copy_bounds(x) for x in field.text_field.text_regions]
+            text_regions = [copy_bounds(x, y_offset) for x in field.text_field.text_regions]
 
         new_field = TextField(
             name=field.text_field.name,
-            visual_region=copy_bounds(field.text_field.visual_region),
-            checkbox_region=copy_bounds(field.text_field.checkbox_region),
+            visual_region=copy_bounds(field.text_field.visual_region, y_offset),
+            checkbox_region=copy_bounds(field.text_field.checkbox_region, y_offset),
             text_regions=text_regions,
             checkbox_text=field.text_field.checkbox_text,
             allow_copy=field.text_field.allow_copy,
@@ -79,8 +87,8 @@ def duplicate_field(field: FormField) -> FormField:
     elif field.checkbox_field is not None:
         new_field = CheckboxField(
             name=field.checkbox_field.name,
-            visual_region=copy_bounds(field.checkbox_field.visual_region),
-            checkbox_region=copy_bounds(field.checkbox_field.checkbox_region),
+            visual_region=copy_bounds(field.checkbox_field.visual_region, y_offset),
+            checkbox_region=copy_bounds(field.checkbox_field.checkbox_region, y_offset),
         )
         return FormField(checkbox_field=new_field)
 
@@ -90,14 +98,14 @@ def duplicate_field(field: FormField) -> FormField:
             checkboxes.append(
                 MultiCheckboxOption(
                     name=checkbox.name,
-                    region=copy_bounds(checkbox.region),
-                    text_region=copy_bounds(checkbox.text_region),
+                    region=copy_bounds(checkbox.region, y_offset),
+                    text_region=copy_bounds(checkbox.text_region, y_offset),
                 )
             )
 
         new_field = MultiCheckboxField(
             name=field.multi_checkbox_field.name,
-            visual_region=copy_bounds(field.multi_checkbox_field.visual_region),
+            visual_region=copy_bounds(field.multi_checkbox_field.visual_region, y_offset),
             validator=field.multi_checkbox_field.validator,
             checkboxes=checkboxes,
         )

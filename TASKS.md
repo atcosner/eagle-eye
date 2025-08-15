@@ -11,3 +11,4 @@
 - [ ] When a file fails to pre-process, the user is prevented from continuing the pipeline
 - [ ] Re-running the pre-processing step on an input file causes a violation on a primary key constraint
   - I think this is because the old pre-processing result does not get deleted
+- [ ] Starting a new job after processing another one does not show the add/confirm files button

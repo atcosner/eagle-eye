@@ -39,9 +39,17 @@ def add_fn_form_v1(session: Session) -> None:
     if not form.path.exists():
         shutil.copy(FORM_BLANK_IMAGE_PATH, form.path)
 
+    #
+    # TODO: Should each block on the field be a separate region? (could be nice for OCR checking)
+    #
+
     # add all fields to the singular region
     region = FormRegion(local_id=0, name='Form')
     region.fields = [
+        #
+        # Header fields
+        #
+
         FormField(
             text_field=TextField(
                 name='Pseudo-Accession',
@@ -51,6 +59,259 @@ def add_fn_form_v1(session: Session) -> None:
                     error_tooltip='Pseudo-Accession must be in the format: <YYYY>-PA<NUMBER>',
                 ),
             ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='KU:Mamm',
+                visual_region=BoxBounds(x=1035, y=60, width=242, height=42),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.INTEGER,
+                    text_required=False,
+                ),
+            ),
+        ),
+        FormField(
+            identifier=True,
+            identifier_regex=r'^FN(?P<id>[0-9]{6})$',
+            text_field=TextField(
+                name='FN Number',
+                visual_region=BoxBounds(x=1391, y=57, width=181, height=61),
+                text_validator=TextValidator(
+                    text_regex=r'^FN[0-9]{6}$',
+                    error_tooltip='FN Numbers must be exactly 6 digits',
+                ),
+            ),
+        ),
+
+        #
+        # ID / Agent fields
+        #
+        FormField(
+            text_field=TextField(
+                name='Species',
+                visual_region=BoxBounds(x=319, y=169, width=511, height=45),
+                # text_validator=TextValidator(
+                #     datatype=TextValidatorDatatype.LIST_CHOICE,
+                #     allow_closest_match_correction=True,
+                #     text_choices=[TextChoice(text=t) for t in species_list], TODO: Add mammalogy species csv
+                # ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='ID by',
+                visual_region=BoxBounds(x=908, y=168, width=210, height=46),
+                # text_validator=TextValidator(
+                #     datatype=TextValidatorDatatype.LIST_CHOICE,
+                #     allow_closest_match_correction=True,
+                #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: Add mammalogy agent csv
+                # ),
+            ),
+        ),
+        FormField(
+            multi_checkbox_field=MultiCheckboxField(
+                name='ID confidence',
+                visual_region=BoxBounds(x=1122, y=176, width=457, height=47),
+                validator=MultiCheckboxValidation.REQUIRE_ONE,
+                checkboxes=[
+                    MultiCheckboxOption(name='Low', region=BoxBounds(x=1324, y=193, width=12, height=14)),
+                    MultiCheckboxOption(name='Medium', region=BoxBounds(x=1405, y=193, width=12, height=14)),
+                    MultiCheckboxOption(name='High', region=BoxBounds(x=1499, y=193, width=12, height=14)),
+                ],
+            )
+        ),
+        FormField(
+            text_field=TextField(
+                name='GPS Waypoint ID',
+                visual_region=BoxBounds(x=438, y=220, width=249, height=45),
+                text_validator=TextValidator(
+                    text_regex=r'^[A-Z]{3,4}[0-9]{1,3}$',
+                    error_tooltip='GPS Waypoint ID must be 3-4 letters followed by 1-3 numbers',
+                ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Trapline ID',
+                visual_region=BoxBounds(x=838, y=224, width=247, height=41),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='BlueCard/Other #',
+                visual_region=BoxBounds(x=1312, y=224, width=263, height=41),
+            ),
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Collector(s), Coll #',
+                visual_region=BoxBounds(x=443, y=278, width=698, height=45),
+                # text_validator=TextValidator(
+                #     datatype=TextValidatorDatatype.LIST_CHOICE,
+                #     allow_closest_match_correction=True,
+                #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: Add mammalogy agent csv
+                # ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Collection Date',
+                visual_region=BoxBounds(x=1269, y=282, width=314, height=41),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.DATE,
+                ),
+            ),
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Preparator, Prep #',
+                visual_region=BoxBounds(x=440, y=337, width=226, height=46),
+                # text_validator=TextValidator(
+                #     datatype=TextValidatorDatatype.LIST_CHOICE,
+                #     allow_closest_match_correction=True,
+                #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: Add mammalogy agent csv
+                # ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Prep Date',
+                visual_region=BoxBounds(x=802, y=337, width=226, height=46),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.DATE,
+                ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Tissue by, Date',
+                visual_region=BoxBounds(x=1238, y=351, width=344, height=32),
+                # TODO: this should probably have a custom validator since it's a composite field
+            ),
+        ),
+
+        #
+        # Locality fields
+        #
+        FormField(
+            text_field=TextField(
+                name='Country/State',
+                visual_region=BoxBounds(x=392, y=422, width=620, height=45),
+                # text_validator=TextValidator( TODO: probably want a custom validator since there can be multiple formats
+                #     datatype=TextValidatorDatatype.DATE,
+                # ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='County',
+                visual_region=BoxBounds(x=1113, y=424, width=461, height=43),
+                # text_validator=TextValidator(
+                #     datatype=TextValidatorDatatype.LIST_CHOICE,
+                #     allow_closest_match_correction=True,
+                #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: add county CSV or use internet?
+                # ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Locality',
+                visual_region=BoxBounds(x=316, y=472, width=1264, height=43),
+            ),
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Latitude',
+                visual_region=BoxBounds(x=261, y=521, width=431, height=42),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.GPS_POINT_DD,
+                    text_required=False,
+                ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Longitude',
+                visual_region=BoxBounds(x=772, y=521, width=434, height=42),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.GPS_POINT_DD,
+                    text_required=False,
+                ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Altitude',
+                visual_region=BoxBounds(x=1367, y=521, width=213, height=42),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.INTEGER,
+                    text_required=False,
+                ),
+            ),
+        ),
+
+        FormField(
+            text_field=TextField(
+                name='Error (m)',
+                visual_region=BoxBounds(x=335, y=570, width=335, height=45),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.INTEGER,
+                    text_required=False,
+                ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Source',
+                visual_region=BoxBounds(x=776, y=572, width=307, height=46),
+                text_validator=TextValidator(
+                    datatype=TextValidatorDatatype.LIST_CHOICE,
+                    allow_closest_match_correction=True,
+                    text_choices=[
+                        TextChoice('GPS unit'),
+                        TextChoice('GeoLocate'),
+                        TextChoice('Google Earth'),
+                        TextChoice('Google Maps'),
+                        TextChoice('Map Centroid'),
+                    ],
+                ),
+            ),
+        ),
+        FormField(
+            text_field=TextField(
+                name='Locality same as FN',
+                visual_region=BoxBounds(x=1343, y=575, width=232, height=41),
+                text_validator=TextValidator(
+                    text_regex=r'^FN[0-9]{6}$',
+                    error_tooltip='FN Numbers must be FN followed by exactly 6 digits',
+                ),
+            ),
+        ),
+
+        #
+        # Attributes fields
+        #
+
+        #
+        # Preparations / Parts fields
+        #
+
+        #
+        # Footer fields
+        #
+        FormField(
+            text_field=TextField(
+                name='Remarks',
+                visual_region=BoxBounds(x=190, y=1931, width=1400, height=137),
+                text_regions=[
+                    BoxBounds(x=551, y=1934, width=1030, height=35),
+                    BoxBounds(x=195, y=1971, width=1383, height=41),
+                    BoxBounds(x=192, y=2017, width=1390, height=39),
+                ],
+            )
         ),
     ]
 

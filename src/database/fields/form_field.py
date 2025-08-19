@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
+from .circled_field import CircledField
 from .checkbox_field import CheckboxField
 from .multi_checkbox_field import MultiCheckboxField
 from .text_field import TextField
@@ -21,18 +22,21 @@ class FormField(MappedAsDataclass, OrmBase):
     text_field: Mapped[TextField] = relationship(default=None, back_populates="form_field")
     checkbox_field: Mapped[CheckboxField] = relationship(default=None, back_populates="form_field")
     multi_checkbox_field: Mapped[MultiCheckboxField] = relationship(default=None, back_populates="form_field")
+    circled_field: Mapped[CircledField] = relationship(default=None, back_populates="form_field")
 
     form_region: Mapped["FormRegion"] = relationship(init=False, back_populates="fields")
 
     #
     # Custom Functions
     #
-    def get_sub_field(self) -> TextField | CheckboxField | MultiCheckboxField:
+    def get_sub_field(self) -> TextField | CheckboxField | MultiCheckboxField | CircledField:
         if self.text_field is not None:
             return self.text_field
         elif self.checkbox_field is not None:
             return self.checkbox_field
         elif self.multi_checkbox_field is not None:
             return self.multi_checkbox_field
+        elif self.circled_field is not None:
+            return self.circled_field
         else:
             raise RuntimeError('FormField is missing subfield')

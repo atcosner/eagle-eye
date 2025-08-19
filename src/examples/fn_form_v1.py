@@ -39,17 +39,10 @@ def add_fn_form_v1(session: Session) -> None:
     if not form.path.exists():
         shutil.copy(FORM_BLANK_IMAGE_PATH, form.path)
 
-    #
-    # TODO: Should each block on the field be a separate region? (could be nice for OCR checking)
-    #
-
-    # add all fields to the singular region
-    region = FormRegion(local_id=0, name='Form')
-    region.fields = [
-        #
-        # Header fields
-        #
-
+    # add the header region
+    header_region = FormRegion(local_id=0, name='Header')
+    form.regions[header_region.local_id] = header_region
+    header_region.fields = [
         FormField(
             text_field=TextField(
                 name='Data entered by:',
@@ -89,10 +82,12 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ),
         ),
+    ]
 
-        #
-        # ID / Agent fields
-        #
+    # add the id/agent region
+    id_region = FormRegion(local_id=1, name='ID/Agent')
+    form.regions[id_region.local_id] = id_region
+    id_region.fields = [
         FormField(
             text_field=TextField(
                 name='Species',
@@ -198,10 +193,12 @@ def add_fn_form_v1(session: Session) -> None:
                 # TODO: this should probably have a custom validator since it's a composite field
             ),
         ),
+    ]
 
-        #
-        # Locality fields
-        #
+    # add the locality region
+    locality_region = FormRegion(local_id=2, name='Locality')
+    form.regions[locality_region.local_id] = locality_region
+    locality_region.fields = [
         FormField(
             text_field=TextField(
                 name='Country/State',
@@ -297,18 +294,16 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ),
         ),
+    ]
 
-        #
-        # Attributes fields
-        #
+    # TODO: attributes region
 
-        #
-        # Preparations / Parts fields
-        #
+    # TODO: preparations/parts region
 
-        #
-        # Footer fields
-        #
+    # add the footer region
+    footer_region = FormRegion(local_id=5, name='Footer')
+    form.regions[footer_region.local_id] = footer_region
+    footer_region.fields = [
         FormField(
             text_field=TextField(
                 name='Remarks',
@@ -322,6 +317,5 @@ def add_fn_form_v1(session: Session) -> None:
         ),
     ]
 
-    form.regions[region.local_id] = region
     session.add(form)
     session.commit()

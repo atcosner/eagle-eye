@@ -115,6 +115,11 @@ class FileOcrResults(QWidget):
             if not pre_process.successful_alignment:
                 return
 
-            rotation = pre_process.rotation_attempts[pre_process.accepted_rotation_angle]
-            self.viewer = FileViewer(self, rotation.path)
-            self.viewer.show()
+            # automatically aligned images will not have an accepted rotation angle
+            if pre_process.accepted_rotation_angle is None:
+                original_path = input_file.path
+            else:
+                original_path = pre_process.rotation_attempts[pre_process.accepted_rotation_angle].path
+
+            viewer = FileViewer(self, original_path)
+            viewer.show()

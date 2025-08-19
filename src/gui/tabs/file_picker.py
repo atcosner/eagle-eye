@@ -112,6 +112,7 @@ class FilePicker(QWidget):
     def load_job(self, job: Job | None) -> None:
         self._job_db_id = job.id if job else None
         self.file_list.load_job(job)
+        self.set_view_only(False)
 
     @pyqtSlot()
     def update_preview(self) -> None:

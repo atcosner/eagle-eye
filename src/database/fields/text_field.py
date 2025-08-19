@@ -22,6 +22,7 @@ class TextField(MappedAsDataclass, OrmBase):
     checkbox_text: Mapped[str] = mapped_column(nullable=True, default=None)
 
     allow_copy: Mapped[bool] = mapped_column(default=False)
+    synthetic_only: Mapped[bool] = mapped_column(default=False)
 
     # Relationships
 

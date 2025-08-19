@@ -56,6 +56,20 @@ class ProcessWorker(QObject):
             current_region: ProcessedRegion,
             identifier_field: ProcessedTextField | None = None,
     ) -> tuple[bool, ProcessedTextField]:
+        # shortcut if this is a synthetic field
+        if field.synthetic_only:
+            return False, ProcessedTextField(
+                name=field.name,
+                roi_path=roi_dest_path,
+                text='',
+                ocr_text='',
+                from_controlled_language=None,
+                copied_from_linked=None,
+                linked_field_id=None,
+                validation_result=validation.validate_text_field(field, ''),
+                text_field=field,
+            )
+
         # Snip and save off the ROI image
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 

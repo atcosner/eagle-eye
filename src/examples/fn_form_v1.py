@@ -52,6 +52,13 @@ def add_fn_form_v1(session: Session) -> None:
 
         FormField(
             text_field=TextField(
+                name='Data entered by:',
+                visual_region=BoxBounds(x=0, y=0, width=0, height=0),
+                synthetic_only=True,
+            ),
+        ),
+        FormField(
+            text_field=TextField(
                 name='Pseudo-Accession',
                 visual_region=BoxBounds(x=333, y=46, width=220, height=56),
                 text_validator=TextValidator(

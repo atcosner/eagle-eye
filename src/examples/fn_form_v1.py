@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from src.database.copy import duplicate_field
 from src.database.exporters.text_exporter import TextExporter
 from src.database.fields.checkbox_field import CheckboxField
+from src.database.fields.circled_field import CircledField
+from src.database.fields.circled_option import CircledOption
 from src.database.fields.form_field import FormField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.multi_checkbox_option import MultiCheckboxOption
@@ -298,7 +300,20 @@ def add_fn_form_v1(session: Session) -> None:
 
     # TODO: attributes region
 
-    # TODO: preparations/parts region
+    parts_region = FormRegion(local_id=4, name='Preparations/Parts')
+    form.regions[parts_region.local_id] = parts_region
+    parts_region.fields = [
+        FormField(
+            circled_field=CircledField(
+                name='DOA',
+                visual_region=BoxBounds(x=1415, y=1161, width=170, height=54),
+                options=[
+                    CircledOption(name='Y', region=BoxBounds(x=1496, y=1173, width=33, height=33)),
+                    CircledOption(name='N', region=BoxBounds(x=1540, y=1172, width=33, height=33)),
+                ],
+            )
+        ),
+    ]
 
     # add the footer region
     footer_region = FormRegion(local_id=5, name='Footer')

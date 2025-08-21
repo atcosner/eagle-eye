@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
+from .processed_circled_field import ProcessedCircledField
 from .processed_checkbox_field import ProcessedCheckboxField
 from .processed_multi_checkbox_field import ProcessedMultiCheckboxField
 from .processed_text_field import ProcessedTextField
@@ -22,3 +23,4 @@ class ProcessedField(MappedAsDataclass, OrmBase):
     text_field: Mapped[ProcessedTextField] = relationship(default=None, back_populates="processed_field")
     checkbox_field: Mapped[ProcessedCheckboxField] = relationship(default=None, back_populates="processed_field")
     multi_checkbox_field: Mapped[ProcessedMultiCheckboxField] = relationship(default=None, back_populates="processed_field")
+    circled_field: Mapped[ProcessedCircledField] = relationship(default=None, back_populates="processed_field")

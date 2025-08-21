@@ -1,11 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
-from src.util.types import BoxBounds
-from .processed_text_field import ProcessedTextField
-
 from .. import OrmBase
-from ..util import DbBoxBounds
 
 
 class ProcessedMultiCheckboxOption(MappedAsDataclass, OrmBase):

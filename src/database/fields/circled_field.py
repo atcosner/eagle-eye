@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 from src.util.types import BoxBounds
 from src.util.validation import MultiCheckboxValidation
 
-from .multi_checkbox_option import MultiCheckboxOption
+from .circled_option import CircledOption
 from .. import OrmBase
 from ..util import DbBoxBounds
 
@@ -21,5 +21,5 @@ class CircledField(MappedAsDataclass, OrmBase):
 
     # Relationships
 
-    # options: Mapped[list[MultiCheckboxOption]] = relationship(back_populates="multi_checkbox_field")
+    options: Mapped[list[CircledOption]] = relationship(back_populates="circled_field")
     form_field: Mapped["FormField"] = relationship(init=False, back_populates="circled_field")

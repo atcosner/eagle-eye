@@ -10,12 +10,15 @@ from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
 
 import src.util.processing as process_util
 from src.database import DB_ENGINE
+from src.database.fields.circled_field import CircledField
 from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.text_field import TextField
 from src.database.input_file import InputFile
 from src.database.job import Job
 from src.database.process_result import ProcessResult
+from src.database.processed_fields.processed_circled_field import ProcessedCircledField
+from src.database.processed_fields.processed_circled_option import ProcessedCircledOption
 from src.database.processed_fields.processed_checkbox_field import ProcessedCheckboxField
 from src.database.processed_fields.processed_field import ProcessedField
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
@@ -222,6 +225,38 @@ class ProcessWorker(QObject):
         )
         return ocr_error, field
 
+    def process_circled_field(
+            self,
+            field: CircledField,
+            aligned_image: np.ndarray,
+            roi_dest_path: Path,
+    ) -> tuple[bool, ProcessedCircledField]:
+        process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
+
+        options: dict[str, ProcessedCircledOption] = {}
+        for option in field.options:
+            # checked = process_util.get_checked(aligned_image, checkbox.region)
+            # self.log.info(f'Checkbox "{checkbox.name}" = {checked}')
+
+            options[option.name] = ProcessedCircledOption(
+                name=option.name,
+                circled=False,
+                circled_option=option,
+            )
+
+        # # Validate the field
+        # validation_result = validation.validate_multi_checkbox_field(field, checkboxes)
+        # self.log.info(f'Validation: {validation_result.result}')
+
+        field = ProcessedCircledField(
+            name=field.name,
+            roi_path=roi_dest_path,
+            # validation_result=validation_result,
+            circled_field=field,
+            options=options,
+        )
+        return False, field
+
     @pyqtSlot()
     def start(self) -> None:
         locker = QMutexLocker(self.mutex)
@@ -322,6 +357,17 @@ class ProcessWorker(QObject):
 
                         processed_field.processing_error = had_error
                         processed_field.multi_checkbox_field = result_field
+
+                    elif field.circled_field is not None:
+                        self.log.info(f'Processing Circled Field: {field.circled_field.name}')
+                        had_error, result_field = self.process_circled_field(
+                            field=field.circled_field,
+                            aligned_image=aligned_image,
+                            roi_dest_path=roi_path,
+                        )
+
+                        processed_field.processing_error = had_error
+                        processed_field.circled_field = result_field
 
                     else:
                         self.log.error(f'Form field had no parts to process')

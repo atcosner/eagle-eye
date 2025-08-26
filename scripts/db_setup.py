@@ -12,4 +12,4 @@ from src.examples.kt_form_v8 import add_kt_form_v8
 
 with Session(DB_ENGINE) as session:
     add_kt_form_v8(session)
-    add_fn_form_v1(session)
+    # add_fn_form_v1(session)

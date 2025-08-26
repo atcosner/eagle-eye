@@ -47,11 +47,13 @@ class SelectionDetails(QGroupBox):
                 self.region_details[region.id] = region_details
                 self.layout.addWidget(region_details)
 
-                for field in region.fields:
-                    field_details = FieldDetails(self, field)
-                    field_details.setVisible(False)
-                    self.field_details[field.id] = field_details
-                    self.layout.addWidget(field_details)
+                # TODO: add a hierarchy level for the field groups
+                for group in region.groups:
+                    for field in group:
+                        field_details = FieldDetails(self, field)
+                        field_details.setVisible(False)
+                        self.field_details[field.id] = field_details
+                        self.layout.addWidget(field_details)
 
     @pyqtSlot(SelectionType, int)
     def load_details(self, selection: SelectionType, db_id: int) -> None:

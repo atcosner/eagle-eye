@@ -48,8 +48,11 @@ class RegionItem(TreeItem):
 
     def _populate(self, region: FormRegion) -> None:
         self.setIcon(0, get_icon_for_region(region.local_id))
-        for field in region.fields:
-            self.addChild(FieldItem(field))
+
+        # TODO: add a hierarchy level for the field groups
+        for group in region.groups:
+            for field in group:
+                self.addChild(FieldItem(field))
 
     def get_field(self, db_id: int) -> FieldItem | None:
         for idx in range(self.childCount()):

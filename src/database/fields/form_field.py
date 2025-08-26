@@ -12,7 +12,6 @@ class FormField(MappedAsDataclass, OrmBase):
     __tablename__ = "form_field"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    form_region_id: Mapped[int] = mapped_column(ForeignKey("form_region.id"), init=False)
 
     identifier: Mapped[bool] = mapped_column(default=False)
     identifier_regex: Mapped[str] = mapped_column(nullable=True, default=None)
@@ -24,7 +23,8 @@ class FormField(MappedAsDataclass, OrmBase):
     multi_checkbox_field: Mapped[MultiCheckboxField] = relationship(default=None, back_populates="form_field")
     circled_field: Mapped[CircledField] = relationship(default=None, back_populates="form_field")
 
-    form_region: Mapped["FormRegion"] = relationship(init=False, back_populates="fields")
+    field_group_id: Mapped[int] = mapped_column(ForeignKey("field_group.id"), init=False)
+    field_group: Mapped["FieldGroup"] = relationship(init=False, back_populates="fields")
 
     #
     # Custom Functions

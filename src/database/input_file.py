@@ -3,9 +3,9 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from . import OrmBase
-from .pre_process_result import PreProcessResult
-from .process_result import ProcessResult
 from .util import DbPath
+from .pre_processing.pre_process_result import PreProcessResult
+from .process_result import ProcessResult
 
 
 class InputFile(MappedAsDataclass, OrmBase):

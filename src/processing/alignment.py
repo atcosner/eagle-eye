@@ -4,8 +4,8 @@ import numpy as np
 from pathlib import Path
 from sqlalchemy.orm import Session
 
-from src.database.pre_process_result import PreProcessResult
-from src.database.rotation_attempt import RotationAttempt
+from src.database.pre_processing.pre_process_result import PreProcessResult
+from src.database.pre_processing.rotation_attempt import RotationAttempt
 from src.util.logging import NamedLoggerAdapter
 from src.util.status import FileStatus
 

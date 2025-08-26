@@ -2,9 +2,10 @@ from pathlib import Path
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship, attribute_keyed_dict
 
-from . import OrmBase
+
 from .rotation_attempt import RotationAttempt
-from .util import DbPath
+from .. import OrmBase
+from ..util import DbPath
 
 
 class PreProcessResult(MappedAsDataclass, OrmBase):

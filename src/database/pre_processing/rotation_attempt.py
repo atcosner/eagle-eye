@@ -2,8 +2,8 @@ from pathlib import Path
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
-from . import OrmBase
-from .util import DbPath
+from .. import OrmBase
+from ..util import DbPath
 
 
 class RotationAttempt(MappedAsDataclass, OrmBase):

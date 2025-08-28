@@ -34,12 +34,12 @@ assert project_path is not None
 # Add some files to the selector
 dev_path = project_path / 'scripts' / 'test_files'
 window.job_widget.processing_pipeline.picker.file_list.file_list.add_items([
-    # # use forms with real data
-    # dev_path / 'kt' / '40013-40014.jpg',
+    # use forms with real data
+    dev_path / 'kt' / '40013-40014.jpg',
     # dev_path / 'kt' / '40015-40018.pdf',
 
-    # pdf with alignment errors
-    dev_path / 'kt' / '40013-40018.pdf',
+    # # pdf with alignment errors
+    # dev_path / 'kt' / '40013-40018.pdf',
 
     # # fake testing forms
     # dev_path / 'kt' / 'test_kt_form__filled.jpg',

@@ -24,7 +24,7 @@ from src.database.processed_fields.processed_field import ProcessedField
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.processed_fields.processed_text_field import ProcessedTextField
-from src.database.processed_region import ProcessedRegion
+from src.database.processing.processed_region import ProcessedRegion
 from src.database.validation.validation_result import ValidationResult
 from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter

@@ -9,7 +9,7 @@ from src.database.processed_fields.processed_text_field import ProcessedTextFiel
 from src.util.types import FormLinkingMethod
 
 from .types import BoxBounds
-from ..database.processed_region import ProcessedRegion
+from src.database.processing.processed_region import ProcessedRegion
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.6  # Checked checkboxes should have less than X% white

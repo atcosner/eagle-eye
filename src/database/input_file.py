@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 from . import OrmBase
 from .util import DbPath
 from .pre_processing.pre_process_result import PreProcessResult
-from .process_result import ProcessResult
+from .processing.process_result import ProcessResult
 
 
 class InputFile(MappedAsDataclass, OrmBase):

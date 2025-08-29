@@ -1,8 +1,8 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship, attribute_keyed_dict
 
-from . import OrmBase
 from .processed_region import ProcessedRegion
+from .. import OrmBase
 
 
 class ProcessResult(MappedAsDataclass, OrmBase):

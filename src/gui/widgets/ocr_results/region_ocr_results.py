@@ -5,7 +5,7 @@ from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QCheckBox, QHBoxLayout, QVBoxLayout
 
 from src.database import DB_ENGINE
-from src.database.processed_region import ProcessedRegion
+from src.database.processing.processed_region import ProcessedRegion
 from src.gui.widgets.result_fields.base import BaseField
 from src.gui.widgets.result_fields.checkbox_field import CheckboxField
 from src.gui.widgets.result_fields.multi_checkbox_field import MultiCheckboxField

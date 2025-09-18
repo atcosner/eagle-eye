@@ -98,7 +98,7 @@ def add_kt_form_v8(session: Session) -> None:
             ],
         ),
         FieldGroup(
-            name='KU Number',
+            name='OT Number',
             fields=[
                 FormField(
                     text_field=TextField(
@@ -316,11 +316,11 @@ def add_kt_form_v8(session: Session) -> None:
             ],
         ),
         FieldGroup(
-            name='Iris',
+            name='Bill',
             fields=[
                 FormField(
                     text_field=TextField(
-                        name='Iris',
+                        name='Bill',
                         visual_region=BoxBounds(x=577, y=412, width=648, height=31),
                         allow_copy=True,
                     ),
@@ -558,7 +558,7 @@ def add_kt_form_v8(session: Session) -> None:
             ],
         ),
         FieldGroup(
-            name='Skull',
+            name='Fat',
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(

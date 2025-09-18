@@ -50,7 +50,7 @@ def add_kt_form_v8(session: Session) -> None:
         shutil.copy(FORM_BLANK_IMAGE_PATH, form.path)
 
     top_region = FormRegion(local_id=0, name='Top')
-    top_region.fields = [
+    top_region.groups = [
         FieldGroup(
             name='KT Number',
             fields=[
@@ -738,7 +738,7 @@ def add_kt_form_v8(session: Session) -> None:
     session.commit()
 
     # Duplicate with an offset for the bottom region
-    bottom_region = copy_region(top_region, remove_copy=True, y_offset=BOTTOM_HALF_Y_OFFSET)
+    bottom_region = copy_region(top_region, name='Bottom', remove_copy=True, y_offset=BOTTOM_HALF_Y_OFFSET)
     form.regions[bottom_region.local_id] = bottom_region
 
     session.add(form)

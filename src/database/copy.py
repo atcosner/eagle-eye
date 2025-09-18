@@ -116,12 +116,13 @@ def duplicate_field(
         raise RuntimeError(f'Field had no sub-fields: {field.id}')
 
 
-def copy_region(region: FormRegion, remove_copy: bool = False, y_offset: int = 0) -> FormRegion:
-    new_region = FormRegion(local_id=region.local_id + 1, name=region.name)
+def copy_region(region: FormRegion, name: str, remove_copy: bool = False, y_offset: int = 0) -> FormRegion:
+    new_region = FormRegion(local_id=region.local_id + 1, name=name)
     for group in region.groups:
         new_group = FieldGroup(name=group.name, fields=[])
         for field in group.fields:
             new_group.fields.append(duplicate_field(field, remove_copy=remove_copy, y_offset=y_offset))
+        new_region.groups.append(new_group)
 
     return new_region
 
@@ -135,5 +136,5 @@ def copy_reference_form(new_form: ReferenceForm, old_form: ReferenceForm, copy_d
         new_form.linking_method = old_form.linking_method
 
     for region in old_form.regions.values():
-        new_region = copy_region(region)
+        new_region = copy_region(region, region.name)
         new_form.regions[new_region.local_id] = new_region

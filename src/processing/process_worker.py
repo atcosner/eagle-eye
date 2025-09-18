@@ -16,15 +16,16 @@ from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.text_field import TextField
 from src.database.input_file import InputFile
 from src.database.job import Job
-from src.database.process_result import ProcessResult
 from src.database.processed_fields.processed_circled_field import ProcessedCircledField
 from src.database.processed_fields.processed_circled_option import ProcessedCircledOption
 from src.database.processed_fields.processed_checkbox_field import ProcessedCheckboxField
 from src.database.processed_fields.processed_field import ProcessedField
+from src.database.processed_fields.processed_field_group import ProcessedFieldGroup
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.processed_fields.processed_text_field import ProcessedTextField
 from src.database.processing.processed_region import ProcessedRegion
+from src.database.processing.process_result import ProcessResult
 from src.database.validation.validation_result import ValidationResult
 from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter
@@ -33,6 +34,7 @@ from src.util.status import FileStatus
 from src.util.types import FormLinkingMethod
 
 from . import validation
+from ..database.processed_fields.processed_field_group import ProcessedFieldGroup
 
 logger = logging.getLogger(__name__)
 
@@ -307,75 +309,81 @@ class ProcessWorker(QObject):
                 )
                 result.regions[processed_region.local_id] = processed_region
 
-                # Sort the fields so that we process the identifier field first
-                for field in sorted(page_region.fields, key=lambda f: f.identifier, reverse=True):
-                    roi_path = processing_directory / f'{field.id}.png'
-                    processed_field = ProcessedField(processing_error=False)
+                # TODO: we should find and process the identifier field first no matter where it is
 
-                    if field.text_field is not None:
-                        self.log.info(f'Processing Text Field: {field.text_field.name}')
-                        had_error, result_field = self.process_text_field(
-                            session=api_session,
-                            field=field.text_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                            linking_method=job.reference_form.linking_method,
-                            current_region=processed_region,
-                            identifier_field=identifier_field,
-                        )
+                for group in page_region.groups:
+                    self.log.info(f'Processing group: "{group.name}"')
+                    processed_field_group = ProcessedFieldGroup(name=group.name)
+                    processed_region.groups.append(processed_field_group)
 
-                        # Save off the identifier field for later linking use
-                        if field.identifier:
-                            self.log.info(f'Located identifier field: {field.text_field.name}')
-                            processed_region.linking_identifier = process_util.extract_identifier(
-                                field.identifier_regex,
-                                result_field.text,
+                    for field in group.fields:
+                        roi_path = processing_directory / f'{field.id}.png'
+                        processed_field = ProcessedField(processing_error=False)
+
+                        if field.text_field is not None:
+                            self.log.info(f'Processing Text Field: {field.text_field.name}')
+                            had_error, result_field = self.process_text_field(
+                                session=api_session,
+                                field=field.text_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                                linking_method=job.reference_form.linking_method,
+                                current_region=processed_region,
+                                identifier_field=identifier_field,
                             )
 
-                        processed_field.processing_error = had_error
-                        processed_field.text_field = result_field
+                            # Save off the identifier field for later linking use
+                            if field.identifier:
+                                self.log.info(f'Located identifier field: {field.text_field.name}')
+                                processed_region.linking_identifier = process_util.extract_identifier(
+                                    field.identifier_regex,
+                                    result_field.text,
+                                )
 
-                    elif field.checkbox_field is not None:
-                        self.log.info(f'Processing Checkbox Field: {field.checkbox_field.name}')
-                        had_error, result_field = self.process_checkbox_field(
-                            field=field.checkbox_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                        )
+                            processed_field.processing_error = had_error
+                            processed_field.text_field = result_field
 
-                        processed_field.processing_error = had_error
-                        processed_field.checkbox_field = result_field
+                        elif field.checkbox_field is not None:
+                            self.log.info(f'Processing Checkbox Field: {field.checkbox_field.name}')
+                            had_error, result_field = self.process_checkbox_field(
+                                field=field.checkbox_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                            )
 
-                    elif field.multi_checkbox_field is not None:
-                        self.log.info(f'Processing Multi-Checkbox Field: {field.multi_checkbox_field.name}')
-                        had_error, result_field = self.process_multi_checkbox_field(
-                            session=api_session,
-                            field=field.multi_checkbox_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                        )
+                            processed_field.processing_error = had_error
+                            processed_field.checkbox_field = result_field
 
-                        processed_field.processing_error = had_error
-                        processed_field.multi_checkbox_field = result_field
+                        elif field.multi_checkbox_field is not None:
+                            self.log.info(f'Processing Multi-Checkbox Field: {field.multi_checkbox_field.name}')
+                            had_error, result_field = self.process_multi_checkbox_field(
+                                session=api_session,
+                                field=field.multi_checkbox_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                            )
 
-                    elif field.circled_field is not None:
-                        self.log.info(f'Processing Circled Field: {field.circled_field.name}')
-                        had_error, result_field = self.process_circled_field(
-                            field=field.circled_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                        )
+                            processed_field.processing_error = had_error
+                            processed_field.multi_checkbox_field = result_field
 
-                        processed_field.processing_error = had_error
-                        processed_field.circled_field = result_field
+                        elif field.circled_field is not None:
+                            self.log.info(f'Processing Circled Field: {field.circled_field.name}')
+                            had_error, result_field = self.process_circled_field(
+                                field=field.circled_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                            )
 
-                    else:
-                        self.log.error(f'Form field had no parts to process')
-                        processed_field.processing_error = True
+                            processed_field.processing_error = had_error
+                            processed_field.circled_field = result_field
 
-                    # Add the processed field to our region
-                    processing_error = processed_field.processing_error
-                    processed_region.fields.append(processed_field)
+                        else:
+                            self.log.error(f'Form field had no parts to process')
+                            processed_field.processing_error = True
+
+                        # Add the processed field to our region
+                        processing_error = processed_field.processing_error
+                        processed_field_group.fields.append(processed_field)
 
             # Commit the results to the DB and signal out that our status is changed
             session.commit()

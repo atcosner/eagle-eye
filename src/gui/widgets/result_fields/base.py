@@ -48,5 +48,5 @@ class BaseField(QWidget):
 
     def update_region_verification(self, field: ProcessedField, prev_data: Any, new_data: Any) -> None:
         if prev_data != new_data:
-            field.processed_region.human_verified = False
+            field.processed_group.processed_region.human_verified = False
             self.flagUnverified.emit()

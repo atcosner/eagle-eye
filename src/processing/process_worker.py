@@ -313,8 +313,17 @@ class ProcessWorker(QObject):
 
                 for group in page_region.groups:
                     self.log.info(f'Processing group: "{group.name}"')
-                    processed_field_group = ProcessedFieldGroup(name=group.name)
+                    processed_field_group = ProcessedFieldGroup(name=group.name, roi_path=None)
                     processed_region.groups.append(processed_field_group)
+
+                    # snip the visual region for the whole group
+                    if group.visual_region is not None:
+                        processed_field_group.roi_path = processing_directory / f'fg_{field.id}.png'
+                        process_util.snip_roi_image(
+                            aligned_image,
+                            group.visual_region,
+                            save_path=processed_field_group.roi_path,
+                        )
 
                     for field in group.fields:
                         roi_path = processing_directory / f'{field.id}.png'

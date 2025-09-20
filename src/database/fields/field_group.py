@@ -1,8 +1,11 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
+from src.util.types import BoxBounds
+
 from .form_field import FormField
 from .. import OrmBase
+from ..util import DbBoxBounds
 
 
 class FieldGroup(MappedAsDataclass, OrmBase):
@@ -11,6 +14,7 @@ class FieldGroup(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
 
     name: Mapped[str]
+    visual_region: Mapped[BoxBounds | None] = mapped_column(DbBoxBounds)
 
     # Relationships
 

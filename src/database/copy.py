@@ -119,7 +119,12 @@ def duplicate_field(
 def copy_region(region: FormRegion, name: str, remove_copy: bool = False, y_offset: int = 0) -> FormRegion:
     new_region = FormRegion(local_id=region.local_id + 1, name=name)
     for group in region.groups:
-        new_group = FieldGroup(name=group.name, fields=[])
+        new_group = FieldGroup(
+            name=group.name,
+            visual_region=None if group.visual_region is None else copy_bounds(group.visual_region, y_offset),
+            fields=[],
+        )
+
         for field in group.fields:
             new_group.fields.append(duplicate_field(field, remove_copy=remove_copy, y_offset=y_offset))
         new_region.groups.append(new_group)

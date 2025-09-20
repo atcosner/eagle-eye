@@ -53,6 +53,7 @@ def add_kt_form_v8(session: Session) -> None:
     top_region.groups = [
         FieldGroup(
             name='KT Number',
+            visual_region=None,
             fields=[
                 FormField(
                     identifier=True,
@@ -72,6 +73,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Prep Number',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -87,6 +89,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='KU Number',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -99,6 +102,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='OT Number',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -112,6 +116,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Locality',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -137,6 +142,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='GPS Waypoint',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -153,6 +159,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Latitude',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -168,6 +175,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Longitude',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -183,6 +191,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Error',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -199,6 +208,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Species',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -216,6 +226,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Coordinate Source',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -229,6 +240,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Collection Date',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -244,6 +256,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Collector',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -262,6 +275,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Habitat',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -276,6 +290,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Collection Method',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -300,6 +315,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Iris',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -317,6 +333,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Bill',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -330,6 +347,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Feet/Legs',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -342,6 +360,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Weight',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -357,6 +376,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Tissue Date',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -373,6 +393,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Time of Death',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -387,6 +408,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Time of Tissue Preservation',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -407,6 +429,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Tissues',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -427,6 +450,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='No. Tubes',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -441,6 +465,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Tissue Preservation',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -465,6 +490,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Prep Date',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -479,6 +505,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Preparator',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -496,6 +523,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Prep',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -521,6 +549,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Molt',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -534,6 +563,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Gonads',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -547,6 +577,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Skull',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -559,6 +590,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Fat',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -578,6 +610,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Bursa',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -591,6 +624,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Stomach',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -604,6 +638,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Sex',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -621,6 +656,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Age',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -633,6 +669,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Parasites Collected',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -650,6 +687,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Remarks',
+            visual_region=None,
             fields=[
                 FormField(
                     text_field=TextField(
@@ -665,6 +703,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='See Back',
+            visual_region=None,
             fields=[
                 FormField(
                     checkbox_field=CheckboxField(
@@ -678,6 +717,7 @@ def add_kt_form_v8(session: Session) -> None:
 
         FieldGroup(
             name='Photos',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -694,6 +734,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Audio',
+            visual_region=None,
             fields=[
                 FormField(
                     checkbox_field=CheckboxField(
@@ -706,6 +747,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Parasite Presence',
+            visual_region=None,
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
@@ -723,6 +765,7 @@ def add_kt_form_v8(session: Session) -> None:
         ),
         FieldGroup(
             name='Washed',
+            visual_region=None,
             fields=[
                 FormField(
                     checkbox_field=CheckboxField(

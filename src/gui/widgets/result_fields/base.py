@@ -14,9 +14,10 @@ from .util import wrap_in_frame
 class BaseField(QWidget):
     flagUnverified = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, hide_roi: bool = False):
         super().__init__()
         self._field_db_id: int | None = None
+        self._hide_roi = hide_roi
 
         self.field_name = QLabel()
         self.validation_result = QLabel()
@@ -41,7 +42,8 @@ class BaseField(QWidget):
         grid.addWidget(wrap_in_frame(self.field_name), row_idx, 0)
         grid.addWidget(wrap_in_frame(self.validation_result, center_horizontal=True), row_idx, 1)
         # Custom entry widget goes in column #2
-        grid.addWidget(wrap_in_frame(self.roi_image), row_idx, 3)
+        if not self._hide_roi:
+            grid.addWidget(wrap_in_frame(self.roi_image), row_idx, 3)
 
     def update_link_data(self) -> None:
         pass

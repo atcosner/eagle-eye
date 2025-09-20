@@ -8,6 +8,7 @@ from src.database import DB_ENGINE
 from src.database.processing.processed_region import ProcessedRegion
 from src.gui.widgets.result_fields.base import BaseField
 from src.gui.widgets.result_fields.checkbox_field import CheckboxField
+from src.gui.widgets.result_fields.field_group import FieldGroup
 from src.gui.widgets.result_fields.multi_checkbox_field import MultiCheckboxField
 from src.gui.widgets.result_fields.text_field import TextField
 from src.gui.widgets.util.table_header import TableHeader
@@ -66,38 +67,36 @@ class RegionOcrResults(QWidget):
             for group in region.groups:
                 logger.info(f'Loading group: {group.name}')
 
-                # If the group only has one field, treat it as the field itself
-                if len(group.fields) == 1:
-                    row_idx = self.field_grid.rowCount()
-                    field = group.fields[0]
+                row_idx = self.field_grid.rowCount()
+                field = group.fields[0]
 
-                    # Create the specific widget to display the field
-                    if field.text_field is not None:
-                        logger.debug(f'Adding text field: {field.text_field.name}')
-                        field_widget = TextField(field.text_field)
+                if len(group.fields) > 1:
+                    logger.debug(f'Adding field group placeholder')
+                    field_widget = FieldGroup(group)
 
-                    elif field.checkbox_field is not None:
-                        logger.debug(f'Adding checkbox field: {field.checkbox_field.name}')
-                        field_widget = CheckboxField(field.checkbox_field)
+                # Create the specific widget to display the field
+                elif field.text_field is not None:
+                    logger.debug(f'Adding text field: {field.text_field.name}')
+                    field_widget = TextField(field.text_field)
 
-                    elif field.multi_checkbox_field is not None:
-                        logger.debug(f'Adding multi checkbox field: {field.multi_checkbox_field.name}')
-                        field_widget = MultiCheckboxField(field.multi_checkbox_field)
+                elif field.checkbox_field is not None:
+                    logger.debug(f'Adding checkbox field: {field.checkbox_field.name}')
+                    field_widget = CheckboxField(field.checkbox_field)
 
-                    else:
-                        logger.error(f'Processed field ({field.id}) did not have a field we could display')
-                        continue
-
-                    # Propagate verification removal getting set up
-                    field_widget.flagUnverified.connect(lambda: self.verificationChange.emit(False, False))
-
-                    # Add the field into the layout and the dictionary
-                    field_widget.add_to_grid(row_idx, self.field_grid)
-                    self.field_widgets[row_idx] = field_widget
+                elif field.multi_checkbox_field is not None:
+                    logger.debug(f'Adding multi checkbox field: {field.multi_checkbox_field.name}')
+                    field_widget = MultiCheckboxField(field.multi_checkbox_field)
 
                 else:
-                    # TODO
-                    pass
+                    logger.error(f'Processed field ({field.id}) did not have a field we could display')
+                    continue
+
+                # Propagate verification removal getting set up
+                field_widget.flagUnverified.connect(lambda: self.verificationChange.emit(False, False))
+
+                # Add the field into the layout and the dictionary
+                field_widget.add_to_grid(row_idx, self.field_grid)
+                self.field_widgets[row_idx] = field_widget
 
     def handle_tab_shown(self) -> None:
         for widget in self.field_widgets.values():

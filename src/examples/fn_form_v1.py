@@ -117,7 +117,7 @@ def add_fn_form_v1(session: Session) -> None:
     #
     id_region = FormRegion(local_id=1, name='ID/Agent')
     form.regions[id_region.local_id] = id_region
-    id_region.fields = [
+    id_region.groups = [
         FieldGroup(
             name='',
             visual_region=None,
@@ -296,7 +296,7 @@ def add_fn_form_v1(session: Session) -> None:
     #
     locality_region = FormRegion(local_id=2, name='Locality')
     form.regions[locality_region.local_id] = locality_region
-    locality_region.fields = [
+    locality_region.groups = [
         FieldGroup(
             name='',
             visual_region=None,
@@ -453,7 +453,7 @@ def add_fn_form_v1(session: Session) -> None:
     #
     attributes_region = FormRegion(local_id=3, name='Attributes')
     form.regions[attributes_region.local_id] = attributes_region
-    attributes_region.fields = [
+    attributes_region.groups = [
         FieldGroup(
             name='Measurements',
             visual_region=BoxBounds(x=405, y=638, width=1089, height=79),
@@ -536,7 +536,7 @@ def add_fn_form_v1(session: Session) -> None:
     #
     parts_region = FormRegion(local_id=4, name='Preparations/Parts')
     form.regions[parts_region.local_id] = parts_region
-    parts_region.fields = [
+    parts_region.groups = [
         FieldGroup(
             name='',
             visual_region=None,
@@ -560,7 +560,7 @@ def add_fn_form_v1(session: Session) -> None:
     #
     footer_region = FormRegion(local_id=5, name='Footer')
     form.regions[footer_region.local_id] = footer_region
-    footer_region.fields = [
+    footer_region.groups = [
         FieldGroup(
             name='',
             visual_region=None,

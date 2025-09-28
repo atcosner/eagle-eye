@@ -603,9 +603,55 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
-        #
-        # TODO: female
-        #
+        FieldGroup(
+            name='Female',
+            visual_region=BoxBounds(x=199, y=841, width=1384, height=98),
+            fields=[
+                FormField(
+                    checkbox_field=CheckboxField(
+                        name='Is Female?',
+                        visual_region=BoxBounds(x=202, y=843, width=152, height=50),
+                        checkbox_region=BoxBounds(x=216, y=861, width=11, height=12),
+                    ),
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Vagina',
+                        visual_region=BoxBounds(x=350, y=846, width=348, height=42),
+                        validator=MultiCheckboxValidation.NONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Open', region=BoxBounds(x=466, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Closed', region=BoxBounds(x=584, y=861, width=11, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Mammae',
+                        visual_region=BoxBounds(x=720, y=847, width=382, height=40),
+                        validator=MultiCheckboxValidation.NONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Enlarged', region=BoxBounds(x=858, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Small', region=BoxBounds(x=1014, y=861, width=11, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Lactation',
+                        visual_region=BoxBounds(x=1139, y=852, width=443, height=33),
+                        validator=MultiCheckboxValidation.NONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Lactating', region=BoxBounds(x=1270, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Not Lactating', region=BoxBounds(x=1421, y=861, width=11, height=12)),
+                        ],
+                    )
+                ),
+                #
+                # TODO: Placental scars, embryo
+                #
+            ],
+        ),
         FieldGroup(
             name='',
             visual_region=None,
@@ -632,12 +678,101 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
-        #
-        # TODO: ecto
-        #
-        #
-        # TODO: endo
-        #
+        FieldGroup(
+            name='Ecto Parasites',
+            visual_region=BoxBounds(x=199, y=989, width=1376, height=50),
+            fields=[
+                FormField(
+                    circled_field=CircledField(
+                        name='Exam?',
+                        visual_region=BoxBounds(x=204, y=992, width=248, height=41),
+                        options=[
+                            CircledOption(name='Yes', region=BoxBounds(x=354, y=994, width=39, height=38)),
+                            CircledOption(name='No', region=BoxBounds(x=404, y=992, width=41, height=40)),
+                        ],
+                    )
+                ),
+                FormField(
+                    circled_field=CircledField(
+                        name='Found?',
+                        visual_region=BoxBounds(x=446, y=991, width=262, height=41),
+                        options=[
+                            CircledOption(name='Yes', region=BoxBounds(x=603, y=992, width=41, height=40)),
+                            CircledOption(name='No', region=BoxBounds(x=658, y=990, width=40, height=42)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='By',
+                        visual_region=BoxBounds(x=753, y=992, width=150, height=33),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Date',
+                        visual_region=BoxBounds(x=965, y=990, width=149, height=35),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Method',
+                        visual_region=BoxBounds(x=1208, y=986, width=368, height=39),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Endo Parasites',
+            visual_region=BoxBounds(x=204, y=1037, width=1373, height=47),
+            fields=[
+                FormField(
+                    circled_field=CircledField(
+                        name='Exam?',
+                        visual_region=BoxBounds(x=206, y=1042, width=247, height=40),
+                        options=[
+                            CircledOption(name='Yes', region=BoxBounds(x=358, y=1043, width=44, height=39)),
+                            CircledOption(name='No', region=BoxBounds(x=413, y=1040, width=40, height=44)),
+                        ],
+                    )
+                ),
+                FormField(
+                    circled_field=CircledField(
+                        name='Found?',
+                        visual_region=BoxBounds(x=453, y=1039, width=248, height=45),
+                        options=[
+                            CircledOption(name='Yes', region=BoxBounds(x=608, y=1041, width=39, height=42)),
+                            CircledOption(name='No', region=BoxBounds(x=659, y=1044, width=43, height=40)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='By',
+                        visual_region=BoxBounds(x=753, y=1037, width=154, height=38),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Date',
+                        visual_region=BoxBounds(x=967, y=1039, width=149, height=36),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                            text_required=False,
+                        ),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Method',
+                        visual_region=BoxBounds(x=1210, y=1039, width=362, height=36),
+                    ),
+                ),
+            ],
+        ),
     ]
 
     #

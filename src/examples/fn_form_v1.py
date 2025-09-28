@@ -531,6 +531,113 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Age Class',
+                        visual_region=BoxBounds(x=207, y=730, width=573, height=44),
+                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Adult', region=BoxBounds(x=346, y=746, width=11, height=12)),
+                            MultiCheckboxOption(name='Subadult', region=BoxBounds(x=447, y=746, width=11, height=12)),
+                            MultiCheckboxOption(name='Juvenile', region=BoxBounds(x=534, y=746, width=11, height=12)),
+                            MultiCheckboxOption(name='Embryo', region=BoxBounds(x=616, y=746, width=11, height=12)),
+                            MultiCheckboxOption(name='Unknown', region=BoxBounds(x=711, y=746, width=11, height=12)),
+                        ],
+                    )
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Relationship',
+            visual_region=BoxBounds(x=896, y=725, width=685, height=54),
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Type',
+                        visual_region=BoxBounds(x=1062, y=731, width=256, height=34),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Other ID',
+                        visual_region=BoxBounds(x=1365, y=728, width=206, height=37),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Male',
+            visual_region=BoxBounds(x=200, y=792, width=927, height=48),
+            fields=[
+                FormField(
+                    checkbox_field=CheckboxField(
+                        name='Is Male?',
+                        visual_region=BoxBounds(x=205, y=791, width=128, height=41),
+                        checkbox_region=BoxBounds(x=216, y=806, width=11, height=12),
+                    ),
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='External',
+                        visual_region=BoxBounds(x=353, y=793, width=421, height=36),
+                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Scrotal', region=BoxBounds(x=483, y=806, width=11, height=12)),
+                            MultiCheckboxOption(name='Non-scrotal', region=BoxBounds(x=617, y=806, width=11, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Testes',
+                        visual_region=BoxBounds(x=801, y=793, width=311, height=43),
+                        text_regions=[
+                            BoxBounds(x=909, y=796, width=73, height=28),
+                            BoxBounds(x=995, y=795, width=69, height=29),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+        #
+        # TODO: female
+        #
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    checkbox_field=CheckboxField(
+                        name='Sex Unknown',
+                        visual_region=BoxBounds(x=201, y=944, width=195, height=40),
+                        checkbox_region=BoxBounds(x=216, y=958, width=11, height=12),
+                    )
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    checkbox_field=CheckboxField(
+                        name='Sex Not Examined',
+                        visual_region=BoxBounds(x=417, y=944, width=241, height=40),
+                        checkbox_region=BoxBounds(x=429, y=958, width=11, height=12),
+                    )
+                ),
+            ],
+        ),
+        #
+        # TODO: ecto
+        #
+        #
+        # TODO: endo
+        #
     ]
 
     #

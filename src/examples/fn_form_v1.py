@@ -515,6 +515,7 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=1264, y=638, width=108, height=46),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
                         ),
                     ),
                 ),
@@ -524,6 +525,7 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=1375, y=638, width=110, height=46),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
                         ),
                     ),
                 ),

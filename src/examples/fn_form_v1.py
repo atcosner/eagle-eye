@@ -786,6 +786,60 @@ def add_fn_form_v1(session: Session) -> None:
             visual_region=None,
             fields=[
                 FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Prep Types',
+                        visual_region=BoxBounds(x=382, y=1101, width=1200, height=61),
+                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Skin', region=BoxBounds(x=410, y=1128, width=12, height=12)),
+                            MultiCheckboxOption(name='Skull', region=BoxBounds(x=509, y=1128, width=12, height=12)),
+                            MultiCheckboxOption(name='Skull + Skel', region=BoxBounds(x=621, y=1128, width=12, height=12)),
+                            MultiCheckboxOption(name='Whole Org', region=BoxBounds(x=804, y=1128, width=12, height=12)),  # TODO: This has a circled option as well
+                            MultiCheckboxOption(name='Tissue only', region=BoxBounds(x=1125, y=1128, width=12, height=12)),
+                            MultiCheckboxOption(
+                                name='Other',
+                                region=BoxBounds(x=1320, y=1128, width=12, height=12),
+                                text_region=BoxBounds(x=1415, y=1103, width=158, height=43),
+                            ),
+                        ],
+                    )
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Collection Method',
+                        visual_region=BoxBounds(x=270, y=1163, width=1150, height=52),
+                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Sherman', region=BoxBounds(x=285, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Snap', region=BoxBounds(x=409, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Rat', region=BoxBounds(x=510, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Gopher', region=BoxBounds(x=592, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Pit', region=BoxBounds(x=691, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Net', region=BoxBounds(x=763, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Gun', region=BoxBounds(x=845, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Salvage', region=BoxBounds(x=935, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Tomahawk', region=BoxBounds(x=1068, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(
+                                name='Other',
+                                region=BoxBounds(x=1182, y=1183, width=12, height=12),
+                                text_region=BoxBounds(x=1265, y=1159, width=144, height=42),
+                            ),
+                        ],
+                    )
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
                     circled_field=CircledField(
                         name='DOA',
                         visual_region=BoxBounds(x=1415, y=1161, width=170, height=54),
@@ -793,6 +847,74 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Y', region=BoxBounds(x=1496, y=1173, width=33, height=33)),
                             CircledOption(name='N', region=BoxBounds(x=1540, y=1172, width=33, height=33)),
                         ],
+                    )
+                ),
+            ],
+        ),
+        #
+        # TODO: specific tissues
+        #
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Tissue Quality',
+                        visual_region=BoxBounds(x=372, y=1803, width=462, height=39),
+                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Excellent', region=BoxBounds(x=381, y=1822, width=9, height=9)),
+                            MultiCheckboxOption(name='Very Good', region=BoxBounds(x=494, y=1822, width=9, height=9)),
+                            MultiCheckboxOption(name='Good', region=BoxBounds(x=620, y=1822, width=9, height=9)),
+                            MultiCheckboxOption(name='Fair', region=BoxBounds(x=701, y=1822, width=9, height=9)),
+                            MultiCheckboxOption(name='Poor', region=BoxBounds(x=767, y=1822, width=9, height=9)),
+                        ],
+                    )
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Time of Death',
+                        visual_region=BoxBounds(x=383, y=1838, width=129, height=37),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.TIME,
+                        ),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Time of Tissue in LN2',
+                        visual_region=BoxBounds(x=773, y=1838, width=114, height=37),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.TIME,
+                        ),
+                    )
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Elapsed Time (min)',
+                        visual_region=BoxBounds(x=383, y=1882, width=128, height=36),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.INTEGER,
+                        ),
                     )
                 ),
             ],

@@ -851,6 +851,192 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
+        FieldGroup(
+            name='Heart, Lung',
+            visual_region=BoxBounds(x=195, y=1301, width=606, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1301, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1314, width=12, height=12)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1347, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1314, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1347, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1301, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Kidney, Spleen',
+            visual_region=BoxBounds(x=195, y=1371, width=606, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1371, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1384, width=12, height=12)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1417, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1384, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1417, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1371, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Liver',
+            visual_region=BoxBounds(x=195, y=1442, width=606, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1442, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1455, width=12, height=12)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1488, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1455, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1488, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1442, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Muscle',
+            visual_region=BoxBounds(x=195, y=1514, width=606, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1514, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1527, width=12, height=12)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1560, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1527, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1560, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1514, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='GI / LI / colon',
+            visual_region=BoxBounds(x=195, y=1586, width=606, height=66),
+            fields=[
+                FormField(
+                    circled_field=CircledField(
+                        name='Type',
+                        visual_region=BoxBounds(x=195, y=1586, width=125, height=69),
+                        options=[
+                            CircledOption(name='GI', region=BoxBounds(x=197, y=1589, width=44, height=32)),
+                            CircledOption(name='LI', region=BoxBounds(x=253, y=1588, width=44, height=35)),
+                            CircledOption(name='colon', region=BoxBounds(x=203, y=1617, width=92, height=37)),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1586, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1599, width=12, height=12)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1632, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1599, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1632, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1586, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Feces',
+            visual_region=BoxBounds(x=195, y=1658, width=606, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1658, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1599, width=12, height=12)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1632, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1599, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1632, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1658, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Blood',
+            visual_region=BoxBounds(x=195, y=1730, width=606, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=324, y=1730, width=188, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Nobuto', region=BoxBounds(x=333, y=1671, width=12, height=12)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1704, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1671, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1704, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=627, y=1730, width=175, height=66),
+                    ),
+                ),
+            ],
+        ),
         #
         # TODO: specific tissues
         #

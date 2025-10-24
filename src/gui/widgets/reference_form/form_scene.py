@@ -54,7 +54,7 @@ class FormScene(QGraphicsScene):
 
                 # TODO: add a hierarchy level for the field groups
                 for group in region.groups:
-                    for field in group:
+                    for field in group.fields:
                         qt_field = BaseField(field, region_color)
                         self.addItem(qt_field)
 

@@ -49,7 +49,7 @@ class SelectionDetails(QGroupBox):
 
                 # TODO: add a hierarchy level for the field groups
                 for group in region.groups:
-                    for field in group:
+                    for field in group.fields:
                         field_details = FieldDetails(self, field)
                         field_details.setVisible(False)
                         self.field_details[field.id] = field_details

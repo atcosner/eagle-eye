@@ -51,7 +51,7 @@ class RegionItem(TreeItem):
 
         # TODO: add a hierarchy level for the field groups
         for group in region.groups:
-            for field in group:
+            for field in group.fields:
                 self.addChild(FieldItem(field))
 
     def get_field(self, db_id: int) -> FieldItem | None:

@@ -11,7 +11,7 @@ configure_root_logger(logging.INFO)
 app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(True)
 
-form_editor = ReferenceFormEditor(None, True, 1)
+form_editor = ReferenceFormEditor(None, True, 2)
 form_editor.show()
 
 app.exec()

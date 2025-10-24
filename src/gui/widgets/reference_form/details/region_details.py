@@ -1,8 +1,8 @@
-from PyQt6.QtWidgets import QWidget, QLabel
+from PyQt6.QtWidgets import QWidget
 
 from src.database.form_region import FormRegion
 
-from ..util.details_tree import DetailsTree, TextItem
+from ...util.details_tree import DetailsTree, TextItem
 
 
 class RegionDetails(DetailsTree):

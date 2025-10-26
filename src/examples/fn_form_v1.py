@@ -1037,9 +1037,305 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
-        #
-        # TODO: specific tissues
-        #
+        FieldGroup(
+            name='Ecto Parasites 1',
+            visual_region=BoxBounds(x=838, y=1301, width=749, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Type & Count',
+                        visual_region=BoxBounds(x=838, y=1301, width=231, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(
+                                name='Flea',
+                                region=BoxBounds(x=863, y=1310, width=24, height=20),
+                                text_region=BoxBounds(x=853, y=1305, width=46, height=26),
+                            ),
+                            MultiCheckboxOption(
+                                name='Tick',
+                                region=BoxBounds(x=872, y=1342, width=15, height=17),
+                                text_region=BoxBounds(x=854, y=1334, width=46, height=26),
+                            ),
+                            MultiCheckboxOption(
+                                name='Mite',
+                                region=BoxBounds(x=973, y=1311, width=16, height=18),
+                                text_region=BoxBounds(x=957, y=1305, width=46, height=26),
+                            ),
+                            MultiCheckboxOption(
+                                name='Lice',
+                                region=BoxBounds(x=973, y=1341, width=16, height=17),
+                                text_region=BoxBounds(x=956, y=1334, width=46, height=26),
+                            ),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=1073, y=1301, width=177, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1314, width=12, height=12)),
+                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1161, y=1314, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1347, width=12, height=12)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1159, y=1347, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1301, width=218, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Ecto Parasites 2',
+            visual_region=BoxBounds(x=838, y=1371, width=749, height=66),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Type & Count',
+                        visual_region=BoxBounds(x=838, y=1371, width=231, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(
+                                name='Flea',
+                                region=BoxBounds(x=863, y=1380, width=24, height=20),
+                                text_region=BoxBounds(x=853, y=1375, width=46, height=26),
+                            ),
+                            MultiCheckboxOption(
+                                name='Tick',
+                                region=BoxBounds(x=872, y=1412, width=15, height=17),
+                                text_region=BoxBounds(x=854, y=1404, width=46, height=26),
+                            ),
+                            MultiCheckboxOption(
+                                name='Mite',
+                                region=BoxBounds(x=973, y=1381, width=16, height=18),
+                                text_region=BoxBounds(x=957, y=1375, width=46, height=26),
+                            ),
+                            MultiCheckboxOption(
+                                name='Lice',
+                                region=BoxBounds(x=973, y=1411, width=16, height=17),
+                                text_region=BoxBounds(x=956, y=1404, width=46, height=26),
+                            ),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=1073, y=1371, width=177, height=66),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1384, width=12, height=12)),
+                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1161, y=1384, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1417, width=12, height=12)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1159, y=1417, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1371, width=218, height=66),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Endo Parasites 1',
+            visual_region=BoxBounds(x=838, y=1514, width=749, height=69),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Type & Count',
+                        visual_region=BoxBounds(x=838, y=1514, width=231, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(
+                                name='Nema',
+                                region=BoxBounds(x=856, y=1525, width=19, height=18),
+                                text_region=BoxBounds(x=842, y=1518, width=45, height=27),
+                            ),
+                            MultiCheckboxOption(
+                                name='Trem',
+                                region=BoxBounds(x=858, y=1554, width=20, height=20),
+                                text_region=BoxBounds(x=843, y=1550, width=45, height=25),
+                            ),
+                            MultiCheckboxOption(
+                                name='Cest',
+                                region=BoxBounds(x=980, y=1527, width=16, height=16),
+                                text_region=BoxBounds(x=964, y=1520, width=46, height=25),
+                            ),
+                            MultiCheckboxOption(
+                                name='Cyst',
+                                region=BoxBounds(x=982, y=1556, width=16, height=17),
+                                text_region=BoxBounds(x=964, y=1551, width=46, height=24),
+                            ),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=1073, y=1514, width=177, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1527, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1560, width=12, height=12)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1527, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1514, width=218, height=69),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Endo Parasites 2',
+            visual_region=BoxBounds(x=838, y=1586, width=749, height=69),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Type & Count',
+                        visual_region=BoxBounds(x=838, y=1586, width=231, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(
+                                name='Nema',
+                                region=BoxBounds(x=856, y=1598, width=19, height=18),
+                                text_region=BoxBounds(x=842, y=1590, width=45, height=27),
+                            ),
+                            MultiCheckboxOption(
+                                name='Trem',
+                                region=BoxBounds(x=858, y=1626, width=20, height=20),
+                                text_region=BoxBounds(x=843, y=1622, width=45, height=25),
+                            ),
+                            MultiCheckboxOption(
+                                name='Cest',
+                                region=BoxBounds(x=980, y=1599, width=16, height=16),
+                                text_region=BoxBounds(x=964, y=1592, width=46, height=25),
+                            ),
+                            MultiCheckboxOption(
+                                name='Cyst',
+                                region=BoxBounds(x=982, y=1628, width=16, height=17),
+                                text_region=BoxBounds(x=964, y=1623, width=46, height=24),
+                            ),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=1073, y=1586, width=177, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1599, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1632, width=12, height=12)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1599, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1586, width=218, height=69),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Endo Parasites 3',
+            visual_region=BoxBounds(x=838, y=1658, width=749, height=69),
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Type & Count',
+                        visual_region=BoxBounds(x=838, y=1658, width=231, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(
+                                name='Nema',
+                                region=BoxBounds(x=856, y=1670, width=19, height=18),
+                                text_region=BoxBounds(x=842, y=1662, width=45, height=27),
+                            ),
+                            MultiCheckboxOption(
+                                name='Trem',
+                                region=BoxBounds(x=858, y=1698, width=20, height=20),
+                                text_region=BoxBounds(x=843, y=1694, width=45, height=25),
+                            ),
+                            MultiCheckboxOption(
+                                name='Cest',
+                                region=BoxBounds(x=980, y=1671, width=16, height=16),
+                                text_region=BoxBounds(x=964, y=1664, width=46, height=25),
+                            ),
+                            MultiCheckboxOption(
+                                name='Cyst',
+                                region=BoxBounds(x=982, y=1700, width=16, height=17),
+                                text_region=BoxBounds(x=964, y=1695, width=46, height=24),
+                            ),
+                        ],
+                    )
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=1073, y=1658, width=177, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1671, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1704, width=12, height=12)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1671, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1658, width=218, height=69),
+                    ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='Embryos',
+            visual_region=BoxBounds(x=838, y=1730, width=749, height=69),
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Count',
+                        visual_region=BoxBounds(x=872, y=1750, width=45, height=26),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.INTEGER),
+                    ),
+                ),
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Preservation',
+                        visual_region=BoxBounds(x=1073, y=1730, width=177, height=69),
+                        validator=MultiCheckboxValidation.OPTIONAL,
+                        checkboxes=[
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=1082, y=1743, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1776, width=12, height=12)),
+                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1170, y=1743, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=1159, y=1176, width=12, height=12)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1730, width=218, height=69),
+                    ),
+                ),
+            ],
+        ),
         FieldGroup(
             name='',
             visual_region=None,

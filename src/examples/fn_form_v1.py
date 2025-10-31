@@ -11,6 +11,7 @@ from src.database.fields.field_group import FieldGroup
 from src.database.fields.form_field import FormField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.multi_checkbox_option import MultiCheckboxOption
+from src.database.fields.sub_circled_option import SubCircledOption
 from src.database.fields.text_field import TextField
 from src.database.form_region import FormRegion
 from src.database.reference_form import ReferenceForm
@@ -794,7 +795,14 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Skin', region=BoxBounds(x=410, y=1128, width=12, height=12)),
                             MultiCheckboxOption(name='Skull', region=BoxBounds(x=509, y=1128, width=12, height=12)),
                             MultiCheckboxOption(name='Skull + Skel', region=BoxBounds(x=621, y=1128, width=12, height=12)),
-                            MultiCheckboxOption(name='Whole Org', region=BoxBounds(x=804, y=1128, width=12, height=12)),  # TODO: This has a circled option as well
+                            MultiCheckboxOption(
+                                name='Whole Org',
+                                region=BoxBounds(x=804, y=1128, width=12, height=12),
+                                circled_options=[
+                                    SubCircledOption(name='95% EtOH', region=BoxBounds(x=956, y=1100, width=71, height=58)),
+                                    SubCircledOption(name='Frozen', region=BoxBounds(x=1039, y=1106, width=54, height=57)),
+                                ]
+                            ),
                             MultiCheckboxOption(name='Tissue only', region=BoxBounds(x=1125, y=1128, width=12, height=12)),
                             MultiCheckboxOption(
                                 name='Other',

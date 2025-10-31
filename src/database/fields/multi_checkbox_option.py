@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationshi
 
 from src.util.types import BoxBounds
 
+from .sub_circled_option import SubCircledOption
 from .. import OrmBase
 from ..util import DbBoxBounds
 
@@ -19,4 +20,6 @@ class MultiCheckboxOption(MappedAsDataclass, OrmBase):
 
     # Relationships
 
+    circled_options: Mapped[list[SubCircledOption]] = relationship(back_populates="multi_checkbox_option", default_factory=list)
     multi_checkbox_field: Mapped["MultiCheckboxField"] = relationship(init=False, back_populates="checkboxes")
+

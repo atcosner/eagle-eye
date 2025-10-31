@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 BOTTOM_HALF_Y_OFFSET = 842
 FORM_BLANK_IMAGE_PATH = Path(__file__).parent / 'kt_field_form_v8.png'
 assert FORM_BLANK_IMAGE_PATH.exists(), f'Form blank reference image does not exist: {FORM_BLANK_IMAGE_PATH}'
-SPECIES_LIST_PATH = Path(__file__).parent / 'ku_orn_taxonomy_reference.csv'
+SPECIES_LIST_PATH = Path(__file__).parent / 'data' / 'ku_orn_taxonomy_reference.csv'
 assert SPECIES_LIST_PATH.exists(), f'Species list does not exist: {SPECIES_LIST_PATH}'
 
 

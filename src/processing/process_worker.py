@@ -24,6 +24,7 @@ from src.database.processed_fields.processed_field_group import ProcessedFieldGr
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.processed_fields.processed_text_field import ProcessedTextField
+from src.database.processed_fields.processed_sub_circled_option import ProcessedSubCircledOption
 from src.database.processing.processed_region import ProcessedRegion
 from src.database.processing.process_result import ProcessResult
 from src.database.validation.validation_result import ValidationResult
@@ -34,7 +35,6 @@ from src.util.status import FileStatus
 from src.util.types import FormLinkingMethod
 
 from . import validation
-from ..database.processed_fields.processed_field_group import ProcessedFieldGroup
 
 logger = logging.getLogger(__name__)
 
@@ -206,12 +206,22 @@ class ProcessWorker(QObject):
                     self.log.info(f'Detected mostly white image, skipping OCR')
                     optional_text = ''
 
+            # If we have circled options, process them
+            circled_options = {}
+            for option in checkbox.circled_options:
+                circled_options[option.name] = ProcessedSubCircledOption(
+                    name=option.name,
+                    circled=False,  # TODO: actually process these
+                    sub_circled_option=option,
+                )
+
             checkboxes[checkbox.name] = ProcessedMultiCheckboxOption(
                 name=checkbox.name,
                 checked=checked,
                 text=optional_text,
                 ocr_text=optional_text,
                 multi_checkbox_option=checkbox,
+                circled_options=circled_options,
             )
 
         # Validate the field
@@ -242,7 +252,7 @@ class ProcessWorker(QObject):
 
             options[option.name] = ProcessedCircledOption(
                 name=option.name,
-                circled=False,
+                circled=False,  # TODO: actually process these
                 circled_option=option,
             )
 

@@ -2,7 +2,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
 from src.util.types import BoxBounds
-from src.util.validation import MultiCheckboxValidation
+from src.util.validation import MultiChoiceValidation
 
 from .circled_option import CircledOption
 from .. import OrmBase

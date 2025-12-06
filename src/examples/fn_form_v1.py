@@ -19,7 +19,7 @@ from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds, FormLinkingMethod, FormAlignmentMethod
-from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype
+from src.util.validation import MultiChoiceValidation, TextValidatorDatatype
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +161,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='ID confidence',
                         visual_region=BoxBounds(x=1122, y=176, width=457, height=47),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Low', region=BoxBounds(x=1324, y=193, width=12, height=14)),
                             MultiCheckboxOption(name='Medium', region=BoxBounds(x=1405, y=193, width=12, height=14)),
@@ -540,7 +540,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Age Class',
                         visual_region=BoxBounds(x=207, y=730, width=573, height=44),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Adult', region=BoxBounds(x=346, y=746, width=11, height=12)),
                             MultiCheckboxOption(name='Subadult', region=BoxBounds(x=447, y=746, width=11, height=12)),
@@ -585,7 +585,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='External',
                         visual_region=BoxBounds(x=353, y=793, width=421, height=36),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Scrotal', region=BoxBounds(x=483, y=806, width=11, height=12)),
                             MultiCheckboxOption(name='Non-scrotal', region=BoxBounds(x=617, y=806, width=11, height=12)),
@@ -619,7 +619,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Vagina',
                         visual_region=BoxBounds(x=350, y=846, width=348, height=42),
-                        validator=MultiCheckboxValidation.NONE,
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Open', region=BoxBounds(x=466, y=861, width=11, height=12)),
                             MultiCheckboxOption(name='Closed', region=BoxBounds(x=584, y=861, width=11, height=12)),
@@ -630,7 +630,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Mammae',
                         visual_region=BoxBounds(x=720, y=847, width=382, height=40),
-                        validator=MultiCheckboxValidation.NONE,
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Enlarged', region=BoxBounds(x=858, y=861, width=11, height=12)),
                             MultiCheckboxOption(name='Small', region=BoxBounds(x=1014, y=861, width=11, height=12)),
@@ -641,7 +641,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Lactation',
                         visual_region=BoxBounds(x=1139, y=852, width=443, height=33),
-                        validator=MultiCheckboxValidation.NONE,
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Lactating', region=BoxBounds(x=1270, y=861, width=11, height=12)),
                             MultiCheckboxOption(name='Not Lactating', region=BoxBounds(x=1421, y=861, width=11, height=12)),
@@ -790,7 +790,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Prep Types',
                         visual_region=BoxBounds(x=382, y=1101, width=1200, height=61),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Skin', region=BoxBounds(x=410, y=1128, width=12, height=12)),
                             MultiCheckboxOption(name='Skull', region=BoxBounds(x=509, y=1128, width=12, height=12)),
@@ -822,7 +822,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Collection Method',
                         visual_region=BoxBounds(x=270, y=1163, width=1150, height=52),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Sherman', region=BoxBounds(x=285, y=1183, width=12, height=12)),
                             MultiCheckboxOption(name='Snap', region=BoxBounds(x=409, y=1183, width=12, height=12)),
@@ -867,7 +867,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1301, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1314, width=12, height=12)),
                             MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1347, width=12, height=12)),
@@ -892,7 +892,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1371, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1384, width=12, height=12)),
                             MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1417, width=12, height=12)),
@@ -917,7 +917,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1442, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1455, width=12, height=12)),
                             MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1488, width=12, height=12)),
@@ -942,7 +942,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1514, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1527, width=12, height=12)),
                             MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1560, width=12, height=12)),
@@ -978,7 +978,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1586, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1599, width=12, height=12)),
                             MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1632, width=12, height=12)),
@@ -1003,7 +1003,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1658, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1599, width=12, height=12)),
                             MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1632, width=12, height=12)),
@@ -1028,7 +1028,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=324, y=1730, width=188, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='Nobuto', region=BoxBounds(x=333, y=1671, width=12, height=12)),
                             MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1704, width=12, height=12)),
@@ -1053,7 +1053,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
                         visual_region=BoxBounds(x=838, y=1301, width=231, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Flea',
@@ -1082,7 +1082,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=1073, y=1301, width=177, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1314, width=12, height=12)),
                             MultiCheckboxOption(name='95%', region=BoxBounds(x=1161, y=1314, width=12, height=12)),
@@ -1107,7 +1107,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
                         visual_region=BoxBounds(x=838, y=1371, width=231, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Flea',
@@ -1136,7 +1136,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=1073, y=1371, width=177, height=66),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1384, width=12, height=12)),
                             MultiCheckboxOption(name='95%', region=BoxBounds(x=1161, y=1384, width=12, height=12)),
@@ -1161,7 +1161,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
                         visual_region=BoxBounds(x=838, y=1514, width=231, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Nema',
@@ -1190,7 +1190,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=1073, y=1514, width=177, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1527, width=12, height=12)),
                             MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1560, width=12, height=12)),
@@ -1214,7 +1214,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
                         visual_region=BoxBounds(x=838, y=1586, width=231, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Nema',
@@ -1243,7 +1243,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=1073, y=1586, width=177, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1599, width=12, height=12)),
                             MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1632, width=12, height=12)),
@@ -1267,7 +1267,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
                         visual_region=BoxBounds(x=838, y=1658, width=231, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Nema',
@@ -1296,7 +1296,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=1073, y=1658, width=177, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1671, width=12, height=12)),
                             MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1704, width=12, height=12)),
@@ -1327,7 +1327,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preservation',
                         visual_region=BoxBounds(x=1073, y=1730, width=177, height=69),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='10% form', region=BoxBounds(x=1082, y=1743, width=12, height=12)),
                             MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1776, width=12, height=12)),
@@ -1352,7 +1352,7 @@ def add_fn_form_v1(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Tissue Quality',
                         visual_region=BoxBounds(x=372, y=1803, width=462, height=39),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Excellent', region=BoxBounds(x=381, y=1822, width=9, height=9)),
                             MultiCheckboxOption(name='Very Good', region=BoxBounds(x=494, y=1822, width=9, height=9)),

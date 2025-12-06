@@ -17,7 +17,7 @@ from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds, FormLinkingMethod, FormAlignmentMethod
-from src.util.validation import MultiCheckboxValidation, TextValidatorDatatype
+from src.util.validation import MultiChoiceValidation, TextValidatorDatatype
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +296,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Collection Method',
                         visual_region=BoxBounds(x=163, y=376, width=1061, height=35),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Shot', region=BoxBounds(x=308, y=387, width=13, height=13)),
                             MultiCheckboxOption(name='Net/Trap', region=BoxBounds(x=391, y=387, width=13, height=13)),
@@ -382,7 +382,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Tissue Date',
                         visual_region=BoxBounds(x=160, y=488, width=283, height=35),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Collection', region=BoxBounds(x=280, y=498, width=13, height=13)),
                             MultiCheckboxOption(name='Preparation', region=BoxBounds(x=360, y=498, width=13, height=13)),
@@ -471,7 +471,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Tissue Preservation',
                         visual_region=BoxBounds(x=569, y=527, width=669, height=33),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='-20C', region=BoxBounds(x=693, y=536, width=13, height=13)),
                             MultiCheckboxOption(name='-80C', region=BoxBounds(x=791, y=536, width=13, height=13)),
@@ -529,7 +529,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Prep',
                         visual_region=BoxBounds(x=158, y=600, width=1077, height=36),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Round Skin', region=BoxBounds(x=242, y=610, width=13, height=13)),
                             MultiCheckboxOption(name='Skeleton', region=BoxBounds(x=385, y=610, width=13, height=13)),
@@ -596,7 +596,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Fat',
                         visual_region=BoxBounds(x=479, y=706, width=384, height=41),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='None', region=BoxBounds(x=536, y=721, width=13, height=13)),
                             MultiCheckboxOption(name='Light', region=BoxBounds(x=599, y=721, width=13, height=13)),
@@ -644,7 +644,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Sex',
                         visual_region=BoxBounds(x=162, y=786, width=329, height=31),
-                        validator=MultiCheckboxValidation.REQUIRE_ONE,
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
                             MultiCheckboxOption(name='Female', region=BoxBounds(x=222, y=795, width=13, height=13)),
                             MultiCheckboxOption(name='Male', region=BoxBounds(x=329, y=795, width=13, height=13)),
@@ -675,7 +675,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Parasites Collected',
                         visual_region=BoxBounds(x=895, y=787, width=333, height=29),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='Ecto', region=BoxBounds(x=1054, y=795, width=13, height=13)),
                             MultiCheckboxOption(name='Endo', region=BoxBounds(x=1143, y=795, width=13, height=13)),
@@ -723,7 +723,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Photos',
                         visual_region=BoxBounds(x=162, y=898, width=259, height=35),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='Habitat', region=BoxBounds(x=253, y=907, width=13, height=13)),
                             MultiCheckboxOption(name='Specimen', region=BoxBounds(x=334, y=907, width=13, height=13)),
@@ -753,7 +753,7 @@ def add_kt_form_v8(session: Session) -> None:
                     multi_checkbox_field=MultiCheckboxField(
                         name='Parasite Presence',
                         visual_region=BoxBounds(x=612, y=897, width=408, height=33),
-                        validator=MultiCheckboxValidation.OPTIONAL,
+                        validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='70%', region=BoxBounds(x=773, y=907, width=13, height=13)),
                             MultiCheckboxOption(name='80%', region=BoxBounds(x=858, y=907, width=13, height=13)),

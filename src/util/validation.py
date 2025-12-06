@@ -29,7 +29,7 @@ VALID_DATE_FORMATS = [
 logger = logging.getLogger(__name__)
 
 
-class MultiCheckboxValidation(Enum):
+class MultiChoiceValidation(Enum):
     NONE = 1
     REQUIRE_ONE = 2
     MAXIMUM_ONE = 3

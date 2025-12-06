@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QGraphicsItem, QGraphicsItemGroup, QWidget, QStyleOp
 
 class SelectionType(Enum):
     REGION = auto()
+    FIELD_GROUP = auto()
     FIELD = auto()
 
 

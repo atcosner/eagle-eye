@@ -15,8 +15,8 @@ app.setQuitOnLastWindowClosed(True)
 # overwire the default exception handler
 sys.excepthook = log_uncaught_exception
 
-screen = SplashScreen()
-screen.initial_setup()
+# screen = SplashScreen()
+# screen.initial_setup()
 
 window = MainWindow()
 window.start(auto_new_job=True)
@@ -31,20 +31,41 @@ for parent in file_path.parents:
 print(f'Project path: {project_path}')
 assert project_path is not None
 
-# Add some files to the selector
-dev_path = project_path / 'scripts' / 'test_files'
-window.job_widget.processing_pipeline.picker.file_list.file_list.add_items([
-    # # use forms with real data
-    # dev_path / 'kt' / '40013-40014.jpg',
-    # dev_path / 'kt' / '40015-40018.pdf',
+#
+# DEVELOPMENT TESTING FILES
+#
+DEV_PATH = project_path / 'scripts' / 'test_files'
+TEST_FILES = [
+    # use forms with real data
+    # DEV_PATH / 'kt' / '40013-40014.jpg',
+    # DEV_PATH / 'kt' / '40015-40018.pdf',
+    DEV_PATH / 'fn' / 'FN5007.pdf',
 
-    # pdf with alignment errors
-    dev_path / 'kt' / '40013-40018.pdf',
+    # # pdf with alignment errors
+    # DEV_PATH / 'kt' / '40013-40018.pdf',
 
     # # fake testing forms
-    # dev_path / 'kt' / 'test_kt_form__filled.jpg',
-    # dev_path / 'kt' / 'test_kt_form__filled_errors.jpg',
-])
+    # DEV_PATH / 'kt' / 'test_kt_form__filled.jpg',
+    # DEV_PATH / 'kt' / 'test_kt_form__filled_errors.jpg',
+]
+
+# Add some files to the selector
+window.job_widget.processing_pipeline.picker.file_list.file_list.add_items(TEST_FILES)
+
+# Choose the reference form based on the test files were using
+found_form = False
+reference_form_prefix = TEST_FILES[0].parent.name.upper()
+for index in range(window.job_widget.reference_form_selector.count()):
+    form_name = window.job_widget.reference_form_selector.itemText(index)
+    print(f'Checking: {form_name}')
+
+    if reference_form_prefix in form_name:
+        print(f'Selected reference form: {form_name}')
+        window.job_widget.reference_form_selector.setCurrentIndex(index)
+        found_form = True
+
+if not found_form:
+    assert False, f'Did not find reference form that contained: {reference_form_prefix}'
 
 # Pre-process
 window.job_widget.processing_pipeline.picker.continueToNextStep.emit()

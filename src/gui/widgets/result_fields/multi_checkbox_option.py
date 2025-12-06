@@ -1,9 +1,11 @@
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal
-from PyQt6.QtWidgets import QWidget, QCheckBox, QLineEdit, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QCheckBox, QLineEdit, QHBoxLayout, QVBoxLayout
 
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
+
+from .sub_circled_option import SubCircledOption
 
 
 class MultiCheckboxOption(QWidget):
@@ -20,8 +22,10 @@ class MultiCheckboxOption(QWidget):
         self.text_entry = QLineEdit()
         self.text_entry.textChanged.connect(self.dataChanged)
 
-        self._set_up_layout()
+        self.circled_options: list[SubCircledOption] = []
+
         self.load(field)
+        self._set_up_layout()
 
     def _set_up_layout(self) -> None:
         self.setContentsMargins(0, 0, 0, 0)
@@ -31,6 +35,11 @@ class MultiCheckboxOption(QWidget):
         layout.addWidget(self.checkbox)
         layout.addWidget(self.text_entry)
 
+        circled_options_layout = QVBoxLayout()
+        for option in self.circled_options:
+            circled_options_layout.addWidget(option)
+        layout.addLayout(circled_options_layout)
+
         self.setLayout(layout)
 
     def to_tuple(self) -> tuple[bool, str]:
@@ -38,10 +47,10 @@ class MultiCheckboxOption(QWidget):
 
     @pyqtSlot(Qt.CheckState)
     def handle_checkbox_state_changed(self, state: Qt.CheckState) -> None:
-        if state == Qt.CheckState.Checked:
-            self.text_entry.setEnabled(True)
-        else:
-            self.text_entry.setEnabled(False)
+        sub_fields_enabled = (state == Qt.CheckState.Checked)
+        self.text_entry.setEnabled(sub_fields_enabled)
+        for option in self.circled_options:
+            option.setEnabled(sub_fields_enabled)
 
     def load(self, field: ProcessedMultiCheckboxOption) -> None:
         self._field_db_id = field.id
@@ -52,9 +61,18 @@ class MultiCheckboxOption(QWidget):
         self.text_entry.setText(field.text)
         self.text_entry.setVisible(field.ocr_text is not None)
 
+        for circled_option in field.circled_options.values():
+            option = SubCircledOption(circled_option)
+            option.setEnabled(field.checked)
+            option.dataChanged.connect(self.dataChanged)
+            self.circled_options.append(option)
+
     def update_db_state(self, session: Session) -> None:
         option = session.get(ProcessedMultiCheckboxOption, self._field_db_id)
         option.checked = self.checkbox.isChecked()
 
         if option.ocr_text is not None or self.text_entry.text():
             option.text = self.text_entry.text()
+
+        for circled_option in self.circled_options:
+            circled_option.update_db_state(session)

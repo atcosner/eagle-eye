@@ -9,7 +9,7 @@ from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.database.job import Job
-from src.database.pre_process_result import PreProcessResult
+from src.database.pre_processing.pre_process_result import PreProcessResult
 from src.util.logging import NamedLoggerAdapter
 from src.util.paths import LocalPaths
 from src.util.status import FileStatus

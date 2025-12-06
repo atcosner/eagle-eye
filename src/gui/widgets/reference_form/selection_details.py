@@ -7,8 +7,9 @@ from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 
-from .field_details import FieldDetails
-from .region_details import RegionDetails
+from .details.field_details import FieldDetails
+from .details.field_group_details import FieldGroupDetails
+from .details.region_details import RegionDetails
 from .util import SelectionType
 
 logger = logging.getLogger(__name__)
@@ -22,18 +23,26 @@ class SelectionDetails(QGroupBox):
 
         self._current_widget: RegionDetails | FieldDetails | None = None
         self.region_details: dict[int, RegionDetails] = {}
+        self.field_group_details: dict[int, FieldGroupDetails] = {}
         self.field_details: dict[int, FieldDetails] = {}
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
     def _update_title(self, suffix: str) -> None:
-        prefix = 'Region' if isinstance(self._current_widget, RegionDetails) else 'Field'
+        if isinstance(self._current_widget, RegionDetails):
+            prefix = 'Region'
+        elif isinstance(self._current_widget, FieldGroupDetails):
+            prefix = 'Field Group'
+        else:
+            prefix = 'Field'
+
         self.setTitle(f'{prefix} {self._base_title}: {suffix}')
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         if form is None:
             self.region_details.clear()
+            self.field_group_details.clear()
             self.field_details.clear()
             self._current_widget = None
             return
@@ -47,17 +56,25 @@ class SelectionDetails(QGroupBox):
                 self.region_details[region.id] = region_details
                 self.layout.addWidget(region_details)
 
-                for field in region.fields:
-                    field_details = FieldDetails(self, field)
-                    field_details.setVisible(False)
-                    self.field_details[field.id] = field_details
-                    self.layout.addWidget(field_details)
+                for group in region.groups:
+                    field_group_details = FieldGroupDetails(self, group)
+                    field_group_details.setVisible(False)
+                    self.field_group_details[group.id] = field_group_details
+                    self.layout.addWidget(field_group_details)
+
+                    for field in group.fields:
+                        field_details = FieldDetails(self, field)
+                        field_details.setVisible(False)
+                        self.field_details[field.id] = field_details
+                        self.layout.addWidget(field_details)
 
     @pyqtSlot(SelectionType, int)
     def load_details(self, selection: SelectionType, db_id: int) -> None:
         match selection:
             case SelectionType.REGION:
                 widget = self.region_details[db_id]
+            case SelectionType.FIELD_GROUP:
+                widget = self.field_group_details[db_id]
             case SelectionType.FIELD:
                 widget = self.field_details[db_id]
             case _:
@@ -67,6 +84,7 @@ class SelectionDetails(QGroupBox):
         if self._current_widget is not widget:
             if self._current_widget:
                 self._current_widget.setVisible(False)
+
             widget.setVisible(True)
             self._current_widget = widget
             self._update_title(self._current_widget.get_name())

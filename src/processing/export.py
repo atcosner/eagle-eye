@@ -166,8 +166,10 @@ def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
                 continue
 
             logger.info(f'Exporting region: {region.name}')
-            for field in region.fields:
-                for export_column, export_value in export_field(mode, field).items():
-                    export_data[export_column].append(export_value)
+            for group in region.groups:
+                logger.info(f'Exporting group: {group.name}')
+                for field in group.fields:
+                    for export_column, export_value in export_field(mode, field).items():
+                        export_data[export_column].append(export_value)
 
     return pd.DataFrame(export_data)

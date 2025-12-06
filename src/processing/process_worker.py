@@ -244,18 +244,19 @@ class ProcessWorker(QObject):
             self,
             field: CircledField,
             aligned_image: np.ndarray,
+            reference_image: np.ndarray,
             roi_dest_path: Path,
     ) -> tuple[bool, ProcessedCircledField]:
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
         options: dict[str, ProcessedCircledOption] = {}
         for option in field.options:
-            # checked = process_util.get_checked(aligned_image, checkbox.region)
-            # self.log.info(f'Circled Option "{checkbox.name}" = {checked}')
+            circled = process_util.get_circled(option.region, reference_image, aligned_image)
+            self.log.info(f'Circled Option "{field.name}" = {circled}')
 
             options[option.name] = ProcessedCircledOption(
                 name=option.name,
-                circled=False,  # TODO: actually process these
+                circled=circled,
                 circled_option=option,
             )
 
@@ -290,11 +291,12 @@ class ProcessWorker(QObject):
             assert input_file.pre_process_result.aligned_image_path.exists(), \
                 f'Path does not exist: {input_file.pre_process_result.aligned_image_path}'
 
-            # Load the aligned image from our pre-processing
+            # Load the reference and aligned image from our pre-processing
             aligned_image = cv2.imread(
                 str(input_file.pre_process_result.aligned_image_path),
                 flags=cv2.IMREAD_GRAYSCALE,
             )
+            reference_image = cv2.cvtColor(cv2.imread(str(input_file.job.reference_form.path)), cv2.COLOR_BGR2GRAY)
 
             # Create a working directory to store our ROI snips
             processing_directory = LocalPaths.processing_directory(job.uuid, input_file.id)
@@ -393,6 +395,7 @@ class ProcessWorker(QObject):
                             had_error, result_field = self.process_circled_field(
                                 field=field.circled_field,
                                 aligned_image=aligned_image,
+                                reference_image=reference_image,
                                 roi_dest_path=roi_path,
                             )
 

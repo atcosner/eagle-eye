@@ -15,7 +15,6 @@ class CircledOption(MappedAsDataclass, OrmBase):
 
     name: Mapped[str]
     region: Mapped[BoxBounds] = mapped_column(DbBoxBounds)
-    # text_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds, nullable=True, default=None)
 
     # Relationships
 

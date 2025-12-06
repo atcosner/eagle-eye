@@ -18,7 +18,7 @@ class ProcessedCircledField(MappedAsDataclass, OrmBase):
 
     # Relationships
 
-    # validation_result: Mapped[ValidationResult] = relationship(back_populates="multi_checkbox_field")
+    validation_result: Mapped[ValidationResult] = relationship(back_populates="circled_field")
 
     processed_field_id: Mapped[int] = mapped_column(ForeignKey("processed_field.id"), init=False)
     processed_field: Mapped["ProcessedField"] = relationship(init=False, back_populates="circled_field")

@@ -260,14 +260,14 @@ class ProcessWorker(QObject):
                 circled_option=option,
             )
 
-        # # Validate the field
-        # validation_result = validation.validate_multi_checkbox_field(field, checkboxes)
-        # self.log.info(f'Validation: {validation_result.result}')
+        # Validate the field
+        validation_result = validation.validate_circled_field(field, options)
+        self.log.info(f'Validation: {validation_result.result}')
 
         field = ProcessedCircledField(
             name=field.name,
             roi_path=roi_dest_path,
-            # validation_result=validation_result,
+            validation_result=validation_result,
             circled_field=field,
             options=options,
         )

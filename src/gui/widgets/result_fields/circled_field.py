@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGridLayout, QVBoxLayout, QWidget
 
+import src.processing.validation as validation
 from src.database import DB_ENGINE
 from src.database.processed_fields.processed_circled_field import ProcessedCircledField
 
@@ -22,7 +23,7 @@ class CircledField(BaseField):
 
     def load_field(self, field: ProcessedCircledField) -> None:
         super().load_field(field)
-        # self.update_validation_result(field.validation_result)
+        self.update_validation_result(field.validation_result)
 
         # Create a checkbox for each option
         layout = QVBoxLayout()
@@ -54,5 +55,9 @@ class CircledField(BaseField):
             for option in self.options:
                 option.update_db_state(session)
 
-            # self.update_validation_result(field.validation_result)
+            field.validation_result = validation.validate_circled_field(
+                field.circled_field,
+                field.options,
+            )
+            self.update_validation_result(field.validation_result)
             session.commit()

@@ -4,8 +4,10 @@ from typing import Iterable
 
 from PyQt6.QtCore import QDate, QTime
 
+from src.database.fields.circled_field import CircledField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.text_field import TextField
+from src.database.processed_fields.processed_circled_option import ProcessedCircledOption
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.validation.text_validator import TextValidator
 from src.database.validation.validation_result import ValidationResult
@@ -18,6 +20,42 @@ from src.util.validation import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def validate_circled_field(
+        field: CircledField,
+        options: dict[str, ProcessedCircledOption],
+) -> ValidationResult:
+    validation_result: bool | None = None
+    tooltip: str | None = None
+
+    match field.validator:
+        case MultiChoiceValidation.NONE:
+            validation_result = None
+            tooltip = 'No validation defined'
+        case MultiChoiceValidation.REQUIRE_ONE:
+            # Ensure that at least one option was circled
+            validation_result = any([option.circled for option in options.values()])
+            tooltip = 'This field is required to have at least one option circled'
+        case MultiChoiceValidation.MAXIMUM_ONE:
+            # Do not allow more than one option to be circled
+            circled_options = [option for option in options.values() if option.circled]
+            validation_result = len(circled_options) <= 1
+            tooltip = f'This field is only allowed to have one option circled, but {len(circled_options)} were circled'
+        case MultiChoiceValidation.OPTIONAL:
+            # Optional circled fields always pass validation
+            validation_result = True
+        case _:
+            logger.error(f'Unknown validator: {field.validator.name}')
+
+    # The tooltip assumes failure, overwrite if success
+    if validation_result:
+        tooltip = f'Field passed validation ({field.validator.name})'
+
+    return ValidationResult(
+        result=validation_result,
+        explanation=tooltip,
+    )
 
 
 def validate_multi_checkbox_field(

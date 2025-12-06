@@ -17,7 +17,7 @@ class CircledField(MappedAsDataclass, OrmBase):
 
     name: Mapped[str]
     visual_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds)
-    # validator: Mapped[MultiCheckboxValidation]
+    validator: Mapped[MultiChoiceValidation]
 
     # Relationships
 

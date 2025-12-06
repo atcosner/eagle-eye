@@ -687,6 +687,7 @@ def add_fn_form_v1(session: Session) -> None:
                     circled_field=CircledField(
                         name='Exam?',
                         visual_region=BoxBounds(x=204, y=992, width=248, height=41),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
                             CircledOption(name='Yes', region=BoxBounds(x=354, y=994, width=39, height=38)),
                             CircledOption(name='No', region=BoxBounds(x=404, y=992, width=41, height=40)),
@@ -697,6 +698,7 @@ def add_fn_form_v1(session: Session) -> None:
                     circled_field=CircledField(
                         name='Found?',
                         visual_region=BoxBounds(x=446, y=991, width=262, height=41),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
                             CircledOption(name='Yes', region=BoxBounds(x=603, y=992, width=41, height=40)),
                             CircledOption(name='No', region=BoxBounds(x=658, y=990, width=40, height=42)),
@@ -734,6 +736,7 @@ def add_fn_form_v1(session: Session) -> None:
                     circled_field=CircledField(
                         name='Exam?',
                         visual_region=BoxBounds(x=206, y=1042, width=247, height=40),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
                             CircledOption(name='Yes', region=BoxBounds(x=358, y=1043, width=44, height=39)),
                             CircledOption(name='No', region=BoxBounds(x=413, y=1040, width=40, height=44)),
@@ -744,6 +747,7 @@ def add_fn_form_v1(session: Session) -> None:
                     circled_field=CircledField(
                         name='Found?',
                         visual_region=BoxBounds(x=453, y=1039, width=248, height=45),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
                             CircledOption(name='Yes', region=BoxBounds(x=608, y=1041, width=39, height=42)),
                             CircledOption(name='No', region=BoxBounds(x=659, y=1044, width=43, height=40)),
@@ -851,6 +855,7 @@ def add_fn_form_v1(session: Session) -> None:
                     circled_field=CircledField(
                         name='DOA',
                         visual_region=BoxBounds(x=1415, y=1161, width=170, height=54),
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
                         options=[
                             CircledOption(name='Y', region=BoxBounds(x=1496, y=1173, width=33, height=33)),
                             CircledOption(name='N', region=BoxBounds(x=1540, y=1172, width=33, height=33)),
@@ -967,6 +972,7 @@ def add_fn_form_v1(session: Session) -> None:
                     circled_field=CircledField(
                         name='Type',
                         visual_region=BoxBounds(x=195, y=1586, width=125, height=69),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
                             CircledOption(name='GI', region=BoxBounds(x=197, y=1589, width=44, height=32)),
                             CircledOption(name='LI', region=BoxBounds(x=253, y=1588, width=44, height=35)),

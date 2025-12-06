@@ -37,4 +37,4 @@ class CircledOption(QWidget):
 
     def update_db_state(self, session: Session) -> None:
         option = session.get(ProcessedCircledOption, self._field_db_id)
-        option.checked = self.checkbox.isChecked()
+        option.circled = self.checkbox.isChecked()

@@ -209,6 +209,9 @@ class ProcessWorker(QObject):
             # If we have circled options, process them
             circled_options = {}
             for option in checkbox.circled_options:
+                # checked = process_util.get_checked(aligned_image, checkbox.region)
+                # self.log.info(f'Sub Circled Option "{checkbox.name}" = {checked}')
+
                 circled_options[option.name] = ProcessedSubCircledOption(
                     name=option.name,
                     circled=False,  # TODO: actually process these
@@ -248,7 +251,7 @@ class ProcessWorker(QObject):
         options: dict[str, ProcessedCircledOption] = {}
         for option in field.options:
             # checked = process_util.get_checked(aligned_image, checkbox.region)
-            # self.log.info(f'Checkbox "{checkbox.name}" = {checked}')
+            # self.log.info(f'Circled Option "{checkbox.name}" = {checked}')
 
             options[option.name] = ProcessedCircledOption(
                 name=option.name,

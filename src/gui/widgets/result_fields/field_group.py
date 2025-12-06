@@ -1,12 +1,12 @@
 import logging
 
-from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGridLayout
 
 from src.database.processed_fields.processed_field_group import ProcessedFieldGroup
 
 from .base import BaseField
 from .checkbox_field import CheckboxField
+from .circled_field import CircledField
 from .multi_checkbox_field import MultiCheckboxField
 from .text_field import TextField
 from .util import wrap_in_frame
@@ -39,6 +39,10 @@ class FieldGroup(BaseField):
             elif field.multi_checkbox_field is not None:
                 logger.debug(f'Adding multi checkbox field: {field.multi_checkbox_field.name}')
                 field_widget = MultiCheckboxField(field.multi_checkbox_field)
+
+            elif field.circled_field is not None:
+                logger.debug(f'Adding circled field: {field.circled_field.name}')
+                field_widget = CircledField(field.circled_field)
 
             else:
                 logger.error(f'Processed field ({field.id}) did not have a field we could display')

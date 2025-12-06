@@ -8,6 +8,7 @@ from src.database import DB_ENGINE
 from src.database.processing.processed_region import ProcessedRegion
 from src.gui.widgets.result_fields.base import BaseField
 from src.gui.widgets.result_fields.checkbox_field import CheckboxField
+from src.gui.widgets.result_fields.circled_field import CircledField
 from src.gui.widgets.result_fields.field_group import FieldGroup
 from src.gui.widgets.result_fields.multi_checkbox_field import MultiCheckboxField
 from src.gui.widgets.result_fields.text_field import TextField
@@ -43,6 +44,7 @@ class RegionOcrResults(QWidget):
         layout = QVBoxLayout()
         layout.addLayout(self.field_grid)
         layout.addLayout(button_layout)
+        layout.addStretch()
         self.setLayout(layout)
 
         # Add the headers to our grid
@@ -65,13 +67,15 @@ class RegionOcrResults(QWidget):
             logger.info(f'Loading region: {region.id} - {region.name}')
 
             for group in region.groups:
-                logger.info(f'Loading group: {group.name}')
+                if group.name:
+                    logger.info(f'Loading group: {group.name}')
                 row_idx = self.field_grid.rowCount()
 
                 if len(group.fields) > 1:
                     logger.debug(f'Adding field group placeholder')
                     field_widget = FieldGroup(group)
                 else:
+                    # Pretend field groups with just one field are not in a group at all
                     field = group.fields[0]
 
                     # Create the specific widget to display the field
@@ -86,6 +90,10 @@ class RegionOcrResults(QWidget):
                     elif field.multi_checkbox_field is not None:
                         logger.debug(f'Adding multi checkbox field: {field.multi_checkbox_field.name}')
                         field_widget = MultiCheckboxField(field.multi_checkbox_field)
+
+                    elif field.circled_field is not None:
+                        logger.debug(f'Adding circled field: {field.circled_field.name}')
+                        field_widget = CircledField(field.circled_field)
 
                     else:
                         logger.error(f'Processed field ({field.id}) did not have a field we could display')

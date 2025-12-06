@@ -15,4 +15,4 @@ jobs:
         with:
           python_ver: '3.12'
           spec: 'eagle_eye.spec'
-          requirements: 'requirements.txt'
+          requirements: 'test_requirements.txt'

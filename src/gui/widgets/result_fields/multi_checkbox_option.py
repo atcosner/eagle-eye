@@ -23,9 +23,10 @@ class MultiCheckboxOption(QWidget):
         self.text_entry.textChanged.connect(self.dataChanged)
 
         self.circled_options: list[SubCircledOption] = []
+        self.circled_options_layout = QVBoxLayout()
 
-        self.load(field)
         self._set_up_layout()
+        self.load(field)
 
     def _set_up_layout(self) -> None:
         self.setContentsMargins(0, 0, 0, 0)
@@ -34,11 +35,7 @@ class MultiCheckboxOption(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.checkbox)
         layout.addWidget(self.text_entry)
-
-        circled_options_layout = QVBoxLayout()
-        for option in self.circled_options:
-            circled_options_layout.addWidget(option)
-        layout.addLayout(circled_options_layout)
+        layout.addLayout(self.circled_options_layout)
 
         self.setLayout(layout)
 
@@ -65,6 +62,8 @@ class MultiCheckboxOption(QWidget):
             option = SubCircledOption(circled_option)
             option.setEnabled(field.checked)
             option.dataChanged.connect(self.dataChanged)
+
+            self.circled_options_layout.addWidget(option)
             self.circled_options.append(option)
 
     def update_db_state(self, session: Session) -> None:

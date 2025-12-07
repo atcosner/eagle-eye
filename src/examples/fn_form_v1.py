@@ -233,12 +233,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Collector(s), Coll #',
                         visual_region=BoxBounds(x=443, y=278, width=698, height=45),
-                        # TODO: add controlled vocabulary (CVS), allow list of initials
-                        # text_validator=TextValidator(
-                        #     datatype=TextValidatorDatatype.LIST_CHOICE,
-                        #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in agent_list],
-                        # ),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.CSV_OF_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
                     ),
                 ),
             ],

@@ -25,11 +25,22 @@ logger = logging.getLogger(__name__)
 
 FORM_BLANK_IMAGE_PATH = Path(__file__).parent / 'fn_field_form_v1.png'
 assert FORM_BLANK_IMAGE_PATH.exists(), f'Form blank reference image does not exist: {FORM_BLANK_IMAGE_PATH}'
+AGENT_LIST_PATH = Path(__file__).parent / 'data' / 'fn_agent_master.csv'
+assert AGENT_LIST_PATH.exists(), f'Agent list does not exist: {AGENT_LIST_PATH}'
 # SPECIES_LIST_PATH = Path(__file__).parent / 'ku_orn_taxonomy_reference.csv'
 # assert SPECIES_LIST_PATH.exists(), f'Species list does not exist: {SPECIES_LIST_PATH}'
 
 
+def _read_agent_list(path: Path) -> list[str]:
+    with path.open('r') as file:
+        agent_initials = {line.strip() for line in file.readlines()}
+        return sorted(agent_initials)
+
+
 def add_fn_form_v1(session: Session) -> None:
+    # read in the controlled vocabulary datasets
+    agent_list = _read_agent_list(AGENT_LIST_PATH)
+
     form = ReferenceForm(
         name='KU Mammalogy - FN Form v1',
         path=LocalPaths.reference_forms_directory() / FORM_BLANK_IMAGE_PATH.name,
@@ -88,6 +99,7 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
+                            # TODO: exactly 6 digits?
                         ),
                     ),
                 ),
@@ -127,10 +139,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Species',
                         visual_region=BoxBounds(x=319, y=169, width=511, height=45),
+                        # TODO: add controlled vocabulary (CV1)
                         # text_validator=TextValidator(
                         #     datatype=TextValidatorDatatype.LIST_CHOICE,
                         #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in species_list], TODO: Add mammalogy species csv
+                        #     text_choices=[TextChoice(text=t) for t in species_list],
                         # ),
                     ),
                 ),
@@ -144,11 +157,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='ID by',
                         visual_region=BoxBounds(x=908, y=168, width=210, height=46),
-                        # text_validator=TextValidator(
-                        #     datatype=TextValidatorDatatype.LIST_CHOICE,
-                        #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: Add mammalogy agent csv
-                        # ),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
                     ),
                 ),
             ],
@@ -220,10 +233,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Collector(s), Coll #',
                         visual_region=BoxBounds(x=443, y=278, width=698, height=45),
+                        # TODO: add controlled vocabulary (CVS), allow list of initials
                         # text_validator=TextValidator(
                         #     datatype=TextValidatorDatatype.LIST_CHOICE,
                         #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: Add mammalogy agent csv
+                        #     text_choices=[TextChoice(text=t) for t in agent_list],
                         # ),
                     ),
                 ),
@@ -253,11 +267,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Preparator, Prep #',
                         visual_region=BoxBounds(x=440, y=337, width=226, height=46),
-                        # text_validator=TextValidator(
-                        #     datatype=TextValidatorDatatype.LIST_CHOICE,
-                        #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: Add mammalogy agent csv
-                        # ),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
                     ),
                 ),
             ],
@@ -285,7 +299,7 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Tissue by, Date',
                         visual_region=BoxBounds(x=1238, y=351, width=344, height=32),
-                        # TODO: this should probably have a custom validator since it's a composite field
+                        # TODO: add validation for composite field (or break into 2 fields?)
                     ),
                 ),
             ],
@@ -306,7 +320,8 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Country/State',
                         visual_region=BoxBounds(x=392, y=422, width=620, height=45),
-                        # text_validator=TextValidator( TODO: probably want a custom validator since there can be multiple formats
+                        # TODO: add controlled vocabulary (CV3 & CV4)
+                        # text_validator=TextValidator(
                         #     datatype=TextValidatorDatatype.DATE,
                         # ),
                     ),
@@ -321,10 +336,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='County',
                         visual_region=BoxBounds(x=1113, y=424, width=461, height=43),
+                        # TODO: add controlled vocabulary (CV5)
                         # text_validator=TextValidator(
                         #     datatype=TextValidatorDatatype.LIST_CHOICE,
                         #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in agent_list], TODO: add county CSV or use internet?
+                        #     text_choices=[TextChoice(text=t) for t in agent_list],
                         # ),
                     ),
                 ),
@@ -381,7 +397,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     text_field=TextField(
-                        name='Altitude',
+                        name='Altitude (m)',
                         visual_region=BoxBounds(x=1367, y=521, width=213, height=42),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
@@ -440,7 +456,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Locality same as FN',
                         visual_region=BoxBounds(x=1343, y=575, width=232, height=41),
                         text_validator=TextValidator(
-                            text_regex=r'^[0-9]{6}$',
+                            text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
                         ),
                     ),
@@ -508,6 +524,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Measured by',
                         visual_region=BoxBounds(x=955, y=637, width=226, height=47),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
                     ),
                 ),
                 FormField(
@@ -560,12 +581,35 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Type',
                         visual_region=BoxBounds(x=1062, y=731, width=256, height=34),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[
+                                TextChoice('self'),
+                                TextChoice('littermate of'),
+                                TextChoice('mate of'),
+                                TextChoice('sibling of'),
+                                TextChoice('parasite of'),
+                                TextChoice('host of'),
+                                TextChoice('ate'),
+                                TextChoice('eaten by'),
+                                TextChoice('offspring of'),
+                                TextChoice('mother or parent of'),
+                                TextChoice('mounted with'),
+                                TextChoice('symbiont of'),
+                                TextChoice('host of symbiont'),
+                            ],
+                        ),
                     ),
                 ),
                 FormField(
                     text_field=TextField(
                         name='Other ID',
                         visual_region=BoxBounds(x=1365, y=728, width=206, height=37),
+                        text_validator=TextValidator(
+                            text_regex=r'^FN[0-9]{6}$',
+                            error_tooltip='FN Numbers must be exactly 6 digits',
+                        ),
                     ),
                 ),
             ],
@@ -709,6 +753,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='By',
                         visual_region=BoxBounds(x=753, y=992, width=150, height=33),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
                     ),
                 ),
                 FormField(
@@ -758,6 +807,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='By',
                         visual_region=BoxBounds(x=753, y=1037, width=154, height=38),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
                     ),
                 ),
                 FormField(
@@ -1159,6 +1213,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
+        # TODO: Misc Parts
         FieldGroup(
             name='Endo Parasites 1',
             visual_region=BoxBounds(x=838, y=1514, width=749, height=69),
@@ -1415,6 +1470,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
+        # TODO: cold chain progression?
     ]
 
     #

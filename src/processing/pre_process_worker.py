@@ -60,7 +60,7 @@ class PreProcessingWorker(QObject):
                     self.processingComplete.emit(self.input_file.id)
                     return
 
-                self.log.error(f'Extracting page from linked file: {linked_file.path.name}')
+                self.log.info(f'Extracting page from linked file: {linked_file.path.name}')
 
                 # TODO: could put the page number in the DB?
                 page_number = int(str(self.input_file.path.stem).split('page')[-1])

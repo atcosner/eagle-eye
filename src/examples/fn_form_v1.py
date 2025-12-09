@@ -1,4 +1,3 @@
-import csv
 import logging
 import shutil
 from pathlib import Path
@@ -108,7 +107,6 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
-                            # TODO: exactly 6 digits?
                         ),
                     ),
                 ),
@@ -343,8 +341,6 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='County',
                         visual_region=BoxBounds(x=1113, y=424, width=461, height=43),
-                        # TODO: this would be cool to change the validation based on another field
-                        # TODO: i.e. the state field changes the counties that are an option
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -932,7 +928,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1301, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -957,7 +953,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1371, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -982,7 +978,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1442, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1007,7 +1003,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1514, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1044,7 +1040,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1586, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1069,7 +1065,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1658, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1094,7 +1090,7 @@ def add_fn_form_v1(session: Session) -> None:
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=324, y=1730, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1148,7 +1144,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1301, width=177, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1202,7 +1198,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1371, width=177, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1221,7 +1217,30 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
-        # TODO: Misc Parts
+        FieldGroup(
+            name='Misc Parasites',
+            visual_region=BoxBounds(x=835, y=1441, width=754, height=72),
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Type',
+                        visual_region=BoxBounds(x=838, y=1442, width=231, height=69),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Preserved',
+                        visual_region=BoxBounds(x=1073, y=1442, width=177, height=69),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Remarks',
+                        visual_region=BoxBounds(x=1369, y=1442, width=218, height=69),
+                    ),
+                ),
+            ],
+        ),
         FieldGroup(
             name='Endo Parasites 1',
             visual_region=BoxBounds(x=838, y=1514, width=749, height=69),
@@ -1257,7 +1276,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1514, width=177, height=69),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1310,7 +1329,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1586, width=177, height=69),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1363,7 +1382,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1658, width=177, height=69),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1394,7 +1413,7 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
-                        name='Preservation',
+                        name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1730, width=177, height=69),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
@@ -1478,7 +1497,66 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
             ],
         ),
-        # TODO: cold chain progression?
+        FieldGroup(
+            name='Cold Chain Progression',
+            visual_region=BoxBounds(x=903, y=1834, width=681, height=90),
+            fields=[
+                FormField(
+                    text_field=TextField(
+                        name='Dry Ice',
+                        visual_region=BoxBounds(x=920, y=1840, width=148, height=38),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Field LN2',
+                        visual_region=BoxBounds(x=1156, y=1836, width=143, height=42),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='-20 C',
+                        visual_region=BoxBounds(x=1374, y=1835, width=147, height=43),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='-40 C',
+                        visual_region=BoxBounds(x=923, y=1881, width=142, height=41),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='-80 C',
+                        visual_region=BoxBounds(x=1159, y=1882, width=141, height=40),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Install LN2',
+                        visual_region=BoxBounds(x=1377, y=1881, width=144, height=41),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
+                    )
+                ),
+            ],
+        ),
     ]
 
     #

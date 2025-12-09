@@ -4,6 +4,7 @@
 - [X] Add logging all messages (debug+) to a file in the working dir
 - [ ] Resize window when the tab of the processing pipeline changes
 - [ ] Fix tab ordering in result check to allow pressing tab to iterate through the whole flow
+- [ ] Allow validation of a field to interact with other fields (i.e. county list changes based on state)
 
 # Bugs
 - [ ] When updating a text field, validation stripping can prevent the user from typing

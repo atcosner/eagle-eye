@@ -1,3 +1,4 @@
+import csv
 import logging
 import shutil
 from pathlib import Path
@@ -27,19 +28,27 @@ FORM_BLANK_IMAGE_PATH = Path(__file__).parent / 'fn_field_form_v1.png'
 assert FORM_BLANK_IMAGE_PATH.exists(), f'Form blank reference image does not exist: {FORM_BLANK_IMAGE_PATH}'
 AGENT_LIST_PATH = Path(__file__).parent / 'data' / 'fn_agent_master.csv'
 assert AGENT_LIST_PATH.exists(), f'Agent list does not exist: {AGENT_LIST_PATH}'
-# SPECIES_LIST_PATH = Path(__file__).parent / 'ku_orn_taxonomy_reference.csv'
-# assert SPECIES_LIST_PATH.exists(), f'Species list does not exist: {SPECIES_LIST_PATH}'
+COUNTY_LIST_PATH = Path(__file__).parent / 'data' / 'fn_county_master.csv'
+assert COUNTY_LIST_PATH.exists(), f'County list does not exist: {COUNTY_LIST_PATH}'
+SPECIES_LIST_PATH = Path(__file__).parent / 'data' / 'fn_mammal_diversity_database.csv'
+assert SPECIES_LIST_PATH.exists(), f'Species list does not exist: {SPECIES_LIST_PATH}'
 
 
-def _read_agent_list(path: Path) -> list[str]:
+def _read_csv(path: Path) -> list[str]:
     with path.open('r') as file:
-        agent_initials = {line.strip() for line in file.readlines()}
-        return sorted(agent_initials)
+        return sorted({line.strip() for line in file.readlines()})
+
+
+def _read_species_list() -> list[str]:
+    with SPECIES_LIST_PATH.open('r') as file:
+        return sorted({line.strip().lower().replace('_', ' ') for line in file.readlines()})
 
 
 def add_fn_form_v1(session: Session) -> None:
     # read in the controlled vocabulary datasets
-    agent_list = _read_agent_list(AGENT_LIST_PATH)
+    agent_list = _read_csv(AGENT_LIST_PATH)
+    county_list = _read_csv(COUNTY_LIST_PATH)
+    species_list = _read_species_list()
 
     form = ReferenceForm(
         name='KU Mammalogy - FN Form v1',
@@ -139,12 +148,11 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Species',
                         visual_region=BoxBounds(x=319, y=169, width=511, height=45),
-                        # TODO: add controlled vocabulary (CV1)
-                        # text_validator=TextValidator(
-                        #     datatype=TextValidatorDatatype.LIST_CHOICE,
-                        #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in species_list],
-                        # ),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in species_list],
+                        ),
                     ),
                 ),
             ],
@@ -335,12 +343,13 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='County',
                         visual_region=BoxBounds(x=1113, y=424, width=461, height=43),
-                        # TODO: add controlled vocabulary (CV5)
-                        # text_validator=TextValidator(
-                        #     datatype=TextValidatorDatatype.LIST_CHOICE,
-                        #     allow_closest_match_correction=True,
-                        #     text_choices=[TextChoice(text=t) for t in agent_list],
-                        # ),
+                        # TODO: this would be cool to change the validation based on another field
+                        # TODO: i.e. the state field changes the counties that are an option
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in county_list],
+                        ),
                     ),
                 ),
             ],

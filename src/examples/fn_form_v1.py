@@ -696,9 +696,78 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                     )
                 ),
-                #
-                # TODO: Placental scars, embryo
-                #
+                FormField(
+                    circled_field=CircledField(
+                        name='Placental Scars',
+                        visual_region=BoxBounds(x=606, y=883, width=111, height=57),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
+                        options=[
+                            CircledOption(name='Yes', region=BoxBounds(x=610, y=887, width=47, height=45)),
+                            CircledOption(name='No', region=BoxBounds(x=668, y=888, width=43, height=46)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Plsc - Right',
+                        visual_region=BoxBounds(x=726, y=888, width=56, height=36),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Plsc - Left',
+                        visual_region=BoxBounds(x=808, y=886, width=62, height=38),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
+                        ),
+                    )
+                ),
+                FormField(
+                    circled_field=CircledField(
+                        name='Embryo',
+                        visual_region=BoxBounds(x=1040, y=882, width=109, height=58),
+                        validator=MultiChoiceValidation.MAXIMUM_ONE,
+                        options=[
+                            CircledOption(name='Yes', region=BoxBounds(x=1045, y=890, width=46, height=44)),
+                            CircledOption(name='No', region=BoxBounds(x=1099, y=889, width=46, height=45)),
+                        ],
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Embryo - Right',
+                        visual_region=BoxBounds(x=1158, y=887, width=58, height=37),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Embryo - Left',
+                        visual_region=BoxBounds(x=1242, y=885, width=61, height=39),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
+                        ),
+                    )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Embryo - CR',
+                        visual_region=BoxBounds(x=1389, y=886, width=85, height=38),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.INTEGER,
+                            text_required=False,
+                        ),
+                    )
+                ),
             ],
         ),
         FieldGroup(

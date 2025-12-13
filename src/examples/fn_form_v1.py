@@ -15,6 +15,7 @@ from src.database.fields.sub_circled_option import SubCircledOption
 from src.database.fields.text_field import TextField
 from src.database.form_region import FormRegion
 from src.database.reference_form import ReferenceForm
+from src.database.validation.custom_data import CustomData
 from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
 from src.util.paths import LocalPaths
@@ -27,10 +28,14 @@ FORM_BLANK_IMAGE_PATH = Path(__file__).parent / 'fn_field_form_v1.png'
 assert FORM_BLANK_IMAGE_PATH.exists(), f'Form blank reference image does not exist: {FORM_BLANK_IMAGE_PATH}'
 AGENT_LIST_PATH = Path(__file__).parent / 'data' / 'fn_agent_master.csv'
 assert AGENT_LIST_PATH.exists(), f'Agent list does not exist: {AGENT_LIST_PATH}'
+COUNTRY_LIST_PATH = Path(__file__).parent / 'data' / 'fn_country_master.csv'
+assert COUNTRY_LIST_PATH.exists(), f'Country list does not exist: {COUNTRY_LIST_PATH}'
 COUNTY_LIST_PATH = Path(__file__).parent / 'data' / 'fn_county_master.csv'
 assert COUNTY_LIST_PATH.exists(), f'County list does not exist: {COUNTY_LIST_PATH}'
 SPECIES_LIST_PATH = Path(__file__).parent / 'data' / 'fn_mammal_diversity_database.csv'
 assert SPECIES_LIST_PATH.exists(), f'Species list does not exist: {SPECIES_LIST_PATH}'
+STATE_LIST_PATH = Path(__file__).parent / 'data' / 'fn_state_master.csv'
+assert STATE_LIST_PATH.exists(), f'State list does not exist: {STATE_LIST_PATH}'
 
 
 def _read_csv(path: Path) -> list[str]:
@@ -47,7 +52,9 @@ def add_fn_form_v1(session: Session) -> None:
     # read in the controlled vocabulary datasets
     agent_list = _read_csv(AGENT_LIST_PATH)
     county_list = _read_csv(COUNTY_LIST_PATH)
+    country_list = _read_csv(COUNTRY_LIST_PATH)
     species_list = _read_species_list()
+    state_list = _read_csv(STATE_LIST_PATH)
 
     form = ReferenceForm(
         name='KU Mammalogy - FN Form v1',
@@ -297,14 +304,27 @@ def add_fn_form_v1(session: Session) -> None:
             ],
         ),
         FieldGroup(
-            name='',
-            visual_region=None,
+            name='Tissue By',
+            visual_region=BoxBounds(x=1238, y=342, width=340, height=41),
             fields=[
                 FormField(
                     text_field=TextField(
-                        name='Tissue by, Date',
-                        visual_region=BoxBounds(x=1238, y=351, width=344, height=32),
-                        # TODO: add validation for composite field (or break into 2 fields?)
+                        name='Initials',
+                        visual_region=BoxBounds(x=1231, y=331, width=106, height=52),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            allow_closest_match_correction=True,
+                            text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Date',
+                        visual_region=BoxBounds(x=1341, y=341, width=234, height=43),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.DATE,
+                        ),
                     ),
                 ),
             ],
@@ -325,10 +345,14 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Country/State',
                         visual_region=BoxBounds(x=392, y=422, width=620, height=45),
-                        # TODO: add controlled vocabulary (CV3 & CV4)
-                        # text_validator=TextValidator(
-                        #     datatype=TextValidatorDatatype.DATE,
-                        # ),
+                        text_validator=TextValidator(
+                            datatype=TextValidatorDatatype.FN_COUNTRY_STATE,
+                            text_regex=r"([a-zA-Z ]*)\/([a-zA-Z ]*)",
+                            custom_data={
+                                0: CustomData(key=0, text_choices=[TextChoice(text=t) for t in country_list]),
+                                1: CustomData(key=1, text_choices=[TextChoice(text=t) for t in state_list]),
+                            },
+                        ),
                     ),
                 ),
             ],

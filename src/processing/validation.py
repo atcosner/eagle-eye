@@ -9,6 +9,7 @@ from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.text_field import TextField
 from src.database.processed_fields.processed_circled_option import ProcessedCircledOption
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
+from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
 from src.database.validation.validation_result import ValidationResult
 from src.util.validation import (
@@ -115,6 +116,18 @@ def check_conversion_from_string(obj: type[QTime | QDate], formats: Iterable[str
             break
 
     return match_found
+
+
+def check_choices_match(text: str, choices: list[TextChoice]) -> tuple[bool, str | None]:
+    strings = [x.text for x in choices]
+    if text in strings:
+        return True, None
+    else:
+        match = find_best_string_match(text, strings)
+        if match is not None:
+            return True, match
+        else:
+            return False, None
 
 
 def validate_raw_text(validator: TextValidator, text: str) -> ValidationResult:
@@ -282,5 +295,63 @@ def validate_text_field(
                     'GPS waypoints must be a string of letters and then numbers',
                 ),
             )
+
+    elif validator.datatype is TextValidatorDatatype.FN_COUNTRY_STATE:
+        # match the regex groups
+        match = re.compile(validator.text_regex).match(text)
+
+        # ensure we matched something for both groups
+        if match.group(1) is None or match.group(2) is None:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(
+                    validator,
+                    'Locality must be of the format "<COUNTRY> / <STATE>"',
+                ),
+            )
+
+        country = match.group(1).strip()
+        state = match.group(2).strip()
+
+        # check the country and state to see if we got a match with the allowed options
+        country_choices = validator.custom_data[0].text_choices
+        state_choices = validator.custom_data[1].text_choices
+
+        country_matched, country_correction = check_choices_match(country, country_choices)
+        state_matched, state_correction = check_choices_match(state, state_choices)
+
+        if not country_matched:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(
+                    validator,
+                    f'Country "{country}" was not in the allowed list',
+                ),
+            )
+        if not state_matched:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(
+                    validator,
+                    f'State "{state}" was not in the allowed list',
+                ),
+            )
+
+        # reformat the result
+        fixed_country = country if country_correction is None else country_correction
+        fixed_state = state if state_correction is None else state_correction
+
+        correction = f'{fixed_country} / {fixed_state}'
+        if correction != text:
+            return ValidationResult(
+                result=True,
+                explanation=f'Correction made: "{text}" -> "{correction}"',
+                correction=correction,
+            )
+        else:
+            return ValidationResult(result=True, explanation=None)
+
+    else:
+        logger.error(f'Unknown validation datatype: {validator.datatype.name}')
 
     return ValidationResult(result=None, explanation=None)

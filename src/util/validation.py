@@ -52,6 +52,7 @@ class TextValidatorDatatype(Enum):
     # DO NOT CHANGE ANY OF THE NUMBERS ABOVE THIS LINE!!
 
     KU_GPS_WAYPOINT = 9
+    FN_COUNTRY_STATE = 10
 
 
 def get_verified_icon(verified: bool) -> QIcon:

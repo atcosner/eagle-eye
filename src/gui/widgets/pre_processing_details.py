@@ -62,6 +62,10 @@ class PreProcessingDetails(QFrame):
 
         self.setLayout(layout)
 
+    def reset(self) -> None:
+        self.hide()
+        self._db_id = None
+
     def loaded_id(self) -> int | None:
         return self._db_id
 

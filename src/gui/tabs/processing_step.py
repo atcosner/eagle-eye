@@ -89,7 +89,6 @@ class ProcessingStep(QWidget):
 
     def load_job(self, job: Job | int | None) -> None:
         self.file_list.clear()
-        # TODO: Clear the details widget
         self._job_db_id = None if job is None else job.id if isinstance(job, Job) else job
 
     def all_items_processed(self) -> bool:
@@ -116,7 +115,10 @@ class ProcessingStep(QWidget):
     @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
     def selected_file_changed(self, current: FileStatusItem, _: FileStatusItem) -> None:
         if self.step_details is not None:
-            self.step_details.load_file(current.get_id())
+            if current is None:
+                self.step_details.reset()
+            else:
+                self.step_details.load_file(current.get_id())
 
     def _start_item_processing(self, item: FileStatusItem) -> None:
         if is_finished(item.get_status()):

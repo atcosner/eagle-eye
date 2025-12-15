@@ -49,26 +49,32 @@ TEST_FILES = [
     # DEV_PATH / 'kt' / 'test_kt_form__filled_errors.jpg',
 ]
 
-# Add some files to the selector
-window.job_widget.processing_pipeline.picker.file_list.file_list.add_items(TEST_FILES)
-
 # Choose the reference form based on the test files were using
+form_tree = window.job_widget.processing_pipeline.reference_form_picker.form_tree
+
 found_form = False
 reference_form_prefix = TEST_FILES[0].parent.name.upper()
-for index in range(window.job_widget.reference_form_selector.count()):
-    form_name = window.job_widget.reference_form_selector.itemText(index)
+for index in range(form_tree.topLevelItemCount()):
+    item = form_tree.topLevelItem(index)
+    form_name = item.text(0)
     print(f'Checking: {form_name}')
 
     if reference_form_prefix in form_name:
         print(f'Selected reference form: {form_name}')
-        window.job_widget.reference_form_selector.setCurrentIndex(index)
+        form_tree.setCurrentItem(item)
         found_form = True
 
 if not found_form:
     assert False, f'Did not find reference form that contained: {reference_form_prefix}'
 
+# Advance past the reference form step
+window.job_widget.processing_pipeline.reference_form_picker.continueToNextStep.emit()
+
+# Add some files to the selector
+window.job_widget.processing_pipeline.file_picker.file_list.file_list.add_items(TEST_FILES)
+
 # Pre-process
-window.job_widget.processing_pipeline.picker.continueToNextStep.emit()
+window.job_widget.processing_pipeline.file_picker.continueToNextStep.emit()
 window.job_widget.processing_pipeline.pre_processing.start_processing()
 
 app.exec()

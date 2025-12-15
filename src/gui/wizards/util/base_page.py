@@ -6,9 +6,9 @@ from src.util.resources import RESOURCES_PATH
 
 
 class BasePage(QWizardPage):
-    def __init__(self):
+    def __init__(self, title: str):
         super().__init__()
-        self.setTitle('Eagle Eye Reference Form Wizard')
+        self.setTitle(title)
 
         watermark_pixmap = QPixmap(str(RESOURCES_PATH / 'wizard_watermark.png'))
         self.setPixmap(

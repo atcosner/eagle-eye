@@ -7,11 +7,11 @@ from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 from src.util.types import FormLinkingMethod, get_link_explanation
 
-from .base import BasePage
+from .ref_page import RefPage
 from .util import DummyField
 
 
-class LinkingPage(BasePage):
+class LinkingPage(RefPage):
     def __init__(self):
         super().__init__()
         self.setSubTitle('Will your form allow linking fields?')

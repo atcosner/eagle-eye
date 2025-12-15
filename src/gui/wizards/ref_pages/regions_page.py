@@ -9,10 +9,10 @@ from src.database.reference_form import ReferenceForm
 from src.util.images import scale_pixmap
 from src.util.resources import REFERENCE_FORM_ICON_PATH
 
-from .base import BasePage
+from .ref_page import RefPage
 
 
-class RegionsPage(BasePage):
+class RegionsPage(RefPage):
     def __init__(self):
         super().__init__()
         self.setSubTitle('How many regions will your form have?')

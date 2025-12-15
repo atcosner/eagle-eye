@@ -6,11 +6,11 @@ from PyQt6.QtWidgets import QLineEdit, QVBoxLayout, QLabel, QHBoxLayout, QGroupB
 from src.database import DB_ENGINE
 from src.gui.widgets.reference_form.form_details_tree import FormDetailsTree
 
-from .base import BasePage
+from .ref_page import RefPage
 from .util import DummyField
 
 
-class StartPage(BasePage):
+class StartPage(RefPage):
     def __init__(self):
         super().__init__()
         self.setSubTitle('Specify a form name and determine the initial state')

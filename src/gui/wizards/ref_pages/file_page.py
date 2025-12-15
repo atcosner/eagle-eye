@@ -7,10 +7,10 @@ from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 from src.gui.widgets.file.input_file_dialog import InputFileDialog
 
-from .base import BasePage
+from .ref_page import RefPage
 
 
-class FilePage(BasePage):
+class FilePage(RefPage):
     def __init__(self):
         super().__init__()
         self.setSubTitle('What file will be used for the reference form?')

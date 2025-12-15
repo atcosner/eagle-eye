@@ -7,11 +7,11 @@ from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 from src.util.types import FormAlignmentMethod, get_alignment_explanation
 
-from .base import BasePage
+from .ref_page import RefPage
 from .util import DummyField
 
 
-class AlignmentPage(BasePage):
+class AlignmentPage(RefPage):
     def __init__(self):
         super().__init__()
         self.setSubTitle('How should you reference form be aligned?')

@@ -6,6 +6,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QPushButton, QHBoxLayout
 
 from src.gui.widgets.util.link_label import LinkLabel
+from src.gui.widgets.util.log_viewer import LogViewer
 from src.util.resources import GENERIC_ICON_PATH
 
 from ..util.base_page import BasePage
@@ -19,6 +20,8 @@ class CliInitPage(BasePage):
         super().__init__('Eagle Eye | Google Cloud CLI Initialization')
 
         self.step_box = QGroupBox('Initialization Google Cloud CLI')
+
+        self.log_viewer = LogViewer()
 
         self.status_icon = QLabel()
         self.status_icon.setPixmap(QIcon(str(GENERIC_ICON_PATH / 'bad.png')).pixmap(QSize(20, 20)))
@@ -68,6 +71,8 @@ class CliInitPage(BasePage):
         layout = QVBoxLayout()
         layout.addWidget(welcome_text)
         layout.addWidget(self.step_box)
+        layout.addWidget(QLabel('Logs'))
+        layout.addWidget(self.log_viewer)
         self.setLayout(layout)
 
     @pyqtSlot()
@@ -76,8 +81,12 @@ class CliInitPage(BasePage):
 
         init_done = False
         try:
+            cmd = 'gcloud config configurations list'
+            self.log_viewer.add_line(f'Running: {cmd}')
+            self.log_viewer.add_line('')
+
             output = subprocess.run(
-                'gcloud config configurations list',
+                cmd,
                 shell=True,
                 check=True,
                 capture_output=True,
@@ -86,6 +95,9 @@ class CliInitPage(BasePage):
 
             logger.info('Output:')
             logger.info(output.stdout)
+
+            self.log_viewer.add_line('Output:')
+            self.log_viewer.add_lines(output.stdout)
 
             found_complete_config = False
             for line in output.stdout.splitlines():

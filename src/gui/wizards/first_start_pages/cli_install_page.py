@@ -6,6 +6,7 @@ from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QPushButton, QHBoxLayout
 
 from src.gui.widgets.util.link_label import LinkLabel
+from src.gui.widgets.util.log_viewer import LogViewer
 from src.util.resources import GENERIC_ICON_PATH
 
 from ..util.base_page import BasePage
@@ -19,6 +20,8 @@ class CliInstallPage(BasePage):
         super().__init__('Eagle Eye | Google Cloud CLI Install')
 
         self.step_box = QGroupBox('Install Google Cloud CLI')
+
+        self.log_viewer = LogViewer()
 
         self.status_icon = QLabel()
         self.status_icon.setPixmap(QIcon(str(GENERIC_ICON_PATH / 'bad.png')).pixmap(QSize(20, 20)))
@@ -52,6 +55,8 @@ class CliInstallPage(BasePage):
         layout = QVBoxLayout()
         layout.addLayout(check_layout)
         layout.addLayout(status_layout)
+        layout.addWidget(QLabel('Logs'))
+        layout.addWidget(self.log_viewer)
         self.step_box.setLayout(layout)
 
     def _set_up_layout(self) -> None:
@@ -76,7 +81,14 @@ class CliInstallPage(BasePage):
 
         found = False
         try:
-            subprocess.run('gcloud version', shell=True, check=True, capture_output=True)
+            cmd = 'gcloud version'
+            self.log_viewer.add_line(f'Running: {cmd}')
+            self.log_viewer.add_line('')
+
+            output = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+
+            self.log_viewer.add_line('Output:')
+            self.log_viewer.add_lines(output.stdout)
 
             logger.info('Command "gcloud version" ran successfully')
             icon_file_name = 'good.png'

@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class CliInstallPage(BasePage):
     def __init__(self):
         super().__init__('Eagle Eye | Google Cloud CLI Install')
+        self._done: bool = False
 
         self.step_box = QGroupBox('Install Google Cloud CLI')
 
@@ -27,9 +28,6 @@ class CliInstallPage(BasePage):
         self.status_icon.setPixmap(QIcon(str(GENERIC_ICON_PATH / 'bad.png')).pixmap(QSize(20, 20)))
 
         self.status_label = QLabel('Google Cloud CLI is NOT installed')
-
-        self.cli_installed = DummyField()
-        self.registerField('cli.installed*', self.cli_installed, property='custom_value', changedSignal=self.cli_installed.valueChanged)
 
         self._set_up_layout()
 
@@ -79,7 +77,6 @@ class CliInstallPage(BasePage):
     def check_gcloud_cli_install(self) -> None:
         logger.info('Checking if gcloud is installed')
 
-        found = False
         try:
             cmd = 'gcloud version'
             self.log_viewer.add_line(f'Running: {cmd}')
@@ -93,7 +90,7 @@ class CliInstallPage(BasePage):
             logger.info('Command "gcloud version" ran successfully')
             icon_file_name = 'good.png'
             self.status_label.setText('Google Cloud CLI is installed')
-            found = True
+            self._done = True
 
         except subprocess.CalledProcessError:
             logger.warning('Command "gcloud version" not found')
@@ -103,5 +100,11 @@ class CliInstallPage(BasePage):
         icon = QIcon(str(GENERIC_ICON_PATH / icon_file_name))
         self.status_icon.setPixmap(icon.pixmap(QSize(20, 20)))
 
-        # update the wizard field
-        self.cli_installed.set_value('Yes' if found else '')
+        self.completeChanged.emit()
+
+    #
+    # Qt Overrides
+    #
+
+    def isComplete(self) -> bool:
+        return self._done

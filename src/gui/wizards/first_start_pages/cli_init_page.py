@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 class CliInitPage(BasePage):
     def __init__(self):
         super().__init__('Eagle Eye | Google Cloud CLI Initialization')
+        self._done: bool = False
 
         self.step_box = QGroupBox('Initialization Google Cloud CLI')
 
@@ -27,9 +28,6 @@ class CliInitPage(BasePage):
         self.status_icon.setPixmap(QIcon(str(GENERIC_ICON_PATH / 'bad.png')).pixmap(QSize(20, 20)))
 
         self.status_label = QLabel('Google Cloud CLI is NOT initialized')
-
-        self.cli_init = DummyField()
-        self.registerField('cli.init*', self.cli_init, property='custom_value', changedSignal=self.cli_init.valueChanged)
 
         self._set_up_layout()
 
@@ -79,7 +77,6 @@ class CliInitPage(BasePage):
     def check_gcloud_cli_initialization(self) -> None:
         logger.info('Checking if gcloud is initialized')
 
-        init_done = False
         try:
             cmd = 'gcloud config configurations list'
             self.log_viewer.add_line(f'Running: {cmd}')
@@ -110,9 +107,11 @@ class CliInitPage(BasePage):
 
             if found_complete_config:
                 icon_file_name = 'good.png'
-                init_done = True
+                self._done = True
+                self.status_label.setText('Google Cloud CLI is initialized')
             else:
                 icon_file_name = 'bad.png'
+                self.status_label.setText('Google Cloud CLI is NOT initialized')
 
         except subprocess.CalledProcessError:
             # gcloud CLI is not installed
@@ -121,4 +120,11 @@ class CliInitPage(BasePage):
         icon = QIcon(str(GENERIC_ICON_PATH / icon_file_name))
         self.status_icon.setPixmap(icon.pixmap(QSize(20, 20)))
 
-        self.cli_init.set_value('Yes' if init_done else '')
+        self.completeChanged.emit()
+
+    #
+    # Qt Overrides
+    #
+
+    def isComplete(self) -> bool:
+        return self._done

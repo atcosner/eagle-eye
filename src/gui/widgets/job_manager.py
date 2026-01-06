@@ -44,3 +44,6 @@ class JobManager(QWidget):
 
             self.job_name.setText(job.name)
             self.processing_pipeline.load_job(job_id)
+
+    def reload_reference_forms(self) -> None:
+        self.processing_pipeline.reload_reference_forms()

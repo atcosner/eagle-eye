@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import Qt
@@ -6,8 +7,11 @@ from PyQt6.QtWidgets import QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, Q
 from src.database import DB_ENGINE
 from src.examples.fn_form_v1 import add_fn_form_v1
 from src.examples.kt_form_v8 import add_kt_form_v8
+from src.util.google_api import save_api_settings
 
 from ..util.base_page import BasePage
+
+logger = logging.getLogger(__name__)
 
 
 class AddFormsPage(BasePage):
@@ -54,15 +58,24 @@ class AddFormsPage(BasePage):
     #
 
     def validatePage(self) -> bool:
+        # TODO: show a dialog since the below operations can take some time to complete
+
         # add any selected reference forms
+        logger.info('Adding reference forms to the DB')
         with Session(DB_ENGINE) as session:
             for index in range(self.form_tree.topLevelItemCount()):
                 item = self.form_tree.topLevelItem(index)
                 if item.checkState(0) == Qt.CheckState.Checked:
                     # add the form to the DB
                     if index == 0:
+                        logger.info('Adding KT Form v8')
                         add_kt_form_v8(session)
                     elif index == 1:
+                        logger.info('Adding FN Form v1')
                         add_fn_form_v1(session)
+
+        # save the Google API settings
+        logger.info('Updating Google API settings')
+        save_api_settings()
 
         return True

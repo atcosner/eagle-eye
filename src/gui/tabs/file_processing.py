@@ -19,9 +19,9 @@ class FileProcessing(ProcessingStep):
             details_cls=None,  # TODO: Should we show any details?
         )
 
-        self._check_api_config()
+        self.check_api_config()
 
-    def _check_api_config(self) -> None:
+    def check_api_config(self) -> None:
         valid_config = SettingsManager().valid_api_config()
         self.auto_process.setDisabled(not valid_config)
         self.process_file_button.setDisabled(not valid_config)

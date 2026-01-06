@@ -49,9 +49,9 @@ class ReferenceFormPicker(QWidget):
         layout.addLayout(button_layout)
 
         self.setLayout(layout)
-        self._load_reference_forms()
+        self.load_reference_forms()
 
-    def _load_reference_forms(self) -> None:
+    def load_reference_forms(self) -> None:
         with Session(DB_ENGINE) as session:
             self.form_tree.load_reference_forms(session)
 

@@ -85,6 +85,9 @@ class ProcessingPipeline(QTabWidget):
             if job.all_processed():
                 self.gui_move_to_result_check()
 
+    def reload_reference_forms(self) -> None:
+        self.reference_form_picker.load_reference_forms()
+
     def gui_move_to_file_picking(self) -> None:
         self.reference_form_picker.set_view_only(True)
 
@@ -138,6 +141,7 @@ class ProcessingPipeline(QTabWidget):
     @pyqtSlot()
     def pre_processing_done(self) -> None:
         self.processing.load_job(self._job_id)
+        self.processing.check_api_config()
         self.gui_move_to_processing()
 
     @pyqtSlot()

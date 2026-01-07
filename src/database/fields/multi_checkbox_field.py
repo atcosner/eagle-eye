@@ -6,6 +6,7 @@ from src.util.validation import MultiChoiceValidation
 
 from .multi_checkbox_option import MultiCheckboxOption
 from .. import OrmBase
+from ..exporters.multi_checkbox_exporter import MultiCheckboxExporter
 from ..util import DbBoxBounds
 
 
@@ -13,7 +14,6 @@ class MultiCheckboxField(MappedAsDataclass, OrmBase):
     __tablename__ = "multi_checkbox_field"
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
-    form_field_id: Mapped[int] = mapped_column(ForeignKey("form_field.id"), init=False)
 
     name: Mapped[str]
     visual_region: Mapped[BoxBounds] = mapped_column(DbBoxBounds)
@@ -22,4 +22,8 @@ class MultiCheckboxField(MappedAsDataclass, OrmBase):
     # Relationships
 
     checkboxes: Mapped[list[MultiCheckboxOption]] = relationship(back_populates="multi_checkbox_field")
+
+    exporter: Mapped[MultiCheckboxExporter] = relationship(default=None, back_populates="multi_checkbox_field")
+
+    form_field_id: Mapped[int] = mapped_column(ForeignKey("form_field.id"), init=False)
     form_field: Mapped["FormField"] = relationship(init=False, back_populates="multi_checkbox_field")

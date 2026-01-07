@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 from sqlalchemy.orm import Session
 
+from src.database.exporters.multi_checkbox_exporter import MultiCheckboxExporter
 from src.database.exporters.text_exporter import TextExporter
 from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.circled_field import CircledField
@@ -18,6 +19,7 @@ from src.database.reference_form import ReferenceForm
 from src.database.validation.custom_data import CustomData
 from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
+from src.util.export import MultiCbExportType
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds, FormLinkingMethod, FormAlignmentMethod
 from src.util.validation import MultiChoiceValidation, TextValidatorDatatype
@@ -83,6 +85,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Data entered by:',
                         visual_region=BoxBounds(x=0, y=0, width=0, height=0),
                         synthetic_only=True,
+                        text_exporter=TextExporter(
+                            export_field_name='entered_by',
+                        ),
                     ),
                 ),
             ],
@@ -99,6 +104,10 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[0-9]{4}-PA[0-9]{1,3}$',
                             error_tooltip='Pseudo-Accession must be in the format: <YYYY>-PA<NUMBER>',
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='pseudo-accn',
+                            capitalize=True,
+                        ),
                     ),
                 ),
             ],
@@ -114,6 +123,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='catalog#',
                         ),
                     ),
                 ),
@@ -132,6 +144,10 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='FN#',
+                            capitalize=True,
                         ),
                     ),
                 ),
@@ -158,6 +174,7 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in species_list],
                         ),
+                        # TODO: export capitalization?
                     ),
                 ),
             ],
@@ -174,6 +191,10 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='ID_by',
+                            capitalize=True,
                         ),
                     ),
                 ),
@@ -193,6 +214,10 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Medium', region=BoxBounds(x=1405, y=193, width=12, height=14)),
                             MultiCheckboxOption(name='High', region=BoxBounds(x=1499, y=193, width=12, height=14)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_field_name='ID_confidence',
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
                     )
                 ),
             ],
@@ -209,6 +234,10 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[A-Z]{3,4}[0-9]{1,3}$',
                             error_tooltip='GPS Waypoint ID must be 3-4 letters followed by 1-3 numbers',
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='GPS_waypoint_ID',
+                            capitalize=True,
+                        ),
                     ),
                 ),
             ],
@@ -221,6 +250,10 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Trapline ID',
                         visual_region=BoxBounds(x=838, y=224, width=247, height=41),
+                        text_exporter=TextExporter(
+                            export_field_name='trapline_ID',
+                            capitalize=True,
+                        ),
                     ),
                 ),
             ],
@@ -233,6 +266,10 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='BlueCard/Other #',
                         visual_region=BoxBounds(x=1312, y=224, width=263, height=41),
+                        text_exporter=TextExporter(
+                            export_field_name='BlueCard_other#',
+                            capitalize=True,
+                        ),
                     ),
                 ),
             ],
@@ -251,6 +288,7 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
+                        # TODO: validation
                     ),
                 ),
             ],
@@ -486,6 +524,7 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
+                            text_required=False,
                         ),
                     ),
                 ),

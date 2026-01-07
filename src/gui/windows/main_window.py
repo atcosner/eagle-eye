@@ -48,7 +48,7 @@ def get_latest_job_id() -> int:
 
 class MainWindow(BaseWindow):
     def __init__(self):
-        super().__init__(None, 'Form Processing')
+        super().__init__(None, title_suffix=None)
         self.job_widget = JobManager()
 
         self._set_up_layout()

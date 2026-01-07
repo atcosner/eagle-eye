@@ -1,23 +1,18 @@
 import logging
+import pandas as pd
 from collections import defaultdict
 
-import pandas as pd
-from enum import Enum
+from src.util.export import ExportMode
 
 from ..database.job import Job
 from ..database.exporters.text_exporter import TextExporter
 from ..database.processed_fields.processed_field import ProcessedField
 from ..database.processed_fields.processed_checkbox_field import ProcessedCheckboxField
+from ..database.processed_fields.processed_circled_field import ProcessedCircledField
 from ..database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
 from ..database.processed_fields.processed_text_field import ProcessedTextField
 
 logger = logging.getLogger(__name__)
-
-
-class ExportMode(Enum):
-    STRICT = object()
-    MODERATE = object()
-    FULL = object()
 
 
 def get_mode_explanation(mode: ExportMode) -> str:
@@ -115,6 +110,13 @@ def export_checkbox_field(field: ProcessedCheckboxField) -> dict[str, str]:
     return {variable_name: export_bool_to_string(field.checked)}
 
 
+def export_circled_field(field: ProcessedCircledField) -> dict[str, str]:
+    logger.info(f'Exporting circled field: {field.name}')
+
+    variable_name = default_variable_name(field.name)
+    return {variable_name: 'TEST'}
+
+
 def export_multi_checkbox_field(
         mode: ExportMode,
         field: ProcessedMultiCheckboxField,
@@ -143,6 +145,8 @@ def export_field(mode: ExportMode, field: ProcessedField) -> dict[str, str]:
         return export_checkbox_field(field.checkbox_field)
     elif field.multi_checkbox_field is not None:
         return export_multi_checkbox_field(mode, field.multi_checkbox_field)
+    elif field.circled_field is not None:
+        return export_circled_field(field.circled_field)
     else:
         logger.error(f'Exported nothing for field: {field.id}')
         return {}
@@ -171,5 +175,10 @@ def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
                 for field in group.fields:
                     for export_column, export_value in export_field(mode, field).items():
                         export_data[export_column].append(export_value)
+
+    # log the entire export for debug later
+    logger.info('Export data:')
+    for key, value in export_data.items():
+        logger.info(f'{key}: {value}')
 
     return pd.DataFrame(export_data)

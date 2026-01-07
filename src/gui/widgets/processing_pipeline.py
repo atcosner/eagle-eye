@@ -151,4 +151,5 @@ class ProcessingPipeline(QTabWidget):
 
     @pyqtSlot()
     def result_check_done(self) -> None:
-        self.setCurrentIndex(4)
+        # Set the export tab to have focus
+        self.setCurrentIndex(5)

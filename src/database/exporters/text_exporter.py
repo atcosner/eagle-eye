@@ -15,6 +15,7 @@ class TextExporter(MappedAsDataclass, OrmBase):
     suffix: Mapped[str | None] = mapped_column(default=None)
 
     strip_value: Mapped[bool] = mapped_column(default=True, nullable=False)
+    capitalize: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     # Relationships
 

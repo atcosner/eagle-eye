@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import (
 
 from src.database import DB_ENGINE
 from src.database.job import Job
-from src.processing.export import ExportMode, get_mode_explanation, build_export_df
+from src.processing.export import get_mode_explanation, build_export_df
+from src.util.export import ExportMode
 
 logger = logging.getLogger(__name__)
 

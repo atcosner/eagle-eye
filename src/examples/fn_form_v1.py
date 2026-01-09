@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from src.database.exporters.multi_checkbox_exporter import MultiCheckboxExporter
 from src.database.exporters.text_exporter import TextExporter
-from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.circled_field import CircledField
 from src.database.fields.circled_option import CircledOption
 from src.database.fields.field_group import FieldGroup
@@ -19,7 +18,7 @@ from src.database.reference_form import ReferenceForm
 from src.database.validation.custom_data import CustomData
 from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
-from src.util.export import MultiCbExportType
+from src.util.export import MultiCbExportType, CapitalizationType
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds, FormLinkingMethod, FormAlignmentMethod
 from src.util.validation import MultiChoiceValidation, TextValidatorDatatype
@@ -106,7 +105,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ),
                         text_exporter=TextExporter(
                             export_field_name='pseudo-accn',
-                            capitalize=True,
+                            capitalization=CapitalizationType.UPPER,
                         ),
                     ),
                 ),
@@ -147,7 +146,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ),
                         text_exporter=TextExporter(
                             export_field_name='FN#',
-                            capitalize=True,
+                            capitalization=CapitalizationType.UPPER,
                         ),
                     ),
                 ),
@@ -174,7 +173,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in species_list],
                         ),
-                        # TODO: export capitalization?
+                        text_exporter=TextExporter(
+                            capitalization=CapitalizationType.TITLE,
+                        ),
                     ),
                 ),
             ],
@@ -194,7 +195,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ),
                         text_exporter=TextExporter(
                             export_field_name='ID_by',
-                            capitalize=True,
+                            capitalization=CapitalizationType.UPPER,
                         ),
                     ),
                 ),
@@ -236,7 +237,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ),
                         text_exporter=TextExporter(
                             export_field_name='GPS_waypoint_ID',
-                            capitalize=True,
+                            capitalization=CapitalizationType.UPPER,
                         ),
                     ),
                 ),
@@ -252,7 +253,7 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=838, y=224, width=247, height=41),
                         text_exporter=TextExporter(
                             export_field_name='trapline_ID',
-                            capitalize=True,
+                            capitalization=CapitalizationType.UPPER,
                         ),
                     ),
                 ),
@@ -268,7 +269,7 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=1312, y=224, width=263, height=41),
                         text_exporter=TextExporter(
                             export_field_name='BlueCard_other#',
-                            capitalize=True,
+                            capitalization=CapitalizationType.UPPER,
                         ),
                     ),
                 ),
@@ -288,7 +289,7 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
-                        # TODO: validation
+                        # TODO: validation wants this to be broken out into multiple columns (collector1, etc.)
                     ),
                 ),
             ],
@@ -303,6 +304,10 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=1269, y=282, width=314, height=41),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
+                        ),
+                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
+                        text_exporter=TextExporter(
+                            export_field_name='coll_date(verbatim)',
                         ),
                     ),
                 ),
@@ -322,6 +327,7 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
+                        # TODO: validation wants this to be broken out into multiple columns (preparator1, etc.)
                     ),
                 ),
             ],
@@ -336,6 +342,10 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=802, y=337, width=226, height=46),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
+                        ),
+                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
+                        text_exporter=TextExporter(
+                            export_field_name='prep_date(verbatim)',
                         ),
                     ),
                 ),
@@ -354,6 +364,10 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
+                        # TODO: not in the export spreadsheet
+                        text_exporter=TextExporter(
+                            no_export=True,
+                        ),
                     ),
                 ),
                 FormField(
@@ -362,6 +376,10 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=1341, y=341, width=234, height=43),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
+                        ),
+                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
+                        text_exporter=TextExporter(
+                            export_field_name='tissueby_date(verbatim)',
                         ),
                     ),
                 ),
@@ -392,6 +410,7 @@ def add_fn_form_v1(session: Session) -> None:
                             },
                         ),
                     ),
+                    # TODO: export as multiple columns
                 ),
             ],
         ),
@@ -408,6 +427,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in county_list],
                         ),
+                        text_exporter=TextExporter(
+                            capitalization=CapitalizationType.TITLE,
+                        ),
                     ),
                 ),
             ],
@@ -420,6 +442,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Locality',
                         visual_region=BoxBounds(x=316, y=472, width=1264, height=43),
+                        text_exporter=TextExporter(
+                            capitalization=CapitalizationType.TITLE,
+                        ),
                     ),
                 ),
             ],
@@ -437,6 +462,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.GPS_POINT_DD,
                             text_required=False,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='latitude_dec',
+                        ),
                     ),
                 ),
             ],
@@ -452,6 +480,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.GPS_POINT_DD,
                             text_required=False,
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='longitude_dec',
                         ),
                     ),
                 ),
@@ -469,6 +500,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='altitude(m)',
+                        ),
                     ),
                 ),
             ],
@@ -485,6 +519,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='error(m)',
                         ),
                     ),
                 ),
@@ -526,6 +563,10 @@ def add_fn_form_v1(session: Session) -> None:
                             error_tooltip='FN Numbers must be exactly 6 digits',
                             text_required=False,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='locality_same_as',
+                            capitalization=CapitalizationType.UPPER,
+                        ),
                     ),
                 ),
             ],
@@ -549,6 +590,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='total(mm)',
+                        ),
                     ),
                 ),
                 FormField(
@@ -557,6 +601,9 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=516, y=638, width=103, height=46),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='tail(mm)',
                         ),
                     ),
                 ),
@@ -567,6 +614,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='hindfoot(mm)',
+                        ),
                     ),
                 ),
                 FormField(
@@ -576,6 +626,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='ear(mm)',
+                        ),
                     ),
                 ),
                 FormField(
@@ -584,6 +637,9 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=830, y=637, width=104, height=47),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='weight(g)',
                         ),
                     ),
                 ),
@@ -596,6 +652,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
+                        text_exporter=TextExporter(
+                            capitalization=CapitalizationType.UPPER,
+                        ),
                     ),
                 ),
                 FormField(
@@ -606,6 +665,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='forearm(mm)',
+                        ),
                     ),
                 ),
                 FormField(
@@ -615,6 +677,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
+                        ),
+                        text_exporter=TextExporter(
+                            export_field_name='tragus(mm)',
                         ),
                     ),
                 ),
@@ -636,6 +701,9 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Embryo', region=BoxBounds(x=616, y=746, width=11, height=12)),
                             MultiCheckboxOption(name='Unknown', region=BoxBounds(x=711, y=746, width=11, height=12)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        )
                     )
                 ),
             ],
@@ -667,6 +735,10 @@ def add_fn_form_v1(session: Session) -> None:
                                 TextChoice('host of symbiont'),
                             ],
                         ),
+                        # TODO: not in the export spreadsheet
+                        text_exporter=TextExporter(
+                            no_export=True,
+                        ),
                     ),
                 ),
                 FormField(
@@ -677,7 +749,33 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
                         ),
+                        # TODO: not in the export spreadsheet
+                        text_exporter=TextExporter(
+                            no_export=True,
+                        ),
                     ),
+                ),
+            ],
+        ),
+        FieldGroup(
+            name='',
+            visual_region=None,
+            fields=[
+                FormField(
+                    multi_checkbox_field=MultiCheckboxField(
+                        name='Sex',
+                        visual_region=BoxBounds(x=200, y=782, width=467, height=206),
+                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        checkboxes=[
+                            MultiCheckboxOption(name='Male', region=BoxBounds(x=216, y=806, width=11, height=12)),
+                            MultiCheckboxOption(name='Female', region=BoxBounds(x=216, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Sex Unknown', region=BoxBounds(x=216, y=958, width=11, height=12)),
+                            MultiCheckboxOption(name='Sex Not Examined', region=BoxBounds(x=429, y=958, width=11, height=12)),
+                        ],
+                        exporter=MultiCheckboxExporter(
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
+                    )
                 ),
             ],
         ),
@@ -685,13 +783,6 @@ def add_fn_form_v1(session: Session) -> None:
             name='Male',
             visual_region=BoxBounds(x=200, y=792, width=927, height=48),
             fields=[
-                FormField(
-                    checkbox_field=CheckboxField(
-                        name='Is Male?',
-                        visual_region=BoxBounds(x=205, y=791, width=128, height=41),
-                        checkbox_region=BoxBounds(x=216, y=806, width=11, height=12),
-                    ),
-                ),
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='External',
@@ -701,6 +792,9 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Scrotal', region=BoxBounds(x=483, y=806, width=11, height=12)),
                             MultiCheckboxOption(name='Non-scrotal', region=BoxBounds(x=617, y=806, width=11, height=12)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_field_name='male_external',
+                        ),
                     )
                 ),
                 FormField(
@@ -711,6 +805,10 @@ def add_fn_form_v1(session: Session) -> None:
                             BoxBounds(x=909, y=796, width=73, height=28),
                             BoxBounds(x=995, y=795, width=69, height=29),
                         ],
+                        # TODO: export as LxW
+                        text_exporter=TextExporter(
+                            export_field_name='T=LxW(mm)',
+                        ),
                     ),
                 ),
             ],
@@ -720,13 +818,6 @@ def add_fn_form_v1(session: Session) -> None:
             visual_region=BoxBounds(x=199, y=841, width=1384, height=98),
             fields=[
                 FormField(
-                    checkbox_field=CheckboxField(
-                        name='Is Female?',
-                        visual_region=BoxBounds(x=202, y=843, width=152, height=50),
-                        checkbox_region=BoxBounds(x=216, y=861, width=11, height=12),
-                    ),
-                ),
-                FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Vagina',
                         visual_region=BoxBounds(x=350, y=846, width=348, height=42),
@@ -735,6 +826,9 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Open', region=BoxBounds(x=466, y=861, width=11, height=12)),
                             MultiCheckboxOption(name='Closed', region=BoxBounds(x=584, y=861, width=11, height=12)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
                     )
                 ),
                 FormField(
@@ -746,6 +840,9 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Enlarged', region=BoxBounds(x=858, y=861, width=11, height=12)),
                             MultiCheckboxOption(name='Small', region=BoxBounds(x=1014, y=861, width=11, height=12)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
                     )
                 ),
                 FormField(
@@ -757,6 +854,9 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Lactating', region=BoxBounds(x=1270, y=861, width=11, height=12)),
                             MultiCheckboxOption(name='Not Lactating', region=BoxBounds(x=1421, y=861, width=11, height=12)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
                     )
                 ),
                 FormField(
@@ -768,8 +868,10 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Yes', region=BoxBounds(x=610, y=887, width=47, height=45)),
                             CircledOption(name='No', region=BoxBounds(x=668, y=888, width=43, height=46)),
                         ],
+                        # TODO: export
                     )
                 ),
+                # TODO: combine these like testes for a better export
                 FormField(
                     text_field=TextField(
                         name='Plsc - Right',
@@ -799,8 +901,10 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Yes', region=BoxBounds(x=1045, y=890, width=46, height=44)),
                             CircledOption(name='No', region=BoxBounds(x=1099, y=889, width=46, height=45)),
                         ],
+                        # TODO: export
                     )
                 ),
+                # TODO: combine these like testes for a better export
                 FormField(
                     text_field=TextField(
                         name='Embryo - Right',
@@ -829,32 +933,10 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                    )
-                ),
-            ],
-        ),
-        FieldGroup(
-            name='',
-            visual_region=None,
-            fields=[
-                FormField(
-                    checkbox_field=CheckboxField(
-                        name='Sex Unknown',
-                        visual_region=BoxBounds(x=201, y=944, width=195, height=40),
-                        checkbox_region=BoxBounds(x=216, y=958, width=11, height=12),
-                    )
-                ),
-            ],
-        ),
-        FieldGroup(
-            name='',
-            visual_region=None,
-            fields=[
-                FormField(
-                    checkbox_field=CheckboxField(
-                        name='Sex Not Examined',
-                        visual_region=BoxBounds(x=417, y=944, width=241, height=40),
-                        checkbox_region=BoxBounds(x=429, y=958, width=11, height=12),
+                        text_exporter=TextExporter(
+                            export_field_name='emb_CR(mm)',
+                            prefix='CR=',
+                        ),
                     )
                 ),
             ],
@@ -872,6 +954,7 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Yes', region=BoxBounds(x=354, y=994, width=39, height=38)),
                             CircledOption(name='No', region=BoxBounds(x=404, y=992, width=41, height=40)),
                         ],
+                        # TODO: export
                     )
                 ),
                 FormField(
@@ -883,6 +966,7 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Yes', region=BoxBounds(x=603, y=992, width=41, height=40)),
                             CircledOption(name='No', region=BoxBounds(x=658, y=990, width=40, height=42)),
                         ],
+                        # TODO: export
                     )
                 ),
                 FormField(
@@ -894,6 +978,10 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='ecto_by',
+                            capitalization=CapitalizationType.UPPER,
+                        ),
                     ),
                 ),
                 FormField(
@@ -903,12 +991,19 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
+                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
+                        text_exporter=TextExporter(
+                            export_field_name='ecto_coll(verbatim)',
+                        ),
                     ),
                 ),
                 FormField(
                     text_field=TextField(
                         name='Method',
                         visual_region=BoxBounds(x=1208, y=986, width=368, height=39),
+                        text_exporter=TextExporter(
+                            export_field_name='ecto_method',
+                        ),
                     ),
                 ),
             ],
@@ -926,6 +1021,7 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Yes', region=BoxBounds(x=358, y=1043, width=44, height=39)),
                             CircledOption(name='No', region=BoxBounds(x=413, y=1040, width=40, height=44)),
                         ],
+                        # TODO: export
                     )
                 ),
                 FormField(
@@ -937,6 +1033,7 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Yes', region=BoxBounds(x=608, y=1041, width=39, height=42)),
                             CircledOption(name='No', region=BoxBounds(x=659, y=1044, width=43, height=40)),
                         ],
+                        # TODO: export
                     )
                 ),
                 FormField(
@@ -948,6 +1045,10 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='endo_by',
+                            capitalization=CapitalizationType.UPPER,
+                        ),
                     ),
                 ),
                 FormField(
@@ -958,12 +1059,19 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.DATE,
                             text_required=False,
                         ),
+                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
+                        text_exporter=TextExporter(
+                            export_field_name='endo_coll(verbatim)',
+                        ),
                     ),
                 ),
                 FormField(
                     text_field=TextField(
                         name='Method',
                         visual_region=BoxBounds(x=1210, y=1039, width=362, height=36),
+                        text_exporter=TextExporter(
+                            export_field_name='endo_method',
+                        ),
                     ),
                 ),
             ],
@@ -1004,6 +1112,10 @@ def add_fn_form_v1(session: Session) -> None:
                                 text_region=BoxBounds(x=1415, y=1103, width=158, height=43),
                             ),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_field_name='prep_type(s)',
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
                     )
                 ),
             ],
@@ -1033,6 +1145,10 @@ def add_fn_form_v1(session: Session) -> None:
                                 text_region=BoxBounds(x=1265, y=1159, width=144, height=42),
                             ),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_field_name='trap_type',
+                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                        ),
                     )
                 ),
             ],
@@ -1050,6 +1166,7 @@ def add_fn_form_v1(session: Session) -> None:
                             CircledOption(name='Y', region=BoxBounds(x=1496, y=1173, width=33, height=33)),
                             CircledOption(name='N', region=BoxBounds(x=1540, y=1172, width=33, height=33)),
                         ],
+                        # TODO: export
                     )
                 ),
             ],
@@ -1541,6 +1658,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Count',
                         visual_region=BoxBounds(x=872, y=1750, width=45, height=26),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.INTEGER),
+                        text_exporter=TextExporter(
+                            export_field_name='emb_count',
+                        ),
                     ),
                 ),
                 FormField(
@@ -1554,12 +1674,18 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='95%', region=BoxBounds(x=1170, y=1743, width=12, height=12)),
                             MultiCheckboxOption(name='Shield', region=BoxBounds(x=1159, y=1176, width=12, height=12)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_field_name='emb_pres',
+                        ),
                     )
                 ),
                 FormField(
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1730, width=218, height=69),
+                        text_exporter=TextExporter(
+                            export_field_name='emb_remarks',
+                        ),
                     ),
                 ),
             ],
@@ -1580,6 +1706,10 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Fair', region=BoxBounds(x=701, y=1822, width=9, height=9)),
                             MultiCheckboxOption(name='Poor', region=BoxBounds(x=767, y=1822, width=9, height=9)),
                         ],
+                        exporter=MultiCheckboxExporter(
+                            export_field_name='tiss_quality',
+                            capitalization=CapitalizationType.TITLE,
+                        ),
                     )
                 ),
             ],
@@ -1595,6 +1725,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.TIME,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='time_death',
+                        ),
                     ),
                 ),
             ],
@@ -1607,8 +1740,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Time of Tissue in LN2',
                         visual_region=BoxBounds(x=773, y=1838, width=114, height=37),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.TIME,
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.TIME),
+                        text_exporter=TextExporter(
+                            export_field_name='time_tissue_pres',
                         ),
                     )
                 ),
@@ -1625,6 +1759,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
+                        text_exporter=TextExporter(
+                            export_field_name='time_elapsed(min)',
+                        ),
                     )
                 ),
             ],
@@ -1637,54 +1774,48 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Dry Ice',
                         visual_region=BoxBounds(x=920, y=1840, width=148, height=38),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.DATE,
-                        ),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        text_exporter=TextExporter(export_field_name='date_dryice'),
                     )
                 ),
                 FormField(
                     text_field=TextField(
                         name='Field LN2',
                         visual_region=BoxBounds(x=1156, y=1836, width=143, height=42),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.DATE,
-                        ),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        text_exporter=TextExporter(export_field_name='date_fieldLN2'),
                     )
                 ),
                 FormField(
                     text_field=TextField(
                         name='-20 C',
                         visual_region=BoxBounds(x=1374, y=1835, width=147, height=43),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.DATE,
-                        ),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        text_exporter=TextExporter(export_field_name='date_-20C'),
                     )
                 ),
                 FormField(
                     text_field=TextField(
                         name='-40 C',
                         visual_region=BoxBounds(x=923, y=1881, width=142, height=41),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.DATE,
-                        ),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        text_exporter=TextExporter(export_field_name='date_-40C'),
                     )
                 ),
                 FormField(
                     text_field=TextField(
                         name='-80 C',
                         visual_region=BoxBounds(x=1159, y=1882, width=141, height=40),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.DATE,
-                        ),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        text_exporter=TextExporter(export_field_name='date_-80C'),
                     )
                 ),
                 FormField(
                     text_field=TextField(
                         name='Install LN2',
                         visual_region=BoxBounds(x=1377, y=1881, width=144, height=41),
-                        text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.DATE,
-                        ),
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        text_exporter=TextExporter(export_field_name='date_installLN2'),
                     )
                 ),
             ],
@@ -1710,6 +1841,9 @@ def add_fn_form_v1(session: Session) -> None:
                             BoxBounds(x=195, y=1971, width=1383, height=41),
                             BoxBounds(x=192, y=2017, width=1390, height=39),
                         ],
+                        text_exporter=TextExporter(
+                            export_field_name='remarks_general',
+                        ),
                     )
                 ),
             ],

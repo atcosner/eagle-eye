@@ -10,3 +10,9 @@ class ExportMode(Enum):
 class MultiCbExportType(Enum):
     MULTIPLE_COLUMNS = object()
     SINGLE_COLUMN = object()
+
+
+class CapitalizationType(Enum):
+    UPPER = object()
+    LOWER = object()
+    TITLE = object()

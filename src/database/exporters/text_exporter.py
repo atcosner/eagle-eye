@@ -1,6 +1,8 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, MappedAsDataclass, relationship
 
+from src.util.export import CapitalizationType
+
 from .. import OrmBase
 
 
@@ -15,7 +17,7 @@ class TextExporter(MappedAsDataclass, OrmBase):
     suffix: Mapped[str | None] = mapped_column(default=None)
 
     strip_value: Mapped[bool] = mapped_column(default=True, nullable=False)
-    capitalize: Mapped[bool] = mapped_column(default=False, nullable=False)
+    capitalization: Mapped[CapitalizationType] = mapped_column(default=CapitalizationType.LOWER, nullable=False)
 
     # Relationships
 

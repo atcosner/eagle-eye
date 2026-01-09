@@ -26,7 +26,8 @@ class TextField(MappedAsDataclass, OrmBase):
 
     # Relationships
 
-    text_exporter: Mapped[TextExporter] = relationship(default=None, back_populates="text_field")
+    exporters: Mapped[list[TextExporter]] = relationship(default_factory=list, back_populates="text_field")
+
     text_validator: Mapped[TextValidator] = relationship(default=None, back_populates="text_field")
 
     form_field_id: Mapped[int] = mapped_column(ForeignKey("form_field.id"), init=False)

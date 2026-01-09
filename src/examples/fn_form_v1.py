@@ -85,9 +85,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Data entered by:',
                         visual_region=BoxBounds(x=0, y=0, width=0, height=0),
                         synthetic_only=True,
-                        text_exporter=TextExporter(
-                            export_field_name='entered_by',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='entered_by'),
+                        ],
                     ),
                 ),
             ],
@@ -105,10 +105,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[0-9]{4}-PA[0-9]{1,3}$',
                             error_tooltip='Pseudo-Accession must be in the format: <YYYY>-PA<NUMBER>',
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='pseudo-accn',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='pseudo-accn', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -125,9 +124,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='catalog#',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='catalog#'),
+                        ],
                     ),
                 ),
             ],
@@ -146,10 +145,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='FN#',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='FN#', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -175,9 +173,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in species_list],
                         ),
-                        text_exporter=TextExporter(
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(capitalization=CapitalizationType.TITLE),
+                        ],
                     ),
                 ),
             ],
@@ -195,10 +193,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='ID_by',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='ID_by', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -238,10 +235,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[A-Z]{3,4}[0-9]{1,3}$',
                             error_tooltip='GPS Waypoint ID must be 3-4 letters followed by 1-3 numbers',
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='GPS_waypoint_ID',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='GPS_waypoint_ID', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -254,10 +250,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Trapline ID',
                         visual_region=BoxBounds(x=838, y=224, width=247, height=41),
-                        text_exporter=TextExporter(
-                            export_field_name='trapline_ID',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='trapline_ID', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -270,10 +265,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='BlueCard/Other #',
                         visual_region=BoxBounds(x=1312, y=224, width=263, height=41),
-                        text_exporter=TextExporter(
-                            export_field_name='BlueCard_other#',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='BlueCard_other#', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -309,10 +303,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.DATE,
                         ),
                         # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
-                        text_exporter=TextExporter(
-                            export_field_name='coll_date(verbatim)',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='coll_date(verbatim)', capitalization=CapitalizationType.TITLE),
+                        ],
                     ),
                 ),
             ],
@@ -348,10 +341,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.DATE,
                         ),
                         # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
-                        text_exporter=TextExporter(
-                            export_field_name='prep_date(verbatim)',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='prep_date(verbatim)', capitalization=CapitalizationType.TITLE),
+                        ],
                     ),
                 ),
             ],
@@ -370,9 +362,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
                         # TODO: not in the export spreadsheet
-                        text_exporter=TextExporter(
-                            no_export=True,
-                        ),
+                        exporters=[
+                            TextExporter(no_export=True),
+                        ],
                     ),
                 ),
                 FormField(
@@ -383,10 +375,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.DATE,
                         ),
                         # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
-                        text_exporter=TextExporter(
-                            export_field_name='tissueby_date(verbatim)',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='tissueby_date(verbatim)', capitalization=CapitalizationType.TITLE),
+                        ],
                     ),
                 ),
             ],
@@ -433,9 +424,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in county_list],
                         ),
-                        text_exporter=TextExporter(
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(capitalization=CapitalizationType.TITLE),
+                        ],
                     ),
                 ),
             ],
@@ -465,9 +456,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.GPS_POINT_DD,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='latitude_dec',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='latitude_dec'),
+                        ],
                     ),
                 ),
             ],
@@ -484,9 +475,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.GPS_POINT_DD,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='longitude_dec',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='longitude_dec'),
+                        ],
                     ),
                 ),
             ],
@@ -503,9 +494,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='altitude(m)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='altitude(m)'),
+                        ],
                     ),
                 ),
             ],
@@ -523,9 +514,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='error(m)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='error(m)'),
+                        ],
                     ),
                 ),
             ],
@@ -566,10 +557,9 @@ def add_fn_form_v1(session: Session) -> None:
                             error_tooltip='FN Numbers must be exactly 6 digits',
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='locality_same_as',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='locality_same_as', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
             ],
@@ -593,9 +583,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='total(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='total(mm)'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -605,9 +595,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='tail(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='tail(mm)'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -617,9 +607,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='hindfoot(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='hindfoot(mm)'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -629,9 +619,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='ear(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='ear(mm)'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -641,9 +631,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='weight(g)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='weight(g)'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -655,9 +645,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
-                        text_exporter=TextExporter(
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
                 FormField(
@@ -668,9 +658,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='forearm(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='forearm(mm)'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -681,9 +671,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='tragus(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='tragus(mm)'),
+                        ],
                     ),
                 ),
             ],
@@ -740,9 +730,9 @@ def add_fn_form_v1(session: Session) -> None:
                             ],
                         ),
                         # TODO: not in the export spreadsheet
-                        text_exporter=TextExporter(
-                            no_export=True,
-                        ),
+                        exporters=[
+                            TextExporter(no_export=True),
+                        ],
                     ),
                 ),
                 FormField(

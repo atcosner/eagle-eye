@@ -13,7 +13,7 @@ class MultiCheckboxExporter(MappedAsDataclass, OrmBase):
     no_export: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     export_field_name: Mapped[str | None] = mapped_column(default=None)
-    capitalization: Mapped[CapitalizationType] = mapped_column(default=CapitalizationType.LOWER, nullable=False)
+    capitalization: Mapped[CapitalizationType] = mapped_column(default=CapitalizationType.NONE, nullable=False)
 
     export_type: Mapped[MultiCbExportType] = mapped_column(default=MultiCbExportType.MULTIPLE_COLUMNS, nullable=False)
 

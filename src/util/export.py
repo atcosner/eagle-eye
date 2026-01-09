@@ -13,6 +13,7 @@ class MultiCbExportType(Enum):
 
 
 class CapitalizationType(Enum):
+    NONE = object()
     UPPER = object()
     LOWER = object()
     TITLE = object()

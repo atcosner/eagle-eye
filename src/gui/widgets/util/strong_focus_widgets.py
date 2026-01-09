@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QDate
 from PyQt6.QtGui import QWheelEvent
 from PyQt6.QtWidgets import QTimeEdit, QDateEdit
 
@@ -18,7 +18,7 @@ class StrongFocusTimeEdit(QTimeEdit):
 
 class StrongFocusDateEdit(QDateEdit):
     def __init__(self):
-        super().__init__()
+        super().__init__(QDate.currentDate())
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setCalendarPopup(True)
 

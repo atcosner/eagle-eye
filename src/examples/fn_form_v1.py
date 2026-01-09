@@ -19,7 +19,7 @@ from src.database.reference_form import ReferenceForm
 from src.database.validation.custom_data import CustomData
 from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
-from src.util.export import MultiCbExportType, CapitalizationType
+from src.util.export import MultiCbExportType, CapitalizationType, ExportType
 from src.util.paths import LocalPaths
 from src.util.types import BoxBounds, FormLinkingMethod, FormAlignmentMethod
 from src.util.validation import MultiChoiceValidation, TextValidatorDatatype
@@ -77,7 +77,7 @@ def add_fn_form_v1(session: Session) -> None:
     form.regions[header_region.local_id] = header_region
     header_region.groups = [
         FieldGroup(
-            name='',
+            name='Control Data',
             visual_region=None,
             fields=[
                 FormField(
@@ -90,9 +90,19 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                     ),
                 ),
+                FormField(
+                    text_field=TextField(
+                        name='Entered on:',
+                        visual_region=BoxBounds(x=0, y=0, width=0, height=0),
+                        synthetic_only=True,
+                        text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
+                        exporters=[
+                            TextExporter(export_field_name='entered_on'),
+                        ],
+                    ),
+                ),
             ],
         ),
-        # TODO: entered_on
         FieldGroup(
             name='',
             visual_region=None,
@@ -302,9 +312,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
-                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
                         exporters=[
                             TextExporter(export_field_name='coll_date(verbatim)', capitalization=CapitalizationType.TITLE),
+                            TextExporter(export_field_name='coll_date(DO-MO-YEAR)', export_type=ExportType.DATE_DMY),
                         ],
                     ),
                 ),
@@ -320,7 +330,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Preparator, Prep #',
                         visual_region=BoxBounds(x=440, y=337, width=226, height=46),
                         text_validator=TextValidator(
-                            datatype=TextValidatorDatatype.LIST_CHOICE,
+                            datatype=TextValidatorDatatype.CSV_OF_CHOICE,
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
@@ -340,9 +350,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
-                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
                         exporters=[
                             TextExporter(export_field_name='prep_date(verbatim)', capitalization=CapitalizationType.TITLE),
+                            TextExporter(export_field_name='prep_date(DO-MO-YEAR)', export_type=ExportType.DATE_DMY),
                         ],
                     ),
                 ),
@@ -361,9 +371,8 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
-                        # TODO: not in the export spreadsheet
                         exporters=[
-                            TextExporter(no_export=True),
+                            TextExporter(export_field_name='tissueby', capitalization=CapitalizationType.UPPER),
                         ],
                     ),
                 ),
@@ -374,9 +383,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
-                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
                         exporters=[
                             TextExporter(export_field_name='tissueby_date(verbatim)', capitalization=CapitalizationType.TITLE),
+                            TextExporter(export_field_name='tissueby_date(DO-MO-YEAR)', export_type=ExportType.DATE_DMY),
                         ],
                     ),
                 ),
@@ -744,9 +753,9 @@ def add_fn_form_v1(session: Session) -> None:
                             error_tooltip='FN Numbers must be exactly 6 digits',
                         ),
                         # TODO: not in the export spreadsheet
-                        text_exporter=TextExporter(
-                            no_export=True,
-                        ),
+                        exporters=[
+                            TextExporter(no_export=True),
+                        ],
                     ),
                 ),
             ],
@@ -802,9 +811,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[0-9]+[x][0-9]+$',
                             error_tooltip='Measurement must be: [Length]x[Width]',
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='T=LxW(mm)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='T=LxW(mm)'),
+                        ],
                     ),
                 ),
             ],
@@ -882,10 +891,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[0-9]+R,[0-9]+L$',
                             error_tooltip='Measurement must be: [integer]R,[integer]L',
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='plsc_R-L',
-                            prefix='plsc=',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='plsc_R-L', prefix='plsc='),
+                        ],
                     )
                 ),
                 FormField(
@@ -912,10 +920,9 @@ def add_fn_form_v1(session: Session) -> None:
                             text_regex=r'^[0-9]+R,[0-9]+L$',
                             error_tooltip='Measurement must be: [integer]R,[integer]L',
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='emb_R-L',
-                            prefix='emb=',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='emb_R-L', prefix='emb='),
+                        ],
                     )
                 ),
                 FormField(
@@ -926,10 +933,9 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='emb_CR(mm)',
-                            prefix='CR=',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='emb_CR(mm)', prefix='CR='),
+                        ],
                     )
                 ),
             ],
@@ -971,10 +977,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='ecto_by',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='ecto_by', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
                 FormField(
@@ -984,19 +989,19 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
-                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
-                        text_exporter=TextExporter(
-                            export_field_name='ecto_coll(verbatim)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='ecto_coll(verbatim)'),
+                            TextExporter(export_field_name='ecto_coll(DO-MO-YEAR)', export_type=ExportType.DATE_DMY),
+                        ],
                     ),
                 ),
                 FormField(
                     text_field=TextField(
                         name='Method',
                         visual_region=BoxBounds(x=1208, y=986, width=368, height=39),
-                        text_exporter=TextExporter(
-                            export_field_name='ecto_method',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='ecto_method'),
+                        ],
                     ),
                 ),
             ],
@@ -1038,10 +1043,9 @@ def add_fn_form_v1(session: Session) -> None:
                             allow_closest_match_correction=True,
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='endo_by',
-                            capitalization=CapitalizationType.UPPER,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='endo_by', capitalization=CapitalizationType.UPPER),
+                        ],
                     ),
                 ),
                 FormField(
@@ -1052,20 +1056,19 @@ def add_fn_form_v1(session: Session) -> None:
                             datatype=TextValidatorDatatype.DATE,
                             text_required=False,
                         ),
-                        # TODO: Ideally this would be two columns (verbatim and DD-MM-YYYY)
-                        text_exporter=TextExporter(
-                            export_field_name='endo_coll(verbatim)',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='endo_coll(verbatim)', capitalization=CapitalizationType.TITLE),
+                            TextExporter(export_field_name='endo_coll(DO-MO-YEAR)', export_type=ExportType.DATE_DMY),
+                        ],
                     ),
                 ),
                 FormField(
                     text_field=TextField(
                         name='Method',
                         visual_region=BoxBounds(x=1210, y=1039, width=362, height=36),
-                        text_exporter=TextExporter(
-                            export_field_name='endo_method',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='endo_method'),
+                        ],
                     ),
                 ),
             ],
@@ -1190,7 +1193,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1301, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='H/L_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='H/L_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1220,7 +1225,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1371, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='K/Sp_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='K/Sp_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1250,7 +1257,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1442, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='L_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='L_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1280,7 +1289,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1514, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='M_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='M_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1325,7 +1336,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1586, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='GI/LI/C_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='GI/LI/C_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1355,7 +1368,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1658, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='F_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='F_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1385,7 +1400,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=627, y=1730, width=175, height=66),
-                        text_exporter=TextExporter(export_field_name='B_remarks'),
+                        exporters=[
+                            TextExporter(export_field_name='B_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1690,9 +1707,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Count',
                         visual_region=BoxBounds(x=872, y=1750, width=45, height=26),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.INTEGER),
-                        text_exporter=TextExporter(
-                            export_field_name='emb_count',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='emb_count'),
+                        ],
                     ),
                 ),
                 FormField(
@@ -1716,9 +1733,9 @@ def add_fn_form_v1(session: Session) -> None:
                     text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1730, width=218, height=69),
-                        text_exporter=TextExporter(
-                            export_field_name='emb_remarks',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='emb_remarks'),
+                        ],
                     ),
                 ),
             ],
@@ -1758,9 +1775,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.TIME,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='time_death',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='time_death'),
+                        ],
                     ),
                 ),
             ],
@@ -1774,9 +1791,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Time of Tissue in LN2',
                         visual_region=BoxBounds(x=773, y=1838, width=114, height=37),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.TIME),
-                        text_exporter=TextExporter(
-                            export_field_name='time_tissue_pres',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='time_tissue_pres'),
+                        ],
                     )
                 ),
             ],
@@ -1792,9 +1809,9 @@ def add_fn_form_v1(session: Session) -> None:
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
-                        text_exporter=TextExporter(
-                            export_field_name='time_elapsed(min)',
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='time_elapsed(min)'),
+                        ],
                     )
                 ),
             ],
@@ -1808,10 +1825,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Dry Ice',
                         visual_region=BoxBounds(x=920, y=1840, width=148, height=38),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
-                        text_exporter=TextExporter(
-                            export_field_name='date_dryice',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='date_dryice', capitalization=CapitalizationType.TITLE),
+                        ],
                     )
                 ),
                 FormField(
@@ -1819,10 +1835,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Field LN2',
                         visual_region=BoxBounds(x=1156, y=1836, width=143, height=42),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
-                        text_exporter=TextExporter(
-                            export_field_name='date_fieldLN2',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='date_fieldLN2', capitalization=CapitalizationType.TITLE),
+                        ],
                     )
                 ),
                 FormField(
@@ -1830,10 +1845,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='-20 C',
                         visual_region=BoxBounds(x=1374, y=1835, width=147, height=43),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
-                        text_exporter=TextExporter(
-                            export_field_name='date_-20C',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='date_-20C', capitalization=CapitalizationType.TITLE),
+                        ],
                     )
                 ),
                 FormField(
@@ -1841,10 +1855,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='-40 C',
                         visual_region=BoxBounds(x=923, y=1881, width=142, height=41),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
-                        text_exporter=TextExporter(
-                            export_field_name='date_-40C',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='date_-40C', capitalization=CapitalizationType.TITLE),
+                        ],
                     )
                 ),
                 FormField(
@@ -1852,10 +1865,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='-80 C',
                         visual_region=BoxBounds(x=1159, y=1882, width=141, height=40),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
-                        text_exporter=TextExporter(
-                            export_field_name='date_-80C',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='date_-80C', capitalization=CapitalizationType.TITLE),
+                        ],
                     )
                 ),
                 FormField(
@@ -1863,10 +1875,9 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Install LN2',
                         visual_region=BoxBounds(x=1377, y=1881, width=144, height=41),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
-                        text_exporter=TextExporter(
-                            export_field_name='date_installLN2',
-                            capitalization=CapitalizationType.TITLE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='date_installLN2', capitalization=CapitalizationType.TITLE),
+                        ],
                     )
                 ),
             ],
@@ -1892,10 +1903,9 @@ def add_fn_form_v1(session: Session) -> None:
                             BoxBounds(x=195, y=1971, width=1383, height=41),
                             BoxBounds(x=192, y=2017, width=1390, height=39),
                         ],
-                        text_exporter=TextExporter(
-                            export_field_name='remarks_general',
-                            capitalization=CapitalizationType.NONE,
-                        ),
+                        exporters=[
+                            TextExporter(export_field_name='remarks_general', capitalization=CapitalizationType.NONE),
+                        ],
                     )
                 ),
             ],

@@ -17,3 +17,9 @@ class CapitalizationType(Enum):
     UPPER = object()
     LOWER = object()
     TITLE = object()
+
+
+class ExportType(Enum):
+    RAW = object()
+    DATE_YMD = object()
+    DATE_DMY = object()

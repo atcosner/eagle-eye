@@ -1,8 +1,9 @@
+import datetime
 import logging
 import pandas as pd
 from collections import defaultdict
 
-from src.util.export import ExportMode, CapitalizationType, MultiCbExportType
+from src.util.export import ExportMode, CapitalizationType, MultiCbExportType, ExportType
 
 from ..database.job import Job
 from ..database.exporters.circled_exporter import CircledExporter
@@ -79,7 +80,7 @@ def custom_text_field_export(
         # Add a column for the controlled language checkbox
         export_columns[f'{export_name}_checkbox'] = export_bool_to_string(field.from_controlled_language)
 
-    # Work through the custom export options
+    # Format the export for the RAW type
     export_text = handle_capitalization(field.text, exporter.capitalization)
     if exporter.strip_value:
         export_text = export_text.strip()
@@ -89,7 +90,26 @@ def custom_text_field_export(
         if exporter.suffix:
             export_text = f'{export_text}{exporter.suffix}'
 
-    export_columns[export_name] = export_text
+    # Work through the custom export options
+    if exporter.export_type is ExportType.RAW:
+        export_columns[export_name] = export_text
+    elif exporter.export_type in [ExportType.DATE_DMY, ExportType.DATE_YMD]:
+        # Try to covert the text into a Python datetime
+        try:
+            date = datetime.datetime.strptime(field.text, '%d %B %Y')
+            if exporter.export_type is ExportType.DATE_DMY:
+                export_text = date.date().strftime('%d-%m-%Y')
+            elif exporter.export_type is ExportType.DATE_YMD:
+                export_text = date.date().isoformat()
+
+        except ValueError:
+            logger.exception(f'Could not parse date: "{field.text}"')
+
+        export_columns[export_name] = export_text
+    else:
+        logger.error(f'Unknown export type (using RAW): {exporter.export_type.name}')
+        export_columns[export_name] = export_text
+
     return export_columns
 
 
@@ -174,11 +194,15 @@ def export_text_field(
     logger.info(f'Exporting text field: {field.name}')
     # TODO: Check validation status for MODERATE mode
 
-    # Handle if the field has a custom exporter
-    if field.text_field.text_exporter is not None:
-        return custom_text_field_export(field, field.text_field.text_exporter)
-    else:
-        return custom_text_field_export(field, TextExporter())
+    # Add in a default exporter if we don't have a custom one
+    if not field.text_field.exporters:
+        field.text_field.exporters.append(TextExporter())
+
+    export_columns = {}
+    for exporter in field.text_field.exporters:
+        export_columns |= custom_text_field_export(field, exporter)
+
+    return export_columns
 
 
 def export_checkbox_field(field: ProcessedCheckboxField) -> dict[str, str]:

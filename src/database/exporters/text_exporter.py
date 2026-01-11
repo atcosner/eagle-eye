@@ -15,10 +15,13 @@ class TextExporter(MappedAsDataclass, OrmBase):
     export_field_name: Mapped[str | None] = mapped_column(default=None)
     prefix: Mapped[str | None] = mapped_column(default=None)
     suffix: Mapped[str | None] = mapped_column(default=None)
-
     strip_value: Mapped[bool] = mapped_column(default=True, nullable=False)
     capitalization: Mapped[CapitalizationType] = mapped_column(default=CapitalizationType.NONE, nullable=False)
+
     export_type: Mapped[ExportType] = mapped_column(default=ExportType.RAW, nullable=False)
+    export_group: Mapped[str | None] = mapped_column(default=None)
+
+    validator_group_index: Mapped[int | None] = mapped_column(default=None)
 
     # Relationships
 

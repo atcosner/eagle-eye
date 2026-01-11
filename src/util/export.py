@@ -23,3 +23,4 @@ class ExportType(Enum):
     RAW = object()
     DATE_YMD = object()
     DATE_DMY = object()
+    CSV_SEP_COLUMNS = object()

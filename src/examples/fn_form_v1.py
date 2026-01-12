@@ -297,7 +297,11 @@ def add_fn_form_v1(session: Session) -> None:
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
                         exporters=[
-                            TextExporter(export_field_name='collector', export_type=ExportType.CSV_SEP_COLUMNS),
+                            TextExporter(
+                                export_field_name='collector',
+                                capitalization=CapitalizationType.UPPER,
+                                export_type=ExportType.CSV_SEP_COLUMNS,
+                            ),
                         ],
                     ),
                 ),
@@ -337,7 +341,11 @@ def add_fn_form_v1(session: Session) -> None:
                             text_choices=[TextChoice(text=t) for t in agent_list],
                         ),
                         exporters=[
-                            TextExporter(export_field_name='preparator', export_type=ExportType.CSV_SEP_COLUMNS),
+                            TextExporter(
+                                export_field_name='preparator',
+                                capitalization=CapitalizationType.UPPER,
+                                export_type=ExportType.CSV_SEP_COLUMNS,
+                            ),
                         ],
                     ),
                 ),
@@ -420,8 +428,18 @@ def add_fn_form_v1(session: Session) -> None:
                             },
                         ),
                         exporters=[
-                            TextExporter(export_field_name='country', validator_group_index=0),
-                            TextExporter(export_field_name='state_province', validator_group_index=1),
+                            TextExporter(
+                                export_field_name='country',
+                                export_type=ExportType.VALIDATOR_PART,
+                                strip_value=True,
+                                validator_group_index=0,
+                            ),
+                            TextExporter(
+                                export_field_name='state_province',
+                                export_type=ExportType.VALIDATOR_PART,
+                                strip_value=True,
+                                validator_group_index=1,
+                            ),
                         ],
                     ),
                 ),
@@ -1390,10 +1408,10 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=324, y=1730, width=188, height=66),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
-                            MultiCheckboxOption(name='Nobuto', region=BoxBounds(x=333, y=1671, width=12, height=12)),
-                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1704, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1671, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1704, width=12, height=12)),
+                            MultiCheckboxOption(name='Nobuto', region=BoxBounds(x=333, y=1743, width=12, height=12)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=331, y=1776, width=12, height=12)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=422, y=1743, width=12, height=12)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1776, width=12, height=12)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Blood_pres',

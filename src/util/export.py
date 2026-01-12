@@ -24,3 +24,4 @@ class ExportType(Enum):
     DATE_YMD = object()
     DATE_DMY = object()
     CSV_SEP_COLUMNS = object()
+    VALIDATOR_PART = object()

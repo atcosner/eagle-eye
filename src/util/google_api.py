@@ -12,6 +12,9 @@ from .types import BoxBounds
 logger = logging.getLogger(__name__)
 
 MAX_API_ATTEMPTS = 3
+OCR_FIXES = {
+    '×': 'x',
+}
 
 
 def save_api_settings() -> None:
@@ -134,6 +137,10 @@ def ocr_text_region(
     # Clean up the string
     if ocr_string is not None:
         ocr_string = ocr_string.strip().replace('\n', ' ')
+
+    # Correct common errors
+    for key, value in OCR_FIXES.items():
+        ocr_string = ocr_string.replace(key, value)
 
     # logger.info(f'Detected: "{ocr_string}"')
     return ocr_string if ocr_string is not None else ''

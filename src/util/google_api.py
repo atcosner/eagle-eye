@@ -138,9 +138,9 @@ def ocr_text_region(
     if ocr_string is not None:
         ocr_string = ocr_string.strip().replace('\n', ' ')
 
-    # Correct common errors
-    for key, value in OCR_FIXES.items():
-        ocr_string = ocr_string.replace(key, value)
+        # Correct common errors
+        for key, value in OCR_FIXES.items():
+            ocr_string = ocr_string.replace(key, value)
 
     # logger.info(f'Detected: "{ocr_string}"')
     return ocr_string if ocr_string is not None else ''

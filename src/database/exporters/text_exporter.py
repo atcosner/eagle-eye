@@ -19,9 +19,6 @@ class TextExporter(MappedAsDataclass, OrmBase):
     capitalization: Mapped[CapitalizationType] = mapped_column(default=CapitalizationType.NONE, nullable=False)
 
     export_type: Mapped[ExportType] = mapped_column(default=ExportType.RAW, nullable=False)
-    export_group: Mapped[str | None] = mapped_column(default=None)
-    element_seperator: Mapped[str] = mapped_column(default=',')
-
     validator_group_index: Mapped[int | None] = mapped_column(default=None)
 
     # Relationships

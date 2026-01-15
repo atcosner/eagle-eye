@@ -17,7 +17,6 @@ class MultiCheckboxExporter(MappedAsDataclass, OrmBase):
     capitalization: Mapped[CapitalizationType] = mapped_column(default=CapitalizationType.NONE, nullable=False)
 
     export_type: Mapped[MultiCbExportType] = mapped_column(default=MultiCbExportType.MULTIPLE_COLUMNS, nullable=False)
-    export_group: Mapped[str | None] = mapped_column(default=None)
 
     # Relationships
 

@@ -175,7 +175,6 @@ def custom_circled_field_export(
 def custom_multi_checkbox_field_export(
         field: ProcessedMultiCheckboxField,
         exporter: MultiCheckboxExporter,
-        export_groups: dict[str, dict[str, int]],
 ) -> dict[str, str]:
     export_columns = {}
     if exporter.no_export:
@@ -188,14 +187,6 @@ def custom_multi_checkbox_field_export(
     text_field_name = f'{export_name}_desc'
     if exporter.text_field_name is not None:
         text_field_name = exporter.text_field_name
-
-    # Check if we are in an export group
-    if exporter.export_group is not None:
-        export_groups[exporter.export_group][export_name] += 1
-        export_name = f'{export_name}{export_groups[exporter.export_group][export_name]}'
-
-        export_groups[exporter.export_group][text_field_name] += 1
-        text_field_name = f'{text_field_name}{export_groups[exporter.export_group][text_field_name]}'
 
     # Handle single column vs multi column exports
     if exporter.export_type is MultiCbExportType.SINGLE_COLUMN:
@@ -240,7 +231,6 @@ def custom_multi_checkbox_field_export(
 def export_text_field(
         mode: ExportMode,
         field: ProcessedTextField,
-        export_groups: dict[str, dict[str, int]],
 ) -> dict[str, str]:
     logger.info(f'Exporting text field: {field.name}')
     # TODO: Check validation status for MODERATE mode
@@ -251,7 +241,7 @@ def export_text_field(
 
     export_columns = {}
     for exporter in field.text_field.exporters:
-        export_columns |= custom_text_field_export(field, exporter, export_groups)
+        export_columns |= custom_text_field_export(field, exporter)
 
     return export_columns
 
@@ -279,7 +269,6 @@ def export_circled_field(field: ProcessedCircledField) -> dict[str, str]:
 def export_multi_checkbox_field(
         mode: ExportMode,
         field: ProcessedMultiCheckboxField,
-        export_groups: dict[str, dict[str, int]],
 ) -> dict[str, str]:
     logger.info(f'Exporting multi checkbox field: {field.name}')
 
@@ -288,21 +277,19 @@ def export_multi_checkbox_field(
     return custom_multi_checkbox_field_export(
         field,
         field.multi_checkbox_field.exporter if field.multi_checkbox_field.exporter is not None else MultiCheckboxExporter(),
-        export_groups
     )
 
 
 def export_field(
         mode: ExportMode,
         field: ProcessedField,
-        export_groups: dict[str, dict[str, int]],
 ) -> dict[str, str]:
     if field.text_field is not None:
-        return export_text_field(mode, field.text_field, export_groups)
+        return export_text_field(mode, field.text_field)
     elif field.checkbox_field is not None:
         return export_checkbox_field(field.checkbox_field)
     elif field.multi_checkbox_field is not None:
-        return export_multi_checkbox_field(mode, field.multi_checkbox_field, export_groups)
+        return export_multi_checkbox_field(mode, field.multi_checkbox_field)
     elif field.circled_field is not None:
         return export_circled_field(field.circled_field)
     else:
@@ -312,7 +299,6 @@ def export_field(
 
 def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
     export_data = defaultdict(list)
-    export_groups = defaultdict(lambda: defaultdict(int))
 
     record_index = 0
     for input_file in job.input_files:
@@ -335,8 +321,8 @@ def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
                     logger.info(f'Exporting group: {group.name}')
 
                 for field in group.fields:
-                    # TODO: ensure all columns are even lengths which is a requirement of a DataFrame
-                    for export_column, export_value in export_field(mode, field, export_groups).items():
+                    field_data = export_field(mode, field)
+                    for export_column, export_value in field_data.items():
                         export_data[export_column].append(export_value)
 
     # log the entire export for debug later

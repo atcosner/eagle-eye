@@ -1454,9 +1454,7 @@ def add_fn_form_v1(session: Session) -> None:
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_type',
-                            text_field_name='para_count',
-                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                            export_field_name='ecto1_type',
                         ),
                     )
                 ),
@@ -1472,7 +1470,7 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Other', region=BoxBounds(x=1159, y=1347, width=12, height=12)),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_pres',
+                            export_field_name='ecto1_pres',
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
@@ -1482,7 +1480,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1301, width=218, height=66),
                         exporters=[
-                            TextExporter(export_field_name='para_remarks'),
+                            TextExporter(export_field_name='ecto1_remarks'),
                         ],
                     ),
                 ),
@@ -1520,9 +1518,7 @@ def add_fn_form_v1(session: Session) -> None:
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_type',
-                            text_field_name='para_count',
-                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                            export_field_name='ecto2_type',
                         ),
                     )
                 ),
@@ -1538,7 +1534,7 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Other', region=BoxBounds(x=1159, y=1417, width=12, height=12)),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_pres',
+                            export_field_name='ecto2_pres',
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
@@ -1548,7 +1544,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1371, width=218, height=66),
                         exporters=[
-                            TextExporter(export_field_name='para_remarks'),
+                            TextExporter(export_field_name='ecto2_remarks'),
                         ],
                     ),
                 ),
@@ -1563,7 +1559,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Type',
                         visual_region=BoxBounds(x=838, y=1442, width=231, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_type'),
+                            TextExporter(export_field_name='misc_para_type'),
                         ],
                     ),
                 ),
@@ -1572,7 +1568,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Count',
                         visual_region=BoxBounds(x=838, y=1442, width=231, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_count'),
+                            TextExporter(export_field_name='misc_para_count'),
                         ],
                     ),
                 ),
@@ -1581,7 +1577,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Preserved',
                         visual_region=BoxBounds(x=1073, y=1442, width=177, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_pres'),
+                            TextExporter(export_field_name='misc_para_pres'),
                         ],
                     ),
                 ),
@@ -1590,7 +1586,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1442, width=218, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_remarks'),
+                            TextExporter(export_field_name='misc_para_remarks'),
                         ],
                     ),
                 ),
@@ -1628,9 +1624,7 @@ def add_fn_form_v1(session: Session) -> None:
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_type',
-                            text_field_name='para_count',
-                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                            export_field_name='endo1_type',
                         ),
                     )
                 ),
@@ -1645,7 +1639,7 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1527, width=12, height=12)),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_pres',
+                            export_field_name='endo1_pres',
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
@@ -1655,7 +1649,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1514, width=218, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_remarks'),
+                            TextExporter(export_field_name='endo1_remarks'),
                         ],
                     ),
                 ),
@@ -1693,9 +1687,7 @@ def add_fn_form_v1(session: Session) -> None:
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_type',
-                            text_field_name='para_count',
-                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                            export_field_name='endo2_type',
                         ),
                     )
                 ),
@@ -1710,7 +1702,7 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1599, width=12, height=12)),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_pres',
+                            export_field_name='endo2_pres',
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
@@ -1720,7 +1712,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1586, width=218, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_remarks'),
+                            TextExporter(export_field_name='endo2_remarks'),
                         ],
                     ),
                 ),
@@ -1758,9 +1750,7 @@ def add_fn_form_v1(session: Session) -> None:
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_type',
-                            text_field_name='para_count',
-                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                            export_field_name='endo3_type',
                         ),
                     )
                 ),
@@ -1775,7 +1765,7 @@ def add_fn_form_v1(session: Session) -> None:
                             MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1671, width=12, height=12)),
                         ],
                         exporter=MultiCheckboxExporter(
-                            export_field_name='para_pres',
+                            export_field_name='endo3_pres',
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
@@ -1785,7 +1775,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Remarks',
                         visual_region=BoxBounds(x=1369, y=1658, width=218, height=69),
                         exporters=[
-                            TextExporter(export_field_name='para_remarks'),
+                            TextExporter(export_field_name='endo3_remarks'),
                         ],
                     ),
                 ),

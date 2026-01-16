@@ -419,6 +419,7 @@ def add_fn_form_v1(session: Session) -> None:
                                 1: CustomData(key=1, text_choices=[TextChoice(text=t) for t in state_list]),
                             },
                         ),
+                        # TODO: strip not working
                         exporters=[
                             TextExporter(
                                 export_field_name='country',
@@ -928,8 +929,7 @@ def add_fn_form_v1(session: Session) -> None:
                         name='Embryo - Measurements',
                         visual_region=BoxBounds(x=1143, y=891, width=184, height=46),
                         text_regions=[
-                            BoxBounds(x=1160, y=896, width=81, height=35),
-                            BoxBounds(x=1346, y=897, width=71, height=34),
+                            BoxBounds(x=1158, y=897, width=160, height=35),
                         ],
                         text_validator=TextValidator(
                             text_regex=r'^[0-9]+R,[0-9]+L$',
@@ -1453,6 +1453,7 @@ def add_fn_form_v1(session: Session) -> None:
                                 text_region=BoxBounds(x=956, y=1334, width=46, height=26),
                             ),
                         ],
+                        # TODO: this format does not match the example
                         exporter=MultiCheckboxExporter(
                             export_field_name='ecto1_type',
                         ),

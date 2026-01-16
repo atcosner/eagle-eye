@@ -70,7 +70,6 @@ def handle_capitalization(value: str, mode: CapitalizationType) -> str:
 def custom_text_field_export(
         field: ProcessedTextField,
         exporter: TextExporter,
-        export_groups: dict[str, dict[str, int]],
 ) -> dict[str, str]:
     export_columns = {}
     if exporter.no_export:
@@ -79,11 +78,6 @@ def custom_text_field_export(
     export_name = default_variable_name(field.name)
     if exporter.export_field_name is not None:
         export_name = exporter.export_field_name
-
-    # Check if we are in an export group
-    if exporter.export_group is not None:
-        export_groups[exporter.export_group][export_name] += 1
-        export_name = f'{export_name}{export_groups[exporter.export_group][export_name]}'
 
     if field.from_controlled_language is not None:
         # Add a column for the controlled language checkbox
@@ -117,13 +111,6 @@ def custom_text_field_export(
 
         except ValueError:
             logger.exception(f'Could not parse date: "{field.text}"')
-
-    elif exporter.export_type is ExportType.CSV_SEP_COLUMNS:
-        export_columns.pop(export_name)
-
-        # Break apart the field text by the seperator and create individual columns for each entry
-        for idx, part in enumerate(export_text.split(exporter.element_seperator)):
-            export_columns[f'{export_name}{idx + 1}'] = part
 
     elif exporter.export_type is ExportType.VALIDATOR_PART or exporter.validator_group_index is not None:
         # TODO: ensure we have a validator
@@ -300,7 +287,6 @@ def export_field(
 def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
     export_data = defaultdict(list)
 
-    record_index = 0
     for input_file in job.input_files:
         if input_file.container_file:
             continue

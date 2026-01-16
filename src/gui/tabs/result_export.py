@@ -176,7 +176,7 @@ class ResultExport(QWidget):
         # Export the dataframe in the requested format
         if 'csv' in self.export_formats.currentText():
             # CSV
-            export_df.to_csv(self.export_file_path.text())
+            export_df.to_csv(self.export_file_path.text(), index=False)
         else:
             # XLSX
-            export_df.to_excel(self.export_file_path.text())
+            export_df.to_excel(self.export_file_path.text(), index=False)

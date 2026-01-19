@@ -180,24 +180,28 @@ def custom_multi_checkbox_field_export(
         text_field_name = exporter.text_field_name
 
     # Handle single column vs multi column exports
-    if exporter.export_type is MultiCbExportType.SINGLE_COLUMN:
+    if exporter.export_type in [MultiCbExportType.SINGLE_COLUMN, MultiCbExportType.SINGLE_PLUS_TEXT]:
         checked_option: ProcessedMultiCheckboxOption | None = None
+        text_option: ProcessedMultiCheckboxOption | None = None
         for option in field.checkboxes.values():
             if option.checked:
                 checked_option = option
+            if option.ocr_text is not None or option.text is not None:
+                text_option = option
 
         if checked_option is None:
             export_columns[export_name] = ''
         else:
             export_columns[export_name] = checked_option.name
 
-            if checked_option.ocr_text is not None or checked_option.text is not None:
-                export_columns[text_field_name] = checked_option.text
-
             if checked_option.circled_options:
                 for option in checked_option.circled_options.values():
                     if option.circled:
                         export_columns[export_name] = f'{checked_option.name}: {option.name}'
+
+        # Add in an extra description column if we need one
+        if exporter.export_type is MultiCbExportType.SINGLE_PLUS_TEXT and text_option is not None:
+            export_columns[text_field_name] = text_option.text
 
     elif exporter.export_type is MultiCbExportType.MULTIPLE_COLUMNS:
         for option in field.checkboxes.values():

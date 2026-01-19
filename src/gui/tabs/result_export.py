@@ -167,6 +167,15 @@ class ResultExport(QWidget):
             )
             return
 
+        # Check that the file path does not exist already
+        if Path(self.export_file_path.text()).exists():
+            QMessageBox.critical(
+                self,
+                'Export Error',
+                'File already exists, please choose another name'
+            )
+            return
+
         # Load the job and turn it into a dataframe
         assert self._job_db_id, 'Cannot export without a job id'
         with Session(DB_ENGINE) as session:

@@ -1125,7 +1125,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='prep_type(s)',
-                            export_type=MultiCbExportType.SINGLE_COLUMN,
+                            export_type=MultiCbExportType.SINGLE_PLUS_TEXT,
                         ),
                     )
                 ),

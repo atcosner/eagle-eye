@@ -11,6 +11,7 @@ class MultiCbExportType(Enum):
     MULTIPLE_COLUMNS = object()
     SINGLE_COLUMN = object()
     MULTI_USE_TEXT = object()
+    SINGLE_PLUS_TEXT = object()
 
 
 class CapitalizationType(Enum):

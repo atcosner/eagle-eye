@@ -419,7 +419,6 @@ def add_fn_form_v1(session: Session) -> None:
                                 1: CustomData(key=1, text_choices=[TextChoice(text=t) for t in state_list]),
                             },
                         ),
-                        # TODO: strip not working
                         exporters=[
                             TextExporter(
                                 export_field_name='country',
@@ -1453,9 +1452,9 @@ def add_fn_form_v1(session: Session) -> None:
                                 text_region=BoxBounds(x=956, y=1334, width=46, height=26),
                             ),
                         ],
-                        # TODO: this format does not match the example
                         exporter=MultiCheckboxExporter(
                             export_field_name='ecto1_type',
+                            export_type=MultiCbExportType.MULTI_USE_TEXT,
                         ),
                     )
                 ),
@@ -1520,6 +1519,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='ecto2_type',
+                            export_type=MultiCbExportType.MULTI_USE_TEXT,
                         ),
                     )
                 ),
@@ -1626,6 +1626,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='endo1_type',
+                            export_type=MultiCbExportType.MULTI_USE_TEXT,
                         ),
                     )
                 ),
@@ -1689,6 +1690,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='endo2_type',
+                            export_type=MultiCbExportType.MULTI_USE_TEXT,
                         ),
                     )
                 ),
@@ -1752,6 +1754,7 @@ def add_fn_form_v1(session: Session) -> None:
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='endo3_type',
+                            export_type=MultiCbExportType.MULTI_USE_TEXT,
                         ),
                     )
                 ),

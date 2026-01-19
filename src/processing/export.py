@@ -67,6 +67,19 @@ def handle_capitalization(value: str, mode: CapitalizationType) -> str:
         return value
 
 
+def handle_text_formatting(text: str, exporter: TextExporter) -> str:
+    export_text = handle_capitalization(text, exporter.capitalization)
+    if exporter.strip_value:
+        export_text = export_text.strip()
+    if export_text:
+        if exporter.prefix:
+            export_text = f'{exporter.prefix}{export_text}'
+        if exporter.suffix:
+            export_text = f'{export_text}{exporter.suffix}'
+
+    return export_text
+
+
 def custom_text_field_export(
         field: ProcessedTextField,
         exporter: TextExporter,
@@ -84,15 +97,7 @@ def custom_text_field_export(
         export_columns[f'{export_name}_checkbox'] = export_bool_to_string(field.from_controlled_language)
 
     # Format the export for the RAW type
-    export_text = handle_capitalization(field.text, exporter.capitalization)
-    if exporter.strip_value:
-        export_text = export_text.strip()
-    if export_text:
-        if exporter.prefix:
-            export_text = f'{exporter.prefix}{export_text}'
-        if exporter.suffix:
-            export_text = f'{export_text}{exporter.suffix}'
-    export_columns[export_name] = export_text
+    export_columns[export_name] = handle_text_formatting(field.text, exporter)
 
     # Work through the custom export options
     if exporter.export_type is ExportType.RAW:
@@ -104,10 +109,9 @@ def custom_text_field_export(
         try:
             date = datetime.datetime.strptime(field.text, '%d %B %Y')
             if exporter.export_type is ExportType.DATE_DMY:
-                export_text = date.date().strftime('%d-%m-%Y')
+                export_columns[export_name] = date.date().strftime('%d-%m-%Y')
             elif exporter.export_type is ExportType.DATE_YMD:
-                export_text = date.date().isoformat()
-            export_columns[export_name] = export_text
+                export_columns[export_name] = date.date().isoformat()
 
         except ValueError:
             logger.exception(f'Could not parse date: "{field.text}"')
@@ -126,7 +130,7 @@ def custom_text_field_export(
                 # Index 0 is the whole match so add 1 to the index to get the subgroup
                 group_index = exporter.validator_group_index + 1
                 try:
-                    export_columns[export_name] = regex_match.group(group_index)
+                    export_columns[export_name] = handle_text_formatting(regex_match.group(group_index), exporter)
                 except IndexError:
                     logger.error(f'Regex did not have a match for group index : {group_index}')
 
@@ -203,6 +207,12 @@ def custom_multi_checkbox_field_export(
             # Add an '_desc' if the checkbox option has a text region
             if option.ocr_text is not None or option.text is not None:
                 export_columns[text_field_name] = option.text
+
+    elif exporter.export_type is MultiCbExportType.MULTI_USE_TEXT:
+        for option in field.checkboxes.values():
+            option_name = f'{export_name}_{default_variable_name(option.name)}'
+            # use the associated text region for the value
+            export_columns[option_name] = option.text if option.text is not None else ''
 
     else:
         logger.error(f'Unknown export type: {exporter.export_type.name}')

@@ -33,9 +33,9 @@ assert project_path is not None
 DEV_PATH = project_path / 'scripts' / 'test_files'
 TEST_FILES = [
     # use forms with real data
-    # DEV_PATH / 'kt' / '40013-40014.jpg',
+    DEV_PATH / 'kt' / '40013-40014.jpg',
     # DEV_PATH / 'kt' / '40015-40018.pdf',
-    DEV_PATH / 'fn' / 'FN5007.pdf',
+    # DEV_PATH / 'fn' / 'FN5007.pdf',
 
     # # pdf with alignment errors
     # DEV_PATH / 'kt' / '40013-40018.pdf',

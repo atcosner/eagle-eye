@@ -61,11 +61,11 @@ def add_kt_form_v8(session: Session) -> None:
                     text_field=TextField(
                         name='KT Number',
                         visual_region=BoxBounds(x=248, y=120, width=120, height=44),
-                        text_exporter=TextExporter(prefix='KT_'),
                         text_validator=TextValidator(
                             text_regex=r'^[0-9]{5}$',
                             error_tooltip='KT Numbers must be exactly 5 digits',
                         ),
+                        exporters=[TextExporter(prefix='KT_')],
                     ),
                 ),
             ],
@@ -95,7 +95,7 @@ def add_kt_form_v8(session: Session) -> None:
                     text_field=TextField(
                         name='KU Number',
                         visual_region=BoxBounds(x=707, y=120, width=207, height=46),
-                        text_exporter=TextExporter(no_export=True),
+                        exporters=[TextExporter(no_export=True)],
                     ),
                 ),
             ],
@@ -108,7 +108,7 @@ def add_kt_form_v8(session: Session) -> None:
                     text_field=TextField(
                         name='OT Number',
                         visual_region=BoxBounds(x=972, y=120, width=215, height=46),
-                        text_exporter=TextExporter(no_export=True),
+                        exporters=[TextExporter(no_export=True)],
                     ),
                 ),
             ],
@@ -123,7 +123,6 @@ def add_kt_form_v8(session: Session) -> None:
                         name='Locality',
                         visual_region=BoxBounds(x=249, y=183, width=992, height=39),
                         allow_copy=True,
-                        text_exporter=TextExporter(export_field_name='locality_string'),
                         # This is not using a custom datatype to text the regex functionality
                         # - Something complicated like this should probably be a custom datatype
                         text_validator=TextValidator(
@@ -135,6 +134,7 @@ def add_kt_form_v8(session: Session) -> None:
                             reformat_regex='{state} : {county} : {location}',
                             error_tooltip='Locality must be in the format: [STATE] : [COUNTY] : [PLACE]',
                         ),
+                        exporters=[TextExporter(export_field_name='locality_string')],
                     ),
                 ),
             ],

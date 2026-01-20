@@ -38,15 +38,16 @@ def duplicate_field(
         y_offset: int = 0,
 ) -> FormField:
     if field.text_field is not None:
-        new_exporter = None
-        if field.text_field.text_exporter is not None:
-            exporter = field.text_field.text_exporter
-            new_exporter = TextExporter(
-                no_export=exporter.no_export,
-                export_field_name=exporter.export_field_name,
-                prefix=exporter.prefix,
-                suffix=exporter.suffix,
-                strip_value=exporter.strip_value,
+        exporters = []
+        for exporter in field.text_field.exporters:
+            exporters.append(
+                TextExporter(
+                    no_export=exporter.no_export,
+                    export_field_name=exporter.export_field_name,
+                    prefix=exporter.prefix,
+                    suffix=exporter.suffix,
+                    strip_value=exporter.strip_value,
+                )
             )
 
         new_validator = None
@@ -76,7 +77,7 @@ def duplicate_field(
             text_regions=text_regions,
             checkbox_text=field.text_field.checkbox_text,
             allow_copy=field.text_field.allow_copy,
-            text_exporter=new_exporter,
+            exporters=exporters,
             text_validator=new_validator,
         )
         return FormField(

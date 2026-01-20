@@ -5,24 +5,48 @@ from pathlib import Path
 from PyInstaller.building.api import COLLECT, EXE, PYZ
 from PyInstaller.building.build_main import Analysis
 
-# bulk auto add all data files in the src/gui/resources directory
-data_files = []
-project_path = Path(SPECPATH)
-resources_path = project_path / 'src' / 'gui' / 'resources'
-assert resources_path.exists(), f'{resources_path} does not exist'
+PROJECT_PATH = Path(SPECPATH)
+DATA_FILES: list[tuple[str, str]] = []
 
-for root, dirs, files in resources_path.walk(on_error=print):
-    truncated_root = root.relative_to(project_path)
-    for file in files:
-        data_files.append(
-            (str(truncated_root / file), str(truncated_root))
-        )
+
+def add_files(
+        top_level_path: Path,
+        directory: Path,
+        excluded_extensions: list[str] | None = None,
+) -> list[tuple[str, str]]:
+    data_files = []
+    for root, dirs, files in directory.walk(on_error=print):
+        truncated_root = root.relative_to(top_level_path)
+        for file in files:
+            # check for an excluded extension
+            if excluded_extensions is not None:
+                if Path(file).suffix in excluded_extensions:
+                    continue
+
+            data_files.append(
+                (str(truncated_root / file), str(truncated_root))
+            )
+
+    return data_files
+
+
+# bulk auto add all data files in the src/gui/resources directory
+resources_path = PROJECT_PATH / 'src' / 'gui' / 'resources'
+assert resources_path.exists(), f'{resources_path} does not exist'
+DATA_FILES.extend(add_files(PROJECT_PATH, resources_path))
+
+
+# add files (that are not .py) in the examples directory
+examples_path = PROJECT_PATH / 'src' / 'examples'
+assert examples_path.exists(), f'{examples_path} does not exist'
+DATA_FILES.extend(add_files(PROJECT_PATH, examples_path, excluded_extensions=['.py', '.pyc']))
+
 
 a = Analysis(
     ['eagle_eye.py'],
     pathex=[],
     binaries=[],
-    datas=data_files,
+    datas=DATA_FILES,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

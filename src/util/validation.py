@@ -29,7 +29,7 @@ VALID_DATE_FORMATS = [
 logger = logging.getLogger(__name__)
 
 
-class MultiCheckboxValidation(Enum):
+class MultiChoiceValidation(Enum):
     NONE = 1
     REQUIRE_ONE = 2
     MAXIMUM_ONE = 3
@@ -52,6 +52,7 @@ class TextValidatorDatatype(Enum):
     # DO NOT CHANGE ANY OF THE NUMBERS ABOVE THIS LINE!!
 
     KU_GPS_WAYPOINT = 9
+    FN_COUNTRY_STATE = 10
 
 
 def get_verified_icon(verified: bool) -> QIcon:

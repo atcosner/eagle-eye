@@ -103,7 +103,7 @@ class TextFieldEntryWidget(QWidget):
     def get_data(self) -> tuple[bool, str]:
         match self.datatype:
             case TextValidatorDatatype.DATE:
-                return self.invalid_data, self.input_widget.date().toString('d MMMM yyyy')
+                return self.invalid_data, self.input_widget.date().toString('dd MMMM yyyy')
             case TextValidatorDatatype.TIME:
                 return self.invalid_data, self.input_widget.time().toString('hh:mm')
             case TextValidatorDatatype.LIST_CHOICE:

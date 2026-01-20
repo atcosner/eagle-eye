@@ -4,13 +4,16 @@ from typing import Iterable
 
 from PyQt6.QtCore import QDate, QTime
 
+from src.database.fields.circled_field import CircledField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.text_field import TextField
+from src.database.processed_fields.processed_circled_option import ProcessedCircledOption
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
+from src.database.validation.text_choice import TextChoice
 from src.database.validation.text_validator import TextValidator
 from src.database.validation.validation_result import ValidationResult
 from src.util.validation import (
-    MultiCheckboxValidation,
+    MultiChoiceValidation,
     TextValidatorDatatype,
     VALID_TIME_FORMATS,
     VALID_DATE_FORMATS,
@@ -18,6 +21,42 @@ from src.util.validation import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def validate_circled_field(
+        field: CircledField,
+        options: dict[str, ProcessedCircledOption],
+) -> ValidationResult:
+    validation_result: bool | None = None
+    tooltip: str | None = None
+
+    match field.validator:
+        case MultiChoiceValidation.NONE:
+            validation_result = None
+            tooltip = 'No validation defined'
+        case MultiChoiceValidation.REQUIRE_ONE:
+            # Ensure that at least one option was circled
+            validation_result = any([option.circled for option in options.values()])
+            tooltip = 'This field is required to have at least one option circled'
+        case MultiChoiceValidation.MAXIMUM_ONE:
+            # Do not allow more than one option to be circled
+            circled_options = [option for option in options.values() if option.circled]
+            validation_result = len(circled_options) <= 1
+            tooltip = f'This field is only allowed to have one option circled, but {len(circled_options)} were circled'
+        case MultiChoiceValidation.OPTIONAL:
+            # Optional circled fields always pass validation
+            validation_result = True
+        case _:
+            logger.error(f'Unknown validator: {field.validator.name}')
+
+    # The tooltip assumes failure, overwrite if success
+    if validation_result:
+        tooltip = f'Field passed validation ({field.validator.name})'
+
+    return ValidationResult(
+        result=validation_result,
+        explanation=tooltip,
+    )
 
 
 def validate_multi_checkbox_field(
@@ -28,19 +67,19 @@ def validate_multi_checkbox_field(
     tooltip: str | None = None
 
     match field.validator:
-        case MultiCheckboxValidation.NONE:
+        case MultiChoiceValidation.NONE:
             validation_result = None
             tooltip = 'No validation defined'
-        case MultiCheckboxValidation.REQUIRE_ONE:
+        case MultiChoiceValidation.REQUIRE_ONE:
             # Ensure that at least one checkbox was checked
             validation_result = any([option.checked for option in checkboxes.values()])
             tooltip = 'This field is required to have at least one option checked'
-        case MultiCheckboxValidation.MAXIMUM_ONE:
+        case MultiChoiceValidation.MAXIMUM_ONE:
             # Do not allow more than one option to be checked
             checked_boxes = [option for option in checkboxes.values() if option.checked]
             validation_result = len(checked_boxes) <= 1
             tooltip = f'This field is only allowed to have one option checked, but {len(checked_boxes)} were checked'
-        case MultiCheckboxValidation.OPTIONAL:
+        case MultiChoiceValidation.OPTIONAL:
             # Optional multi-checkboxes always pass validation
             validation_result = True
         case _:
@@ -77,6 +116,18 @@ def check_conversion_from_string(obj: type[QTime | QDate], formats: Iterable[str
             break
 
     return match_found
+
+
+def check_choices_match(text: str, choices: list[TextChoice]) -> tuple[bool, str | None]:
+    strings = [x.text for x in choices]
+    if text in strings:
+        return True, None
+    else:
+        match = find_best_string_match(text, strings)
+        if match is not None:
+            return True, match
+        else:
+            return False, None
 
 
 def validate_raw_text(validator: TextValidator, text: str) -> ValidationResult:
@@ -244,5 +295,63 @@ def validate_text_field(
                     'GPS waypoints must be a string of letters and then numbers',
                 ),
             )
+
+    elif validator.datatype is TextValidatorDatatype.FN_COUNTRY_STATE:
+        # match the regex groups
+        match = re.compile(validator.text_regex).match(text)
+
+        # ensure we matched something for both groups
+        if match.group(1) is None or match.group(2) is None:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(
+                    validator,
+                    'Locality must be of the format "<COUNTRY> / <STATE>"',
+                ),
+            )
+
+        country = match.group(1).strip()
+        state = match.group(2).strip()
+
+        # check the country and state to see if we got a match with the allowed options
+        country_choices = validator.custom_data[0].text_choices
+        state_choices = validator.custom_data[1].text_choices
+
+        country_matched, country_correction = check_choices_match(country, country_choices)
+        state_matched, state_correction = check_choices_match(state, state_choices)
+
+        if not country_matched:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(
+                    validator,
+                    f'Country "{country}" was not in the allowed list',
+                ),
+            )
+        if not state_matched:
+            return ValidationResult(
+                result=False,
+                explanation=get_explanation(
+                    validator,
+                    f'State "{state}" was not in the allowed list',
+                ),
+            )
+
+        # reformat the result
+        fixed_country = country if country_correction is None else country_correction
+        fixed_state = state if state_correction is None else state_correction
+
+        correction = f'{fixed_country} / {fixed_state}'
+        if correction != text:
+            return ValidationResult(
+                result=True,
+                explanation=f'Correction made: "{text}" -> "{correction}"',
+                correction=correction,
+            )
+        else:
+            return ValidationResult(result=True, explanation=None)
+
+    else:
+        logger.error(f'Unknown validation datatype: {validator.datatype.name}')
 
     return ValidationResult(result=None, explanation=None)

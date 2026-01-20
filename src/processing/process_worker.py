@@ -10,18 +10,23 @@ from PyQt6.QtCore import QObject, pyqtSlot, pyqtSignal, QMutex, QMutexLocker
 
 import src.util.processing as process_util
 from src.database import DB_ENGINE
+from src.database.fields.circled_field import CircledField
 from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.multi_checkbox_field import MultiCheckboxField
 from src.database.fields.text_field import TextField
 from src.database.input_file import InputFile
 from src.database.job import Job
-from src.database.process_result import ProcessResult
+from src.database.processed_fields.processed_circled_field import ProcessedCircledField
+from src.database.processed_fields.processed_circled_option import ProcessedCircledOption
 from src.database.processed_fields.processed_checkbox_field import ProcessedCheckboxField
 from src.database.processed_fields.processed_field import ProcessedField
+from src.database.processed_fields.processed_field_group import ProcessedFieldGroup
 from src.database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
 from src.database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from src.database.processed_fields.processed_text_field import ProcessedTextField
-from src.database.processed_region import ProcessedRegion
+from src.database.processed_fields.processed_sub_circled_option import ProcessedSubCircledOption
+from src.database.processing.processed_region import ProcessedRegion
+from src.database.processing.process_result import ProcessResult
 from src.database.validation.validation_result import ValidationResult
 from src.util.google_api import open_api_session, ocr_text_region
 from src.util.logging import NamedLoggerAdapter
@@ -56,6 +61,20 @@ class ProcessWorker(QObject):
             current_region: ProcessedRegion,
             identifier_field: ProcessedTextField | None = None,
     ) -> tuple[bool, ProcessedTextField]:
+        # shortcut if this is a synthetic field
+        if field.synthetic_only:
+            return False, ProcessedTextField(
+                name=field.name,
+                roi_path=roi_dest_path,
+                text='',
+                ocr_text='',
+                from_controlled_language=None,
+                copied_from_linked=None,
+                linked_field_id=None,
+                validation_result=validation.validate_text_field(field, ''),
+                text_field=field,
+            )
+
         # Snip and save off the ROI image
         process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
 
@@ -187,12 +206,25 @@ class ProcessWorker(QObject):
                     self.log.info(f'Detected mostly white image, skipping OCR')
                     optional_text = ''
 
+            # If we have circled options, process them
+            circled_options = {}
+            for option in checkbox.circled_options:
+                # checked = process_util.get_checked(aligned_image, checkbox.region)
+                # self.log.info(f'Sub Circled Option "{checkbox.name}" = {checked}')
+
+                circled_options[option.name] = ProcessedSubCircledOption(
+                    name=option.name,
+                    circled=False,  # TODO: actually process these
+                    sub_circled_option=option,
+                )
+
             checkboxes[checkbox.name] = ProcessedMultiCheckboxOption(
                 name=checkbox.name,
                 checked=checked,
                 text=optional_text,
                 ocr_text=optional_text,
                 multi_checkbox_option=checkbox,
+                circled_options=circled_options,
             )
 
         # Validate the field
@@ -207,6 +239,39 @@ class ProcessWorker(QObject):
             checkboxes=checkboxes,
         )
         return ocr_error, field
+
+    def process_circled_field(
+            self,
+            field: CircledField,
+            aligned_image: np.ndarray,
+            reference_image: np.ndarray,
+            roi_dest_path: Path,
+    ) -> tuple[bool, ProcessedCircledField]:
+        process_util.snip_roi_image(aligned_image, field.visual_region, save_path=roi_dest_path)
+
+        options: dict[str, ProcessedCircledOption] = {}
+        for option in field.options:
+            circled = process_util.get_circled(option.region, reference_image, aligned_image)
+            self.log.info(f'Circled Option "{field.name}" = {circled}')
+
+            options[option.name] = ProcessedCircledOption(
+                name=option.name,
+                circled=circled,
+                circled_option=option,
+            )
+
+        # Validate the field
+        validation_result = validation.validate_circled_field(field, options)
+        self.log.info(f'Validation: {validation_result.result}')
+
+        field = ProcessedCircledField(
+            name=field.name,
+            roi_path=roi_dest_path,
+            validation_result=validation_result,
+            circled_field=field,
+            options=options,
+        )
+        return False, field
 
     @pyqtSlot()
     def start(self) -> None:
@@ -226,11 +291,12 @@ class ProcessWorker(QObject):
             assert input_file.pre_process_result.aligned_image_path.exists(), \
                 f'Path does not exist: {input_file.pre_process_result.aligned_image_path}'
 
-            # Load the aligned image from our pre-processing
+            # Load the reference and aligned image from our pre-processing
             aligned_image = cv2.imread(
                 str(input_file.pre_process_result.aligned_image_path),
                 flags=cv2.IMREAD_GRAYSCALE,
             )
+            reference_image = cv2.cvtColor(cv2.imread(str(input_file.job.reference_form.path)), cv2.COLOR_BGR2GRAY)
 
             # Create a working directory to store our ROI snips
             processing_directory = LocalPaths.processing_directory(job.uuid, input_file.id)
@@ -258,64 +324,91 @@ class ProcessWorker(QObject):
                 )
                 result.regions[processed_region.local_id] = processed_region
 
-                # Sort the fields so that we process the identifier field first
-                for field in sorted(page_region.fields, key=lambda f: f.identifier, reverse=True):
-                    roi_path = processing_directory / f'{field.id}.png'
-                    processed_field = ProcessedField(processing_error=False)
+                # TODO: we should find and process the identifier field first no matter where it is
 
-                    if field.text_field is not None:
-                        self.log.info(f'Processing Text Field: {field.text_field.name}')
-                        had_error, result_field = self.process_text_field(
-                            session=api_session,
-                            field=field.text_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                            linking_method=job.reference_form.linking_method,
-                            current_region=processed_region,
-                            identifier_field=identifier_field,
+                for group in page_region.groups:
+                    self.log.info(f'Processing group: "{group.name}"')
+                    processed_field_group = ProcessedFieldGroup(name=group.name, roi_path=None)
+                    processed_region.groups.append(processed_field_group)
+
+                    # snip the visual region for the whole group
+                    if group.visual_region is not None:
+                        processed_field_group.roi_path = processing_directory / f'fg_{field.id}.png'
+                        process_util.snip_roi_image(
+                            aligned_image,
+                            group.visual_region,
+                            save_path=processed_field_group.roi_path,
                         )
 
-                        # Save off the identifier field for later linking use
-                        if field.identifier:
-                            self.log.info(f'Located identifier field: {field.text_field.name}')
-                            processed_region.linking_identifier = process_util.extract_identifier(
-                                field.identifier_regex,
-                                result_field.text,
+                    for field in group.fields:
+                        roi_path = processing_directory / f'{field.id}.png'
+                        processed_field = ProcessedField(processing_error=False)
+
+                        if field.text_field is not None:
+                            self.log.info(f'Processing Text Field: {field.text_field.name}')
+                            had_error, result_field = self.process_text_field(
+                                session=api_session,
+                                field=field.text_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                                linking_method=job.reference_form.linking_method,
+                                current_region=processed_region,
+                                identifier_field=identifier_field,
                             )
 
-                        processed_field.processing_error = had_error
-                        processed_field.text_field = result_field
+                            # Save off the identifier field for later linking use
+                            if field.identifier:
+                                self.log.info(f'Located identifier field: {field.text_field.name}')
+                                processed_region.linking_identifier = process_util.extract_identifier(
+                                    field.identifier_regex,
+                                    result_field.text,
+                                )
 
-                    elif field.checkbox_field is not None:
-                        self.log.info(f'Processing Checkbox Field: {field.checkbox_field.name}')
-                        had_error, result_field = self.process_checkbox_field(
-                            field=field.checkbox_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                        )
+                            processed_field.processing_error = had_error
+                            processed_field.text_field = result_field
 
-                        processed_field.processing_error = had_error
-                        processed_field.checkbox_field = result_field
+                        elif field.checkbox_field is not None:
+                            self.log.info(f'Processing Checkbox Field: {field.checkbox_field.name}')
+                            had_error, result_field = self.process_checkbox_field(
+                                field=field.checkbox_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                            )
 
-                    elif field.multi_checkbox_field is not None:
-                        self.log.info(f'Processing Multi-Checkbox Field: {field.multi_checkbox_field.name}')
-                        had_error, result_field = self.process_multi_checkbox_field(
-                            session=api_session,
-                            field=field.multi_checkbox_field,
-                            aligned_image=aligned_image,
-                            roi_dest_path=roi_path,
-                        )
+                            processed_field.processing_error = had_error
+                            processed_field.checkbox_field = result_field
 
-                        processed_field.processing_error = had_error
-                        processed_field.multi_checkbox_field = result_field
+                        elif field.multi_checkbox_field is not None:
+                            self.log.info(f'Processing Multi-Checkbox Field: {field.multi_checkbox_field.name}')
+                            had_error, result_field = self.process_multi_checkbox_field(
+                                session=api_session,
+                                field=field.multi_checkbox_field,
+                                aligned_image=aligned_image,
+                                roi_dest_path=roi_path,
+                            )
 
-                    else:
-                        self.log.error(f'Form field had no parts to process')
-                        processed_field.processing_error = True
+                            processed_field.processing_error = had_error
+                            processed_field.multi_checkbox_field = result_field
 
-                    # Add the processed field to our region
-                    processing_error = processed_field.processing_error
-                    processed_region.fields.append(processed_field)
+                        elif field.circled_field is not None:
+                            self.log.info(f'Processing Circled Field: {field.circled_field.name}')
+                            had_error, result_field = self.process_circled_field(
+                                field=field.circled_field,
+                                aligned_image=aligned_image,
+                                reference_image=reference_image,
+                                roi_dest_path=roi_path,
+                            )
+
+                            processed_field.processing_error = had_error
+                            processed_field.circled_field = result_field
+
+                        else:
+                            self.log.error(f'Form field had no parts to process')
+                            processed_field.processing_error = True
+
+                        # Add the processed field to our region
+                        processing_error = processed_field.processing_error
+                        processed_field_group.fields.append(processed_field)
 
             # Commit the results to the DB and signal out that our status is changed
             session.commit()

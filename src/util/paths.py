@@ -70,7 +70,9 @@ class LocalPaths:
 
     @staticmethod
     def reference_forms_directory() -> Path:
-        return get_working_dir() / 'reference_forms'
+        reference_form_dir = get_working_dir() / 'reference_forms'
+        reference_form_dir.mkdir(exist_ok=True)
+        return reference_form_dir
 
     @staticmethod
     def bug_reports_directory() -> Path:

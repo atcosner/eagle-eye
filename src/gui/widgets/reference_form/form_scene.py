@@ -52,12 +52,14 @@ class FormScene(QGraphicsScene):
                 region_color = REGION_COLORS[region.local_id]
                 self.region_colors[region.id] = region_color
 
-                for field in region.fields:
-                    qt_field = BaseField(field, region_color)
-                    self.addItem(qt_field)
+                # TODO: add a hierarchy level for the field groups
+                for group in region.groups:
+                    for field in group.fields:
+                        qt_field = BaseField(field, region_color)
+                        self.addItem(qt_field)
 
-                    self.fields_by_region[region.id].append(qt_field)
-                    self.fields_by_id[field.id] = qt_field
+                        self.fields_by_region[region.id].append(qt_field)
+                        self.fields_by_id[field.id] = qt_field
 
     def handle_deletion(self, selection: SelectionType, db_id: int) -> None:
         if selection is SelectionType.REGION:

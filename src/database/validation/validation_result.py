@@ -47,3 +47,13 @@ class ValidationResult(MappedAsDataclass, OrmBase):
         init=False,
         back_populates="validation_result",
     )
+
+    circled_field_id: Mapped[int] = mapped_column(
+        ForeignKey("processed_circled_field.id"),
+        init=False,
+        nullable=True,
+    )
+    circled_field: Mapped["ProcessedCircledField"] = relationship(
+        init=False,
+        back_populates="validation_result",
+    )

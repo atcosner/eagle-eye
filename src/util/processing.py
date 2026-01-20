@@ -9,10 +9,11 @@ from src.database.processed_fields.processed_text_field import ProcessedTextFiel
 from src.util.types import FormLinkingMethod
 
 from .types import BoxBounds
-from ..database.processed_region import ProcessedRegion
+from src.database.processing.processed_region import ProcessedRegion
 
 OCR_WHITE_PIXEL_THRESHOLD = 0.99  # Ignore images that are over X% white
 CHECKBOX_WHITE_PIXEL_THRESHOLD = 0.6  # Checked checkboxes should have less than X% white
+CIRCLED_WHITE_PIXEL_THRESHOLD = 0.9  # Circled fields should have less than X% white
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +75,29 @@ def get_checked(aligned_image: np.ndarray, region: BoxBounds) -> bool:
 
     # Check if there are enough black pixels to confirm a selection
     return (white_pixels / roi_pixels) < CHECKBOX_WHITE_PIXEL_THRESHOLD
+
+
+def get_circled(
+        region: BoxBounds,
+        reference_image: np.ndarray,
+        aligned_image: np.ndarray
+) -> bool:
+    aligned_region = snip_roi_image(aligned_image, region)
+    reference_region = snip_roi_image(reference_image, region)
+    roi_pixels = region.height * region.width
+
+    # Apply a blur to the reference image since scans won't be as crisp as a screenshot
+    reference_blur = cv2.GaussianBlur(reference_region, ksize=(5, 5), sigmaX=0, borderType=cv2.BORDER_REPLICATE)
+    _, reference_blur = cv2.threshold(reference_blur, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Mask out the black pixels in the alignment image that are present in the reference image
+    masked_image = aligned_region.copy()
+    masked_image[reference_blur == 0] = 255
+
+    # Check if there are enough black pixels to confirm a selection
+    white_pixels = cv2.countNonZero(masked_image)
+    logger.debug(f'White: {white_pixels}, Total: {roi_pixels}, Pct: {white_pixels / roi_pixels}')
+    return (white_pixels / roi_pixels) < CIRCLED_WHITE_PIXEL_THRESHOLD
 
 
 def should_copy_from_previous(ocr_text: str) -> bool:

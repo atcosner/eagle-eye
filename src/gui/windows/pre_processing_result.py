@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QWidget, QTabWidget
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
 from src.util.logging import NamedLoggerAdapter
+from src.util.types import FormAlignmentMethod
 
 from .base import BaseWindow
 from ..widgets.file_preview import FilePreview
@@ -56,15 +57,24 @@ class PreProcessingResult(BaseWindow):
             self.aligned_viewer.update_preview(result.aligned_image_path)
             self.overlaid_viewer.update_preview(result.overlaid_image_path)
 
-            # Create a tab for each rotation attempt
-            for angle, attempt in sorted(result.rotation_attempts.items(), key=lambda x: x[0]):
-                preview = FilePreview()
-                preview.update_preview(attempt.path)
+            match input_file.job.reference_form.alignment_method:
+                case FormAlignmentMethod.ALIGNMENT_MARKS:
+                    # Create a tab for each rotation attempt
+                    for angle, attempt in sorted(result.rotation_attempts.items(), key=lambda x: x[0]):
+                        preview = FilePreview()
+                        preview.update_preview(attempt.path)
 
-                index = self.rotation_tabs.addTab(preview, str(angle))
-                self.rotation_viewers[angle] = preview
+                        index = self.rotation_tabs.addTab(preview, str(angle))
+                        self.rotation_viewers[angle] = preview
 
-                # Focus on the accepted rotation
-                if angle == result.accepted_rotation_angle:
-                    self.rotation_tabs.setTabText(index, f'* {angle} *')
-                    self.rotation_tabs.setCurrentIndex(index)
+                        # Focus on the accepted rotation
+                        if angle == result.accepted_rotation_angle:
+                            self.rotation_tabs.setTabText(index, f'* {angle} *')
+                            self.rotation_tabs.setCurrentIndex(index)
+
+                case FormAlignmentMethod.AUTOMATIC:
+                    # remove the tab for rotation attempts
+                    self.main_tabs.removeTab(0)
+
+                case _:
+                    self.log.error(f'Unrecognized alignment method: {input_file.job.reference_form.alignment_method}')

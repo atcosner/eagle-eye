@@ -1,23 +1,23 @@
+import datetime
 import logging
+import pandas as pd
+import re
 from collections import defaultdict
 
-import pandas as pd
-from enum import Enum
+from src.util.export import ExportMode, CapitalizationType, MultiCbExportType, ExportType
 
 from ..database.job import Job
+from ..database.exporters.circled_exporter import CircledExporter
+from ..database.exporters.multi_checkbox_exporter import MultiCheckboxExporter
 from ..database.exporters.text_exporter import TextExporter
 from ..database.processed_fields.processed_field import ProcessedField
 from ..database.processed_fields.processed_checkbox_field import ProcessedCheckboxField
+from ..database.processed_fields.processed_circled_field import ProcessedCircledField
 from ..database.processed_fields.processed_multi_checkbox_field import ProcessedMultiCheckboxField
+from ..database.processed_fields.processed_multi_checkbox_option import ProcessedMultiCheckboxOption
 from ..database.processed_fields.processed_text_field import ProcessedTextField
 
 logger = logging.getLogger(__name__)
-
-
-class ExportMode(Enum):
-    STRICT = object()
-    MODERATE = object()
-    FULL = object()
 
 
 def get_mode_explanation(mode: ExportMode) -> str:
@@ -53,6 +53,33 @@ def export_bool_to_string(value: bool) -> str:
     return 'yes' if value else 'no'
 
 
+def handle_capitalization(value: str, mode: CapitalizationType) -> str:
+    if mode is CapitalizationType.LOWER:
+        return value.lower()
+    elif mode is CapitalizationType.UPPER:
+        return value.upper()
+    elif mode is CapitalizationType.TITLE:
+        return value.title()
+    elif mode is CapitalizationType.NONE:
+        return value
+    else:
+        logger.error(f'Unknown capitalization mode: {mode.name}')
+        return value
+
+
+def handle_text_formatting(text: str, exporter: TextExporter) -> str:
+    export_text = handle_capitalization(text, exporter.capitalization)
+    if exporter.strip_value:
+        export_text = export_text.strip()
+    if export_text:
+        if exporter.prefix:
+            export_text = f'{exporter.prefix}{export_text}'
+        if exporter.suffix:
+            export_text = f'{export_text}{exporter.suffix}'
+
+    return export_text
+
+
 def custom_text_field_export(
         field: ProcessedTextField,
         exporter: TextExporter,
@@ -61,24 +88,144 @@ def custom_text_field_export(
     if exporter.no_export:
         return export_columns
 
-    base_variable_name = default_variable_name(field.name)
+    export_name = default_variable_name(field.name)
     if exporter.export_field_name is not None:
-        base_variable_name = exporter.export_field_name
+        export_name = exporter.export_field_name
 
     if field.from_controlled_language is not None:
         # Add a column for the controlled language checkbox
-        export_columns[f'{base_variable_name}_checkbox'] = export_bool_to_string(field.from_controlled_language)
+        export_columns[f'{export_name}_checkbox'] = export_bool_to_string(field.from_controlled_language)
+
+    # Format the export for the RAW type
+    export_columns[export_name] = handle_text_formatting(field.text, exporter)
 
     # Work through the custom export options
-    export_text = field.text
-    if exporter.strip_value:
-        export_text = export_text.strip()
-    if exporter.prefix:
-        export_text = f'{exporter.prefix}{export_text}'
-    if exporter.suffix:
-        export_text = f'{export_text}{exporter.suffix}'
+    if exporter.export_type is ExportType.RAW:
+        # column is already set above
+        pass
 
-    export_columns[base_variable_name] = export_text
+    elif exporter.export_type in [ExportType.DATE_DMY, ExportType.DATE_YMD]:
+        # Try to covert the text into a Python datetime
+        try:
+            date = datetime.datetime.strptime(field.text, '%d %B %Y')
+            if exporter.export_type is ExportType.DATE_DMY:
+                export_columns[export_name] = date.date().strftime('%d-%m-%Y')
+            elif exporter.export_type is ExportType.DATE_YMD:
+                export_columns[export_name] = date.date().isoformat()
+
+        except ValueError:
+            logger.exception(f'Could not parse date: "{field.text}"')
+
+    elif exporter.export_type is ExportType.VALIDATOR_PART or exporter.validator_group_index is not None:
+        # TODO: ensure we have a validator
+        validator = field.text_field.text_validator
+        if validator is None:
+            logger.error(f'Field did not have a validator but was using the VALIDATOR_PART export type')
+        else:
+            regex_pattern = re.compile(validator.text_regex)
+            regex_match = regex_pattern.match(field.text)
+            if regex_match is None:
+                logger.error(f'Validator regex did not match field text')
+            else:
+                # Index 0 is the whole match so add 1 to the index to get the subgroup
+                group_index = exporter.validator_group_index + 1
+                try:
+                    export_columns[export_name] = handle_text_formatting(regex_match.group(group_index), exporter)
+                except IndexError:
+                    logger.error(f'Regex did not have a match for group index : {group_index}')
+
+    else:
+        logger.error(f'Unknown export type (using RAW): {exporter.export_type.name}')
+
+    return export_columns
+
+
+def custom_circled_field_export(
+        field: ProcessedCircledField,
+        exporter: CircledExporter,
+) -> dict[str, str]:
+    export_columns = {}
+    if exporter.no_export:
+        return export_columns
+
+    export_name = default_variable_name(field.name)
+    if exporter.export_field_name is not None:
+        export_name = exporter.export_field_name
+
+    # Determine the value string
+    export_value: str = ''
+    for option in field.options.values():
+        if option.circled:
+            export_value = option.name
+            break
+
+    export_columns[export_name] = handle_capitalization(export_value, exporter.capitalization)
+    return export_columns
+
+
+def custom_multi_checkbox_field_export(
+        field: ProcessedMultiCheckboxField,
+        exporter: MultiCheckboxExporter,
+) -> dict[str, str]:
+    export_columns = {}
+    if exporter.no_export:
+        return export_columns
+
+    export_name = default_variable_name(field.name)
+    if exporter.export_field_name is not None:
+        export_name = exporter.export_field_name
+
+    text_field_name = f'{export_name}_desc'
+    if exporter.text_field_name is not None:
+        text_field_name = exporter.text_field_name
+
+    # Handle single column vs multi column exports
+    if exporter.export_type in [MultiCbExportType.SINGLE_COLUMN, MultiCbExportType.SINGLE_PLUS_TEXT]:
+        checked_option: ProcessedMultiCheckboxOption | None = None
+        text_option: ProcessedMultiCheckboxOption | None = None
+        for option in field.checkboxes.values():
+            if option.checked:
+                checked_option = option
+            if option.ocr_text is not None or option.text is not None:
+                text_option = option
+
+        if checked_option is None:
+            export_columns[export_name] = ''
+        else:
+            export_columns[export_name] = checked_option.name
+
+            if checked_option.circled_options:
+                for option in checked_option.circled_options.values():
+                    if option.circled:
+                        export_columns[export_name] = f'{checked_option.name}: {option.name}'
+
+        # Add in an extra description column if we need one
+        if exporter.export_type is MultiCbExportType.SINGLE_PLUS_TEXT and text_option is not None:
+            export_columns[text_field_name] = text_option.text
+
+    elif exporter.export_type is MultiCbExportType.MULTIPLE_COLUMNS:
+        for option in field.checkboxes.values():
+            option_name = f'{export_name}_{default_variable_name(option.name)}'
+            export_columns[option_name] = export_bool_to_string(option.checked)
+
+            # Add an '_desc' if the checkbox option has a text region
+            if option.ocr_text is not None or option.text is not None:
+                export_columns[text_field_name] = option.text
+
+    elif exporter.export_type is MultiCbExportType.MULTI_USE_TEXT:
+        for option in field.checkboxes.values():
+            option_name = f'{export_name}_{default_variable_name(option.name)}'
+            # use the associated text region for the value
+            export_columns[option_name] = option.text if option.text is not None else ''
+
+    else:
+        logger.error(f'Unknown export type: {exporter.export_type.name}')
+        return export_columns
+
+    # Update capitalization on all values in our export
+    for key, value in export_columns.items():
+        export_columns[key] = handle_capitalization(value, exporter.capitalization)
+
     return export_columns
 
 
@@ -87,25 +234,17 @@ def export_text_field(
         field: ProcessedTextField,
 ) -> dict[str, str]:
     logger.info(f'Exporting text field: {field.name}')
-    is_test_field = isinstance(field, ProcessedTextField)
-
     # TODO: Check validation status for MODERATE mode
 
-    # Handle if the field has a custom exporter
-    exporter = field.text_field.text_exporter if is_test_field else field.multiline_text_field.text_exporter
-    if exporter is not None:
-        return custom_text_field_export(field, exporter)
-    else:
-        export_columns = {}
-        base_variable_name = default_variable_name(field.name)
+    # Add in a default exporter if we don't have a custom one
+    if not field.text_field.exporters:
+        field.text_field.exporters.append(TextExporter())
 
-        # Handle controlled language without a custom exporter
-        if field.from_controlled_language is not None:
-            # Add a column for the controlled language checkbox
-            export_columns[f'{base_variable_name}_checkbox'] = export_bool_to_string(field.from_controlled_language)
+    export_columns = {}
+    for exporter in field.text_field.exporters:
+        export_columns |= custom_text_field_export(field, exporter)
 
-        export_columns[base_variable_name] = field.text.lower()
-        return export_columns
+    return export_columns
 
 
 def export_checkbox_field(field: ProcessedCheckboxField) -> dict[str, str]:
@@ -115,34 +254,45 @@ def export_checkbox_field(field: ProcessedCheckboxField) -> dict[str, str]:
     return {variable_name: export_bool_to_string(field.checked)}
 
 
+def export_circled_field(field: ProcessedCircledField) -> dict[str, str]:
+    logger.info(f'Exporting circled field: {field.name}')
+
+    # TODO: Check validation status for MODERATE mode
+
+    if field.circled_field.exporter is not None:
+        return custom_circled_field_export(field, field.circled_field.exporter)
+    else:
+        # TODO: handle this
+        variable_name = default_variable_name(field.name)
+        return {variable_name: 'TEST'}
+
+
 def export_multi_checkbox_field(
         mode: ExportMode,
         field: ProcessedMultiCheckboxField,
 ) -> dict[str, str]:
     logger.info(f'Exporting multi checkbox field: {field.name}')
-    base_variable_name = default_variable_name(field.name)
 
     # TODO: Check validation status for MODERATE mode
 
-    export_columns = {}
-    for checkbox_option in field.checkboxes.values():
-        option_variable_name = f'{base_variable_name}_{default_variable_name(checkbox_option.name)}'
-        export_columns[option_variable_name] = export_bool_to_string(checkbox_option.checked)
-
-        # Add an '_desc' if the checkbox option has a text region
-        if checkbox_option.ocr_text is not None or checkbox_option.text is not None:
-            export_columns[f'{option_variable_name}_desc'] = checkbox_option.text
-
-    return export_columns
+    return custom_multi_checkbox_field_export(
+        field,
+        field.multi_checkbox_field.exporter if field.multi_checkbox_field.exporter is not None else MultiCheckboxExporter(),
+    )
 
 
-def export_field(mode: ExportMode, field: ProcessedField) -> dict[str, str]:
+def export_field(
+        mode: ExportMode,
+        field: ProcessedField,
+) -> dict[str, str]:
     if field.text_field is not None:
         return export_text_field(mode, field.text_field)
     elif field.checkbox_field is not None:
         return export_checkbox_field(field.checkbox_field)
     elif field.multi_checkbox_field is not None:
         return export_multi_checkbox_field(mode, field.multi_checkbox_field)
+    elif field.circled_field is not None:
+        return export_circled_field(field.circled_field)
     else:
         logger.error(f'Exported nothing for field: {field.id}')
         return {}
@@ -166,8 +316,18 @@ def build_export_df(mode: ExportMode, job: Job) -> pd.DataFrame:
                 continue
 
             logger.info(f'Exporting region: {region.name}')
-            for field in region.fields:
-                for export_column, export_value in export_field(mode, field).items():
-                    export_data[export_column].append(export_value)
+            for group in region.groups:
+                if group.name:
+                    logger.info(f'Exporting group: {group.name}')
+
+                for field in group.fields:
+                    field_data = export_field(mode, field)
+                    for export_column, export_value in field_data.items():
+                        export_data[export_column].append(export_value)
+
+    # log the entire export for debug later
+    logger.info('Export data:')
+    for key, value in export_data.items():
+        logger.info(f'{key}: {value}')
 
     return pd.DataFrame(export_data)

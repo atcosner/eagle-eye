@@ -108,8 +108,10 @@ class FileStatusList(QTreeWidget):
         pending_files = []
 
         had_sub_items = False
-        parent_item: QTreeWidget | QTreeWidgetItem = self
         for file in job.input_files:
+            parent_item: QTreeWidget | QTreeWidgetItem = self
+            logger.info(f'Loading input file {file.id}')
+
             # nest files that are linked to other files
             if file.linked_input_file_id is not None:
                 had_sub_items = True

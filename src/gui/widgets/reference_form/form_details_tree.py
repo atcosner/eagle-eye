@@ -1,15 +1,18 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QTreeWidget, QHeaderView, QTreeWidgetItem
 from src.database.reference_form import ReferenceForm
 
 
 class FormDetailsTree(QTreeWidget):
+    referenceFormChanged = pyqtSignal(int)
+
     def __init__(self, add_checkboxes: bool = False):
         super().__init__()
         self._add_checkboxes = add_checkboxes
+        self._selected_reference_form_id: int | None = None
 
         self.setColumnCount(5)
         self.setHeaderLabels(['Name', 'Alignment', 'Link Method', 'Regions', 'Fields'])
@@ -19,6 +22,11 @@ class FormDetailsTree(QTreeWidget):
         self.header().setStretchLastSection(False)
         self.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
 
+        self.currentItemChanged.connect(self.handle_current_item_changed)
+
+    def get_reference_form(self) -> int | None:
+        return self._selected_reference_form_id
+
     def resize_columns(self) -> None:
         for idx in range(self.columnCount()):
             self.resizeColumnToContents(idx)
@@ -27,6 +35,12 @@ class FormDetailsTree(QTreeWidget):
         self.clear()
 
         for form in session.scalars(select(ReferenceForm)):
+            # sum up the number of fields
+            field_count = 0
+            for region in form.regions.values():
+                for group in region.groups:
+                    field_count += len(group.fields)
+
             item = QTreeWidgetItem(
                 None,
                 [
@@ -34,7 +48,7 @@ class FormDetailsTree(QTreeWidget):
                     form.alignment_description(),
                     form.linking_method.name,
                     str(len(form.regions)),
-                    str(sum([len(region.fields) for region in form.regions.values()])),
+                    str(field_count),
                 ],
             )
             item.setData(0, Qt.ItemDataRole.UserRole, form.id)
@@ -57,3 +71,22 @@ class FormDetailsTree(QTreeWidget):
                 checked_items.append(item)
 
         return checked_items
+
+    def set_reference_form(self, db_id: int | None) -> None:
+        for child_id in range(self.topLevelItemCount()):
+            item = self.topLevelItem(child_id)
+
+            if item.data(0, Qt.ItemDataRole.UserRole) == db_id:
+                self.setCurrentItem(item)
+                self.scrollToItem(item)
+
+    @pyqtSlot(QTreeWidgetItem, QTreeWidgetItem)
+    def handle_current_item_changed(
+            self,
+            current: QTreeWidgetItem | None,
+            _: QTreeWidgetItem | None,
+    ) -> None:
+        current_id = current.data(0, Qt.ItemDataRole.UserRole)
+        if current_id != self._selected_reference_form_id:
+            self.referenceFormChanged.emit(current_id)
+            self._selected_reference_form_id = current_id

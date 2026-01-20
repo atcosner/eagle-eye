@@ -12,5 +12,8 @@ class TextChoice(MappedAsDataclass, OrmBase):
 
     # Relationships
 
-    text_validator_id: Mapped[int] = mapped_column(ForeignKey("text_validator.id"), init=False)
+    text_validator_id: Mapped[int | None] = mapped_column(ForeignKey("text_validator.id"), init=False)
     text_validator: Mapped["TextValidator"] = relationship(init=False, back_populates="text_choices")
+
+    custom_data_id: Mapped[int | None] = mapped_column(ForeignKey("custom_data.id"), init=False)
+    custom_data: Mapped["CustomData"] = relationship(init=False, back_populates="text_choices")

@@ -47,29 +47,29 @@ class Job(MappedAsDataclass, OrmBase):
         statuses = self._processing_statuses()
         return statuses and all(statuses)
 
-    def get_status_str(self) -> str:
-        if not self.input_files:
-            return 'Picking Files'
-
-        all_pre_processed = all([(file.pre_process_result is not None) for file in self.input_files])
-        all_processed = all([(file.process_result is not None) for file in self.input_files])
-
+    def all_verified(self) -> bool:
         all_verified = True
         for file in self.input_files:
             if file.process_result is None:
                 all_verified = False
-                continue
+                break
             else:
                 region_statuses = [region.human_verified for region in file.process_result.regions.values()]
                 if not all(region_statuses):
                     all_verified = False
-                    continue
+                    break
 
-        if all_verified:
+        return all_verified
+
+    def get_status_str(self) -> str:
+        if not self.input_files:
+            return 'Picking Files'
+
+        if self.all_verified():
             return 'Complete'
-        elif all_processed:
+        elif self.all_processed():
             return 'Checking Results'
-        elif all_pre_processed:
+        elif self.all_pre_processed():
             return 'Processing'
         else:
             return 'Pre-Processing'

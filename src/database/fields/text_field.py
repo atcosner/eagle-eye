@@ -22,10 +22,12 @@ class TextField(MappedAsDataclass, OrmBase):
     checkbox_text: Mapped[str] = mapped_column(nullable=True, default=None)
 
     allow_copy: Mapped[bool] = mapped_column(default=False)
+    synthetic_only: Mapped[bool] = mapped_column(default=False)
 
     # Relationships
 
-    text_exporter: Mapped[TextExporter] = relationship(default=None, back_populates="text_field")
+    exporters: Mapped[list[TextExporter]] = relationship(default_factory=list, back_populates="text_field")
+
     text_validator: Mapped[TextValidator] = relationship(default=None, back_populates="text_field")
 
     form_field_id: Mapped[int] = mapped_column(ForeignKey("form_field.id"), init=False)

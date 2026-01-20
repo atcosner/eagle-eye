@@ -10,7 +10,8 @@ from PyQt6.QtWidgets import (
 
 from src.database import DB_ENGINE
 from src.database.job import Job
-from src.processing.export import ExportMode, get_mode_explanation, build_export_df
+from src.processing.export import get_mode_explanation, build_export_df
+from src.util.export import ExportMode
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +167,15 @@ class ResultExport(QWidget):
             )
             return
 
+        # Check that the file path does not exist already
+        if Path(self.export_file_path.text()).exists():
+            QMessageBox.critical(
+                self,
+                'Export Error',
+                'File already exists, please choose another name'
+            )
+            return
+
         # Load the job and turn it into a dataframe
         assert self._job_db_id, 'Cannot export without a job id'
         with Session(DB_ENGINE) as session:
@@ -175,7 +185,7 @@ class ResultExport(QWidget):
         # Export the dataframe in the requested format
         if 'csv' in self.export_formats.currentText():
             # CSV
-            export_df.to_csv(self.export_file_path.text())
+            export_df.to_csv(self.export_file_path.text(), index=False)
         else:
             # XLSX
-            export_df.to_excel(self.export_file_path.text())
+            export_df.to_excel(self.export_file_path.text(), index=False)

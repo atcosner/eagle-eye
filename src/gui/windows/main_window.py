@@ -23,6 +23,7 @@ from ..dialogs.reference_form_importer import ReferenceFormImporter
 from ..dialogs.reference_form_selector import ReferenceFormSelector
 from ..dialogs.vision_api_config import VisionApiConfig
 from ..widgets.job_manager import JobManager
+from ..wizards.first_start_wizard import FirstStartWizard
 from ..wizards.reference_form_wizard import ReferenceFormWizard
 
 logger = logging.getLogger(__name__)
@@ -47,11 +48,12 @@ def get_latest_job_id() -> int:
 
 class MainWindow(BaseWindow):
     def __init__(self):
-        super().__init__(None, 'Form Processing')
+        super().__init__(None, title_suffix=None)
         self.job_widget = JobManager()
 
         self._set_up_layout()
         self._create_menu_bar()
+        self._check_first_start()
 
     def _set_up_layout(self) -> None:
         self.setMinimumHeight(700)
@@ -69,7 +71,6 @@ class MainWindow(BaseWindow):
         form_menu.addAction('View Reference Forms').triggered.connect(self.handle_view_reference_form)
         form_menu.addSeparator()
         form_menu.addAction('Create New Reference Form').triggered.connect(self.handle_create_reference_form)
-        form_menu.addAction('Edit Current Reference Form').triggered.connect(self.handle_edit_current_reference_form)
         form_menu.addSeparator()
         form_menu.addAction('Import Reference Forms').triggered.connect(self.handle_import_reference_form)
 
@@ -82,6 +83,20 @@ class MainWindow(BaseWindow):
         help_menu.addAction('Report A Bug').triggered.connect(lambda: BugReporter(self).exec())
         help_menu.addSeparator()
         help_menu.addAction('About').triggered.connect(lambda: AboutUs(self).exec())
+
+    def _check_first_start(self) -> None:
+        with Session(DB_ENGINE) as session:
+            job_count = session.query(Job).count()
+            reference_form_count = session.query(ReferenceForm).count()
+            logger.info(f'Checking first start: {job_count} jobs, {reference_form_count} reference forms')
+
+            # TODO: we could check for the directory structure on disk instead
+            if job_count == 0 and reference_form_count == 0:
+                self.show()
+                FirstStartWizard(self).exec()
+
+                # the wizard could add reference forms, so we need to reload that tab
+                self.job_widget.reload_reference_forms()
 
     @pyqtSlot()
     def handle_change_job(self, allow_new_jobs: bool) -> None:
@@ -101,17 +116,6 @@ class MainWindow(BaseWindow):
         form_builder = ReferenceFormEditor(self, False, form_id)
         form_builder.setWindowModality(Qt.WindowModality.ApplicationModal)
         form_builder.show()
-
-    @pyqtSlot()
-    def handle_edit_current_reference_form(self) -> None:
-        form_id = self.job_widget.get_current_reference_form_id()
-        if form_id is not None:
-            form_builder = ReferenceFormEditor(self, True, form_id)
-            form_builder.setWindowModality(Qt.WindowModality.ApplicationModal)
-            form_builder.show()
-        else:
-            # TODO: show an error
-            pass
 
     @pyqtSlot()
     def handle_import_reference_form(self) -> None:

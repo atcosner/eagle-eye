@@ -21,7 +21,13 @@ ALLOWED_ROTATIONS = [0] \
 
 # configuration for automatic alignment
 MAX_FEATURES = 500
-KEYPOINT_KEEP_THRESHOLD = 0.2  # top 20% of keypoints
+KEYPOINT_KEEP_THRESHOLD = 0.2   # top 20% of keypoints
+MIN_INLIER_RATIO = 0.15         # RANSAC inliers as a fraction of kept matches
+                                 # (kept low because handwriting features on the test image
+                                 # can never match the blank reference and are always outliers)
+MIN_INLIER_Y_COVERAGE = 0.5     # inliers must span at least 50% of the image height;
+                                 # a narrow band of inliers means the bottom is extrapolated
+MIN_ALIGNMENT_NCC = 0.5         # minimum normalized cross-correlation between aligned and reference
 
 
 class AlignmentError(Exception):
@@ -103,7 +109,7 @@ def reference_mark_alignment(
     if best_angle is None:
         raise AlignmentFailed()
 
-    result.successful_alignment = True
+    result.alignment_possible = True
     result.accepted_rotation_angle = best_angle
 
     # Filter down the reference alignment marks if we didn't find them all in the test image
@@ -163,6 +169,19 @@ def reference_mark_alignment(
     return status
 
 
+def _compute_ncc(img1: np.ndarray, img2: np.ndarray) -> float:
+    """Compute the normalized cross-correlation between two same-shape images.
+
+    Returns a value in [-1, 1] where 1.0 is a perfect match.
+    """
+    a = img1.astype(np.float64) - img1.mean()
+    b = img2.astype(np.float64) - img2.mean()
+    denominator = np.sqrt((a ** 2).sum() * (b ** 2).sum())
+    if denominator == 0:
+        return 0.0
+    return float(np.sum(a * b) / denominator)
+
+
 def automatic_alignment(
         logger: logging.Logger | NamedLoggerAdapter,
         session: Session,
@@ -203,31 +222,93 @@ def automatic_alignment(
     cv2.imwrite(str(matches_path), matched_image)
     result.matches_image_path = matches_path
 
-    # prep the keypoints to compute a homography matrix
+    # prep the keypoints to compute an affine matrix
     test_points = np.zeros((len(matches), 2), dtype="float")
     ref_points = np.zeros((len(matches), 2), dtype="float")
     for (idx, match) in enumerate(matches):
         test_points[idx] = test_keypoints[match.queryIdx].pt
         ref_points[idx] = ref_keypoints[match.trainIdx].pt
 
-    # compute the homography matrix and align the images using it
-    (matrix_h, _) = cv2.findHomography(test_points, ref_points, method=cv2.RANSAC)
+    # Default some fields in the result before we start the alignment
+    result.alignment_possible = False
+    result.fully_aligned = False
+
+    # Estimate an affine (not perspective/homography) transform.
+    # A full homography has 8 DOF and can model perspective warp, which causes distortion
+    # in regions away from where features are concentrated.  For two scans of the same
+    # flat document the correct transform is affine (6 DOF: translate + rotate + scale +
+    # shear), which cannot introduce that kind of warp.
+    (matrix_aff, ransac_mask) = cv2.estimateAffine2D(test_points, ref_points, method=cv2.RANSAC)
+
+    # Check 1: estimateAffine2D returns None when it cannot find a valid solution.
+    # This is the only check that prevents saving — without a matrix there is nothing to warp.
+    if matrix_aff is None:
+        logger.error('estimateAffine2D failed to compute a valid affine matrix')
+        session.commit()
+        return FileStatus.FAILED
+    
+    # If we got a transform matrix, mark the image as possible to align
+    result.alignment_possible = True
+
+    # Checks 2 and 3 evaluate whether the computed matrix is trustworthy, but we still
+    # warp and save the images afterwards so the user can inspect a bad alignment and
+    # report it as a bug or future improvement.
+    alignment_failed = False
+
+    # Check 2: a low RANSAC inlier ratio means the match set was too noisy to trust
+    inlier_count = int(ransac_mask.sum())
+    inlier_ratio = inlier_count / len(matches)
+    logger.info(f'RANSAC inliers: {inlier_count}/{len(matches)} ({inlier_ratio:.2%})')
+    if inlier_ratio < MIN_INLIER_RATIO:
+        logger.error(
+            f'RANSAC inlier ratio {inlier_ratio:.2%} is below the minimum threshold '
+            f'({MIN_INLIER_RATIO:.2%}) — alignment is unreliable'
+        )
+        alignment_failed = True
+
+    # Check 3: inliers must be spread across the image height, not clustered in one band.
+    # If all good matches are near the top, the affine transform is reliable there but
+    # the bottom is a blind extrapolation.
+    inlier_pts = test_points[ransac_mask.ravel() == 1]
+    y_coverage = (inlier_pts[:, 1].max() - inlier_pts[:, 1].min()) / test_image.shape[0]
+    logger.info(f'Inlier vertical coverage: {y_coverage:.2%} (threshold: {MIN_INLIER_Y_COVERAGE:.2%})')
+    if y_coverage < MIN_INLIER_Y_COVERAGE:
+        logger.error(
+            f'Inliers only cover {y_coverage:.2%} of image height — '
+            f'alignment below the matched region is unreliable'
+        )
+        alignment_failed = True
+
+    # Always warp and save so the user can inspect the result regardless of quality
     (h, w) = reference_image.shape[:2]
-    aligned_image = cv2.warpPerspective(test_image, matrix_h, (w, h))
+    aligned_image = cv2.warpAffine(test_image, matrix_aff, (w, h))
     logger.info(f'Writing aligned image: {aligned_path}')
     cv2.imwrite(str(aligned_path), aligned_image)
     result.aligned_image_path = aligned_path
 
-    # Save an overlaid image to assist in debugging
     overlaid_image = aligned_image.copy()
     cv2.addWeighted(reference_image, 0.5, aligned_image, 0.5, 0, overlaid_image)
     logger.info(f'Writing overlaid image: {overlaid_path}')
     cv2.imwrite(str(overlaid_path), overlaid_image)
     result.overlaid_image_path = overlaid_path
 
-    # update the pre-process result
-    result.successful_alignment = True
+    if alignment_failed:
+        session.commit()
+        return FileStatus.FAILED
+
+    # Check 4: compare the aligned image to the reference with NCC to catch cases where
+    # the transform was computed successfully but the visual result is wrong
+    ncc = _compute_ncc(reference_image, aligned_image)
+    logger.info(f'Post-alignment NCC: {ncc:.4f} (threshold: {MIN_ALIGNMENT_NCC})')
+    if ncc < MIN_ALIGNMENT_NCC:
+        logger.error(
+            f'Post-alignment NCC {ncc:.4f} is below the minimum threshold '
+            f'({MIN_ALIGNMENT_NCC}) — images do not appear to be aligned'
+        )
+        session.commit()
+        return FileStatus.WARNING
+
+    # Indicate a sucessful alignment if we passed all the quality checks
     result.fully_aligned = True
     session.commit()
-
     return FileStatus.SUCCESS

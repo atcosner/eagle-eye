@@ -5,10 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "DB Setup",
+            "name": "Full Start - Fast",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/scripts/db_setup.py",
+            "program": "${workspaceFolder}/scripts/full_start.py",
+            "args": ["--no-splash", "--load-last-job"],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
             },
@@ -19,6 +20,16 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/dev_start.py",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+        },
+
+        {
+            "name": "DB Setup",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/db_setup.py",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
             },

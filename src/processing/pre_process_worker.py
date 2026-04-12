@@ -82,6 +82,8 @@ class PreProcessingWorker(QObject):
                 self.log.error(f'Ref image did not exist: {self.job.reference_form.path}')
                 self.finish(session, FileStatus.FAILED)
                 return
+            
+            self.log.info(f'Reference form image: {self.job.reference_form.path}')
 
             # Build the paths for our output results
             pre_process_directory = LocalPaths.pre_processing_directory(self.job.uuid, self.input_file.id)

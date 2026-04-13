@@ -301,7 +301,7 @@ def validate_text_field(
         match = re.compile(validator.text_regex).match(text)
 
         # ensure we matched something for both groups
-        if match.group(1) is None or match.group(2) is None:
+        if match is None or match.group(1) is None or match.group(2) is None:
             return ValidationResult(
                 result=False,
                 explanation=get_explanation(

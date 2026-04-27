@@ -95,7 +95,3 @@ def get_movement_restrictions(anchor: AnchorPoint) -> tuple[bool, bool]:
         y_restricted = True
 
     return x_restricted, y_restricted
-
-
-def get_irregular_change(anchor: AnchorPoint) -> bool:
-    return False if anchor in [AnchorPoint.RIGHT_MIDDLE, AnchorPoint.BOTTOM_MIDDLE, AnchorPoint.BOTTOM_RIGHT] else True

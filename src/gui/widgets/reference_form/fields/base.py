@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QGraphicsItem, QGraphicsSimpleTextItem, QWidget, \
 
 from src.database.fields.form_field import FormField
 
-from ..util import AnchorPoint, get_position_with_anchor, get_movement_restrictions, get_irregular_change
+from ..util import AnchorPoint, get_position_with_anchor, get_movement_restrictions
 
 
 class FieldLabel(QGraphicsSimpleTextItem):
@@ -35,24 +35,28 @@ class ResizeBox(QGraphicsItem):
     #
     # Qt overrides
     #
-    def mousePressEvent(self, event: QGraphicsSceneMouseEvent) -> None:
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent | None) -> None:
         # swallow these events to not take focus from parent
         pass
 
-    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent) -> None:
-        x_change = 0 if self.x_restricted else event.scenePos().x() - event.lastScenePos().x()
-        y_change = 0 if self.y_restricted else event.scenePos().y() - event.lastScenePos().y()
-        self.parentItem().handle_child_resize(self.anchor_point, x_change, y_change)
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent | None) -> None:
+        if event is not None:
+            x_change = 0 if self.x_restricted else event.scenePos().x() - event.lastScenePos().x()
+            y_change = 0 if self.y_restricted else event.scenePos().y() - event.lastScenePos().y()
+            self.parentItem().handle_child_resize(self.anchor_point, x_change, y_change)
 
     def boundingRect(self) -> QRectF:
         return self.position_rect
 
     def paint(
         self,
-        painter: QPainter,
-        option: QStyleOptionGraphicsItem,
+        painter: QPainter | None,
+        option: QStyleOptionGraphicsItem | None,
         widget: QWidget | None = None,
     ) -> None:
+        if painter is None:
+            return
+
         pen = painter.pen()
         pen.setColor(self.color)
         painter.setPen(pen)
@@ -102,27 +106,25 @@ class ResizableField(QGraphicsItem):
             self.prepareGeometryChange()
             if point in [AnchorPoint.TOP_LEFT, AnchorPoint.TOP_MIDDLE, AnchorPoint.LEFT_MIDDLE]:
                 # instead of changing the width and height we need to change the top left point
-                point = self.position_rect.topLeft()
-                point.setX(point.x() + delta_x)
-                point.setY(point.y() + delta_y)
-                self.position_rect.setTopLeft(point)
+                update_point = self.position_rect.topLeft()
+                update_point.setX(update_point.x() + delta_x)
+                update_point.setY(update_point.y() + delta_y)
+                self.position_rect.setTopLeft(update_point)
             elif point is AnchorPoint.BOTTOM_LEFT:
-                point = self.position_rect.bottomLeft()
-                point.setX(point.x() + delta_x)
-                point.setY(point.y() + delta_y)
-                self.position_rect.setBottomLeft(point)
+                update_point = self.position_rect.bottomLeft()
+                update_point.setX(update_point.x() + delta_x)
+                update_point.setY(update_point.y() + delta_y)
+                self.position_rect.setBottomLeft(update_point)
             elif point is AnchorPoint.TOP_RIGHT:
-                point = self.position_rect.topRight()
-                point.setX(point.x() + delta_x)
-                point.setY(point.y() + delta_y)
-                self.position_rect.setTopRight(point)
+                update_point = self.position_rect.topRight()
+                update_point.setX(update_point.x() + delta_x)
+                update_point.setY(update_point.y() + delta_y)
+                self.position_rect.setTopRight(update_point)
             else:
                 # Right middle, bottom middle, bottom right
                 if delta_x:
-                    # TODO: this only changes the right edge
                     self.position_rect.setWidth(self.position_rect.width() + delta_x)
                 if delta_y:
-                    # TODO: this only changes the bottom edge
                     self.position_rect.setHeight(self.position_rect.height() + delta_y)
 
         for anchor in self.resize_anchors:
@@ -132,12 +134,12 @@ class ResizableField(QGraphicsItem):
     # Qt overrides
     #
 
-    def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+    def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent | None) -> None:
         self.hovering = True
         self.update_cursor()
         super().hoverEnterEvent(event)
 
-    def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent) -> None:
+    def hoverLeaveEvent(self, event: QGraphicsSceneHoverEvent | None) -> None:
         self.hovering = False
         self.update_cursor()
         super().hoverEnterEvent(event)
@@ -156,16 +158,19 @@ class ResizableField(QGraphicsItem):
 
     def paint(
         self,
-        painter: QPainter,
-        option: QStyleOptionGraphicsItem,
+        painter: QPainter | None,
+        option: QStyleOptionGraphicsItem | None,
         widget: QWidget | None = None,
     ) -> None:
+        if painter is None:
+            return
+
         pen = painter.pen()
         pen.setColor(self.color)
         painter.setPen(pen)
         painter.drawRect(self.position_rect)
 
-        if option.state & QStyle.StateFlag.State_Selected:
+        if option and option.state & QStyle.StateFlag.State_Selected:
             pen.setStyle(Qt.PenStyle.DashLine)
             pen.setColor(QColor('black'))
             painter.setPen(pen)
@@ -181,6 +186,9 @@ class BaseField(ResizableField):
 
         self.label = FieldLabel(self, field.get_sub_field().name)
         self.label.setPos(self.position_rect.topLeft())
+
+        # don't draw ourselves if we dont have a visual region
+        self.setVisible(not self.position_rect.isEmpty())
 
     def get_db_id(self) -> int:
         return self._field_db_id

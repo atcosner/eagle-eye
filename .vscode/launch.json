@@ -34,5 +34,15 @@
                 "PYTHONPATH": "${workspaceFolder}",
             },
         },
+
+        {
+            "name": "Reference Form Editor",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/form_editor.py",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+        },
     ]
 }

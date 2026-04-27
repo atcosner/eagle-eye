@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot, QRect
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 
 from src.database.reference_form import ReferenceForm
@@ -66,3 +66,7 @@ class FieldBrowser(LineSplitter):
             return
 
         self.deleteSelection.emit(result[0], result[1])
+
+    @pyqtSlot(int, QRect)
+    def handle_field_position_update(self, field_db_id: int, new_position: QRect) -> None:
+        self.selection_details.update_field_position(field_db_id, new_position)

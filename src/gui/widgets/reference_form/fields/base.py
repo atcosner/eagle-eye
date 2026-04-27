@@ -1,9 +1,9 @@
 from typing import Any
 
-from PyQt6.QtCore import Qt, QRectF
+from PyQt6.QtCore import Qt, QRect, QRectF, pyqtSignal
 from PyQt6.QtGui import QColor, QPainter
 from PyQt6.QtWidgets import QGraphicsItem, QGraphicsSimpleTextItem, QWidget, \
-    QStyleOptionGraphicsItem, QStyle, QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent
+    QStyleOptionGraphicsItem, QStyle, QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QGraphicsObject
 
 from src.database.fields.form_field import FormField
 
@@ -69,7 +69,7 @@ class ResizeBox(QGraphicsItem):
             painter.drawRect(self.position_rect)
 
 
-class ResizableField(QGraphicsItem):
+class ResizableField(QGraphicsObject):
     def __init__(self, position_rect: QRectF, color: QColor):
         super().__init__()
         self.hovering: bool = False
@@ -178,9 +178,10 @@ class ResizableField(QGraphicsItem):
 
 
 class BaseField(ResizableField):
+    positionUpdate = pyqtSignal(int, QRect)
+
     def __init__(self, field: FormField, color: QColor) -> None:
-        self.position_rect = field.get_sub_field().visual_region.to_qt_rect()
-        super().__init__(self.position_rect, color)
+        super().__init__(field.get_sub_field().visual_region.to_qt_rect(), color)
 
         self._field_db_id = field.id
 
@@ -196,3 +197,4 @@ class BaseField(ResizableField):
     def handle_child_resize(self, point: AnchorPoint, delta_x: int, delta_y: int) -> None:
         super().handle_child_resize(point, delta_x, delta_y)
         self.label.setPos(self.position_rect.topLeft())
+        self.positionUpdate.emit(self._field_db_id, self.position_rect.toRect())

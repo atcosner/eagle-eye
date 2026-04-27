@@ -1,9 +1,8 @@
 import logging
 from collections import defaultdict
-
-from PyQt6.QtCore import pyqtSignal, pyqtSlot
 from sqlalchemy.orm import Session
 
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QRect
 from PyQt6.QtGui import QPixmap, QColor
 from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItemGroup
 
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class FormScene(QGraphicsScene):
     fieldSelected = pyqtSignal(int)
+    fieldPositionUpdate = pyqtSignal(int, QRect)
 
     def __init__(self):
         super().__init__()
@@ -56,6 +56,7 @@ class FormScene(QGraphicsScene):
                 for group in region.groups:
                     for field in group.fields:
                         qt_field = BaseField(field, region_color)
+                        qt_field.positionUpdate.connect(self.fieldPositionUpdate)
                         self.addItem(qt_field)
 
                         self.fields_by_region[region.id].append(qt_field)

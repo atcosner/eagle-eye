@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSlot, pyqtSignal, QRect
 from PyQt6.QtGui import QWheelEvent, QKeyEvent, QCursor
 from PyQt6.QtWidgets import QGraphicsView
 
@@ -10,6 +10,7 @@ from .util import SelectionType
 
 class FormFieldCanvas(QGraphicsView):
     fieldSelected = pyqtSignal(int)
+    fieldPositionUpdate = pyqtSignal(int, QRect)
 
     def __init__(self):
         super().__init__()
@@ -19,6 +20,7 @@ class FormFieldCanvas(QGraphicsView):
         self.setScene(self._scene)
 
         self._scene.fieldSelected.connect(self.fieldSelected)
+        self._scene.fieldPositionUpdate.connect(self.fieldPositionUpdate)
 
     def fit_form(self) -> None:
         self.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)

@@ -1,9 +1,10 @@
 from src.database.fields.checkbox_field import CheckboxField
 
-from ..util.details_tree import BaseFieldDetails, BoxBoundsDetails
+from src.gui.widgets.util.details.base_field_details import BaseFieldDetails
+from src.gui.widgets.util.details.box_bounds_details import BoxBoundsDetails
 
 
-class CheckboxDetails(BaseFieldDetails):
+class CheckboxFieldDetails(BaseFieldDetails):
     def __init__(self):
         super().__init__()
 

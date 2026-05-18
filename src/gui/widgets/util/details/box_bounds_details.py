@@ -1,18 +1,7 @@
-from typing import Any
-
 from PyQt6.QtCore import QRect
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
 
 from src.util.types import BoxBounds
-
-
-class TextItem(QTreeWidgetItem):
-    def __init__(self, parent: QTreeWidget | QTreeWidgetItem, name: str):
-        super().__init__(parent)
-        self.setText(0, name)
-
-    def load(self, value: Any) -> None:
-        self.setText(1, str(value))
 
 
 class BoundsPart(QTreeWidgetItem):
@@ -117,24 +106,3 @@ class BoxBoundsDetails(QTreeWidgetItem):
 
         self._update_title()
         self.treeWidget().resizeColumnToContents(0)
-
-
-class BaseFieldDetails(QTreeWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.name_item = TextItem(self, 'Name')
-        self.visual_region_item  = BoxBoundsDetails(self, 'Visual Region')
-
-        self.setColumnCount(2)
-        self.setHeaderLabels(['Setting', 'Value'])
-    
-    def _load(self, name: str, bounds: BoxBounds | None) -> None:
-        self.name_item.load(name)
-        if bounds is not None:
-            self.visual_region_item.load(bounds)
-        else:
-            self.visual_region_item.setHidden(True)
-    
-    def update_position(self, position: QRect) -> None:
-        self.visual_region_item.update_position(position)

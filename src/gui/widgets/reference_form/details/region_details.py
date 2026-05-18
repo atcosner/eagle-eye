@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import QWidget
 
 from src.database.form_region import FormRegion
 
-from ...util.details_tree import BaseFieldDetails, TextItem
+from src.gui.widgets.util.details.base_field_details import BaseFieldDetails
+from src.gui.widgets.util.details.text_details import TextDetails
 
 
 class RegionDetails(BaseFieldDetails):
@@ -11,7 +12,7 @@ class RegionDetails(BaseFieldDetails):
         self.setParent(parent)
 
         self.name = ''
-        self.region_id = TextItem(self, 'Local ID')
+        self.region_id = TextDetails(self, 'Local ID')
         self._load_region(region)
 
     def _load_region(self, region: FormRegion) -> None:

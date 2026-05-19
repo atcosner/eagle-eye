@@ -5,7 +5,10 @@ from PyQt6.QtGui import QColor, QPainter
 from PyQt6.QtWidgets import QGraphicsItem, QGraphicsSimpleTextItem, QWidget, \
     QStyleOptionGraphicsItem, QStyle, QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QGraphicsObject
 
+from src.database.fields.circled_field import CircledField
+from src.database.fields.checkbox_field import CheckboxField
 from src.database.fields.form_field import FormField
+from src.database.fields.multi_checkbox_field import MultiCheckboxField
 
 from ..util import AnchorPoint, get_position_with_anchor, get_movement_restrictions
 
@@ -13,6 +16,11 @@ from ..util import AnchorPoint, get_position_with_anchor, get_movement_restricti
 class FieldLabel(QGraphicsSimpleTextItem):
     def __init__(self, parent: QGraphicsItem, text: str):
         super().__init__(text, parent=parent)
+    
+    def set_bold(self, bold: bool) -> None:
+        font = self.font()
+        font.setBold(bold)
+        self.setFont(font)
 
 
 class ResizeBox(QGraphicsItem):
@@ -177,24 +185,59 @@ class ResizableField(QGraphicsObject):
             painter.drawRect(self.position_rect)
 
 
-class BaseField(ResizableField):
+class LabeledField(ResizableField):
+    def __init__(self, position_rect: QRectF, color: QColor, label: str) -> None:
+        super().__init__(position_rect, color)
+
+        self._label = FieldLabel(self, label)
+        self._label.setPos(self.position_rect.topLeft())
+
+    def handle_child_resize(self, point: AnchorPoint, delta_x: int, delta_y: int) -> None:
+        super().handle_child_resize(point, delta_x, delta_y)
+        self._label.setPos(self.position_rect.topLeft())
+
+
+class DbSceneField(LabeledField):
     positionUpdate = pyqtSignal(int, QRect)
 
     def __init__(self, field: FormField, color: QColor) -> None:
-        super().__init__(field.get_sub_field().visual_region.to_qt_rect(), color)
+        super().__init__(
+            field.get_sub_field().visual_region.to_qt_rect(),
+            color,
+            field.get_sub_field().name,
+        )
 
         self._field_db_id = field.id
+        self._child_items: list[LabeledField] = []
 
-        self.label = FieldLabel(self, field.get_sub_field().name)
-        self.label.setPos(self.position_rect.topLeft())
+        # make the primary label bold
+        self._label.set_bold(True)
 
         # don't draw ourselves if we dont have a visual region
         self.setVisible(not self.position_rect.isEmpty())
+
+        self._add_children(field, color)
+
+    def _add_children(self, field: FormField, color: QColor) -> None:
+        sub_field = field.get_sub_field()
+        if isinstance(sub_field, CircledField):
+            for option in sub_field.options:
+                child_item = LabeledField(option.region.to_qt_rect(), color, option.name)
+                child_item.setParentItem(self)
+                self._child_items.append(child_item)
+        elif isinstance(sub_field, CheckboxField):
+            child_item = LabeledField(sub_field.checkbox_region.to_qt_rect(), color, '')
+            child_item.setParentItem(self)
+            self._child_items.append(child_item)
+        elif isinstance(sub_field, MultiCheckboxField):
+            for checkbox in sub_field.checkboxes:
+                child_item = LabeledField(checkbox.region.to_qt_rect(), color, checkbox.name)
+                child_item.setParentItem(self)
+                self._child_items.append(child_item)
 
     def get_db_id(self) -> int:
         return self._field_db_id
 
     def handle_child_resize(self, point: AnchorPoint, delta_x: int, delta_y: int) -> None:
         super().handle_child_resize(point, delta_x, delta_y)
-        self.label.setPos(self.position_rect.topLeft())
         self.positionUpdate.emit(self._field_db_id, self.position_rect.toRect())

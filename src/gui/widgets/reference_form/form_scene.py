@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItemGr
 from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 
-from .fields.base import BaseField
+from .fields.base import DbSceneField, LabeledField
 from .util import SelectionType, RegionGroup
 from ..util.colors import REGION_COLORS
 
@@ -30,8 +30,8 @@ class FormScene(QGraphicsScene):
         self.reference_pixmap: QGraphicsPixmapItem | None = None
 
         self.region_colors: dict[int, QColor] = {}
-        self.fields_by_region: dict[int, list[BaseField]] = defaultdict(list)
-        self.fields_by_id: dict[int, BaseField] = {}
+        self.fields_by_region: dict[int, list[DbSceneField]] = defaultdict(list)
+        self.fields_by_id: dict[int, DbSceneField] = {}
 
         self.region_group: QGraphicsItemGroup | None = None
 
@@ -55,7 +55,7 @@ class FormScene(QGraphicsScene):
                 # TODO: add a hierarchy level for the field groups
                 for group in region.groups:
                     for field in group.fields:
-                        qt_field = BaseField(field, region_color)
+                        qt_field = DbSceneField(field, region_color)
                         qt_field.positionUpdate.connect(self.fieldPositionUpdate)
                         self.addItem(qt_field)
 
@@ -98,6 +98,9 @@ class FormScene(QGraphicsScene):
             self.region_group = RegionGroup(self.region_colors[db_id], region_items)
             self.addItem(self.region_group)
             self.region_group.setSelected(True)
+        
+        elif selection is SelectionType.FIELD_GROUP:
+            pass
 
         else:
             logger.error(f'Unknown selection type: {selection}')
@@ -108,5 +111,10 @@ class FormScene(QGraphicsScene):
             return
 
         selected = self.selectedItems()[0]
-        if isinstance(selected, BaseField):
+        if isinstance(selected, DbSceneField):
             self.fieldSelected.emit(selected.get_db_id())
+        elif isinstance(selected, LabeledField):
+            # check if this is a child of a DB field
+            parent_item = selected.parentItem()
+            if isinstance(parent_item, DbSceneField):
+                self.fieldSelected.emit(parent_item.get_db_id())

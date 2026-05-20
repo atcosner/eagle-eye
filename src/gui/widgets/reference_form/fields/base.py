@@ -235,6 +235,16 @@ class DbSceneField(LabeledField):
                 child_item.setParentItem(self)
                 self._child_items.append(child_item)
 
+                for sub_circled in checkbox.circled_options:
+                    child_item = LabeledField(sub_circled.region.to_qt_rect(), color, sub_circled.name)
+                    child_item.setParentItem(self)
+                    self._child_items.append(child_item)
+                
+                if checkbox.text_region:
+                    child_item = LabeledField(checkbox.text_region.to_qt_rect(), color, f'{checkbox.name} - text')
+                    child_item.setParentItem(self)
+                    self._child_items.append(child_item)
+
     def get_db_id(self) -> int:
         return self._field_db_id
 

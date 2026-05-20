@@ -11,7 +11,7 @@ from src.database.reference_form import ReferenceForm
 
 from .fields.base import DbSceneField, LabeledField
 from .util import SelectionType, RegionGroup
-from ..util.colors import REGION_COLORS
+from ..util.colors import get_region_color
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class FormScene(QGraphicsScene):
             self.reference_pixmap = self.addPixmap(QPixmap(str(form.path)))
 
             for region in form.regions.values():
-                region_color = REGION_COLORS[region.local_id]
+                region_color = get_region_color(region.local_id)
                 self.region_colors[region.id] = region_color
 
                 # TODO: add a hierarchy level for the field groups

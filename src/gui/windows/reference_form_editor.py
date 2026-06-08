@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import pyqtSlot, QSize
@@ -10,6 +11,8 @@ from src.util.resources import get_lock_icon
 
 from .base import BaseWindow
 from ..widgets.reference_form_viewer import ReferenceFormViewer
+
+logger = logging.getLogger(__name__)
 
 
 class ReferenceFormEditor(BaseWindow):
@@ -63,6 +66,7 @@ class ReferenceFormEditor(BaseWindow):
     @pyqtSlot()
     def handle_edit_mode_change(self) -> None:
         self._allow_edit = not self._allow_edit
+        logger.info(f'Updating edit mode to: {self._allow_edit}')
         self.set_edit_mode(self._allow_edit)
 
     #

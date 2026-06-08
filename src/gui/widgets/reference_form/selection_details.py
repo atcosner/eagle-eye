@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy.orm import Session
 
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, QRect
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
 from src.database import DB_ENGINE
@@ -26,8 +26,8 @@ class SelectionDetails(QGroupBox):
         self.field_group_details: dict[int, FieldGroupDetails] = {}
         self.field_details: dict[int, FieldDetails] = {}
 
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
+        self._layout = QVBoxLayout()
+        self.setLayout(self._layout)
 
     def _update_title(self, suffix: str) -> None:
         if isinstance(self._current_widget, RegionDetails):
@@ -54,19 +54,19 @@ class SelectionDetails(QGroupBox):
                 region_details = RegionDetails(self, region)
                 region_details.setVisible(False)
                 self.region_details[region.id] = region_details
-                self.layout.addWidget(region_details)
+                self._layout.addWidget(region_details)
 
                 for group in region.groups:
                     field_group_details = FieldGroupDetails(self, group)
                     field_group_details.setVisible(False)
                     self.field_group_details[group.id] = field_group_details
-                    self.layout.addWidget(field_group_details)
+                    self._layout.addWidget(field_group_details)
 
                     for field in group.fields:
                         field_details = FieldDetails(self, field)
                         field_details.setVisible(False)
                         self.field_details[field.id] = field_details
-                        self.layout.addWidget(field_details)
+                        self._layout.addWidget(field_details)
 
     @pyqtSlot(SelectionType, int)
     def load_details(self, selection: SelectionType, db_id: int) -> None:
@@ -88,3 +88,10 @@ class SelectionDetails(QGroupBox):
             widget.setVisible(True)
             self._current_widget = widget
             self._update_title(self._current_widget.get_name())
+    
+    def update_field_position(self, db_id: int, position: QRect) -> None:
+        if db_id not in self.field_details:
+            logger.warning(f'Got poistion update for unknown field: {db_id}')
+            return
+        
+        self.field_details[db_id].update_position(position)

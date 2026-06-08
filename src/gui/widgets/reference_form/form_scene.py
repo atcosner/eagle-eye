@@ -1,18 +1,17 @@
 import logging
 from collections import defaultdict
-
-from PyQt6.QtCore import pyqtSignal, pyqtSlot
 from sqlalchemy.orm import Session
 
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, QRect
 from PyQt6.QtGui import QPixmap, QColor
 from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItemGroup
 
 from src.database import DB_ENGINE
 from src.database.reference_form import ReferenceForm
 
-from .fields.base import BaseField
+from .fields.base import DbSceneField, LabeledField
 from .util import SelectionType, RegionGroup
-from ..util.colors import REGION_COLORS
+from ..util.colors import get_region_color
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class FormScene(QGraphicsScene):
     fieldSelected = pyqtSignal(int)
+    fieldPositionUpdate = pyqtSignal(int, QRect)
 
     def __init__(self):
         super().__init__()
@@ -30,12 +30,17 @@ class FormScene(QGraphicsScene):
         self.reference_pixmap: QGraphicsPixmapItem | None = None
 
         self.region_colors: dict[int, QColor] = {}
-        self.fields_by_region: dict[int, list[BaseField]] = defaultdict(list)
-        self.fields_by_id: dict[int, BaseField] = {}
+        self.fields_by_region: dict[int, list[DbSceneField]] = defaultdict(list)
+        self.fields_by_id: dict[int, DbSceneField] = {}
 
         self.region_group: QGraphicsItemGroup | None = None
 
         self.selectionChanged.connect(self.handle_selection_change)
+
+    def set_edit_mode(self, allow_edits: bool) -> None:
+        # update the edit mode on all of our fields
+        for field in self.fields_by_id.values():
+            field.set_edit_mode(allow_edits)
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self._form_db_id = None
@@ -49,13 +54,14 @@ class FormScene(QGraphicsScene):
             self.reference_pixmap = self.addPixmap(QPixmap(str(form.path)))
 
             for region in form.regions.values():
-                region_color = REGION_COLORS[region.local_id]
+                region_color = get_region_color(region.local_id)
                 self.region_colors[region.id] = region_color
 
                 # TODO: add a hierarchy level for the field groups
                 for group in region.groups:
                     for field in group.fields:
-                        qt_field = BaseField(field, region_color)
+                        qt_field = DbSceneField(field, region_color)
+                        qt_field.positionUpdate.connect(self.fieldPositionUpdate)
                         self.addItem(qt_field)
 
                         self.fields_by_region[region.id].append(qt_field)
@@ -97,6 +103,9 @@ class FormScene(QGraphicsScene):
             self.region_group = RegionGroup(self.region_colors[db_id], region_items)
             self.addItem(self.region_group)
             self.region_group.setSelected(True)
+        
+        elif selection is SelectionType.FIELD_GROUP:
+            pass
 
         else:
             logger.error(f'Unknown selection type: {selection}')
@@ -107,5 +116,10 @@ class FormScene(QGraphicsScene):
             return
 
         selected = self.selectedItems()[0]
-        if isinstance(selected, BaseField):
+        if isinstance(selected, DbSceneField):
             self.fieldSelected.emit(selected.get_db_id())
+        elif isinstance(selected, LabeledField):
+            # check if this is a child of a DB field
+            parent_item = selected.parentItem()
+            if isinstance(parent_item, DbSceneField):
+                self.fieldSelected.emit(parent_item.get_db_id())

@@ -112,7 +112,7 @@ class FileOcrResults(QWidget):
                 return
 
             pre_process = input_file.pre_process_result
-            if not pre_process.successful_alignment:
+            if not pre_process.alignment_possible:
                 return
 
             # automatically aligned images will not have an accepted rotation angle

@@ -1,8 +1,11 @@
+import logging
 from enum import Enum
 from pathlib import Path
 from typing import NamedTuple
 
 from PyQt6.QtCore import QRectF, QPointF
+
+logger = logging.getLogger(__name__)
 
 
 class BoxBounds(NamedTuple):
@@ -22,8 +25,12 @@ class BoxBounds(NamedTuple):
         if db_value is None:
             return None
 
-        int_values = [int(part) for part in db_value.split(',')]
-        return BoxBounds(*int_values)
+        try:
+            int_values = [int(part) for part in db_value.split(',')]
+            return BoxBounds(*int_values)
+        except ValueError:
+            logger.error(f'Error parsing bounds string: **{db_value}**')
+            return None
 
     def to_qt_rect(self) -> QRectF:
         return QRectF(self.x, self.y, self.width, self.height)

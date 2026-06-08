@@ -110,7 +110,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Pseudo-Accession',
-                        visual_region=BoxBounds(x=333, y=46, width=220, height=56),
+                        visual_region=BoxBounds(x=500, y=69, width=330, height=84),
                         text_validator=TextValidator(
                             text_regex=r'^[0-9]{4}-PA[0-9]{1,3}$',
                             error_tooltip='Pseudo-Accession must be in the format: <YYYY>-PA<NUMBER>',
@@ -129,7 +129,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='KU:Mamm',
-                        visual_region=BoxBounds(x=1035, y=60, width=242, height=42),
+                        visual_region=BoxBounds(x=1552, y=90, width=363, height=63),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
@@ -150,7 +150,7 @@ def add_fn_form_v1(session: Session) -> None:
                     identifier_regex=r'^FN(?P<id>[0-9]{6})$',
                     text_field=TextField(
                         name='FN Number',
-                        visual_region=BoxBounds(x=1391, y=57, width=181, height=61),
+                        visual_region=BoxBounds(x=2086, y=86, width=272, height=92),
                         text_validator=TextValidator(
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
@@ -177,7 +177,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Species',
-                        visual_region=BoxBounds(x=319, y=169, width=511, height=45),
+                        visual_region=BoxBounds(x=478, y=254, width=766, height=68),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -197,7 +197,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='ID by',
-                        visual_region=BoxBounds(x=908, y=168, width=210, height=46),
+                        visual_region=BoxBounds(x=1362, y=252, width=315, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -217,12 +217,12 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='ID confidence',
-                        visual_region=BoxBounds(x=1122, y=176, width=457, height=47),
+                        visual_region=BoxBounds(x=1683, y=264, width=686, height=70),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Low', region=BoxBounds(x=1324, y=193, width=12, height=14)),
-                            MultiCheckboxOption(name='Medium', region=BoxBounds(x=1405, y=193, width=12, height=14)),
-                            MultiCheckboxOption(name='High', region=BoxBounds(x=1499, y=193, width=12, height=14)),
+                            MultiCheckboxOption(name='Low', region=BoxBounds(x=1986, y=290, width=18, height=21)),
+                            MultiCheckboxOption(name='Medium', region=BoxBounds(x=2108, y=290, width=18, height=21)),
+                            MultiCheckboxOption(name='High', region=BoxBounds(x=2248, y=290, width=18, height=21)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='ID_confidence',
@@ -240,7 +240,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='GPS Waypoint ID',
-                        visual_region=BoxBounds(x=438, y=220, width=249, height=45),
+                        visual_region=BoxBounds(x=657, y=330, width=374, height=68),
                         text_validator=TextValidator(
                             text_regex=r'^[A-Z]{3,4}[0-9]{1,3}$',
                             error_tooltip='GPS Waypoint ID must be 3-4 letters followed by 1-3 numbers',
@@ -259,7 +259,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Trapline ID',
-                        visual_region=BoxBounds(x=838, y=224, width=247, height=41),
+                        visual_region=BoxBounds(x=1257, y=336, width=370, height=62),
                         exporters=[
                             TextExporter(export_field_name='trapline_ID', capitalization=CapitalizationType.UPPER),
                         ],
@@ -274,7 +274,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='BlueCard/Other #',
-                        visual_region=BoxBounds(x=1312, y=224, width=263, height=41),
+                        visual_region=BoxBounds(x=1968, y=336, width=394, height=62),
                         exporters=[
                             TextExporter(export_field_name='BlueCard_other#', capitalization=CapitalizationType.UPPER),
                         ],
@@ -290,7 +290,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Collector(s), Coll #',
-                        visual_region=BoxBounds(x=443, y=278, width=698, height=45),
+                        visual_region=BoxBounds(x=664, y=417, width=1047, height=68),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.CSV_OF_CHOICE,
                             allow_closest_match_correction=True,
@@ -310,7 +310,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Collection Date',
-                        visual_region=BoxBounds(x=1269, y=282, width=314, height=41),
+                        visual_region=BoxBounds(x=1904, y=423, width=471, height=62),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
@@ -330,7 +330,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Preparator, Prep #',
-                        visual_region=BoxBounds(x=440, y=337, width=226, height=46),
+                        visual_region=BoxBounds(x=660, y=506, width=339, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.CSV_OF_CHOICE,
                             allow_closest_match_correction=True,
@@ -350,7 +350,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Prep Date',
-                        visual_region=BoxBounds(x=802, y=337, width=226, height=46),
+                        visual_region=BoxBounds(x=1203, y=506, width=339, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
@@ -364,12 +364,12 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Tissue By',
-            visual_region=BoxBounds(x=1238, y=342, width=340, height=41),
+            visual_region=BoxBounds(x=1857, y=513, width=510, height=62),
             fields=[
                 FormField(
                     text_field=TextField(
                         name='Initials',
-                        visual_region=BoxBounds(x=1231, y=331, width=106, height=52),
+                        visual_region=BoxBounds(x=1846, y=496, width=159, height=78),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -383,7 +383,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Date',
-                        visual_region=BoxBounds(x=1341, y=341, width=234, height=43),
+                        visual_region=BoxBounds(x=2012, y=512, width=351, height=64),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
@@ -410,7 +410,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Country/State',
-                        visual_region=BoxBounds(x=392, y=422, width=620, height=45),
+                        visual_region=BoxBounds(x=588, y=633, width=930, height=68),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.FN_COUNTRY_STATE,
                             text_regex=r"([a-zA-Z ]*)\/([a-zA-Z ]*)",
@@ -444,7 +444,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='County',
-                        visual_region=BoxBounds(x=1113, y=424, width=461, height=43),
+                        visual_region=BoxBounds(x=1670, y=636, width=692, height=64),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -464,7 +464,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Locality',
-                        visual_region=BoxBounds(x=316, y=472, width=1264, height=43),
+                        visual_region=BoxBounds(x=474, y=708, width=1896, height=64),
                     ),
                 ),
             ],
@@ -477,7 +477,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Latitude',
-                        visual_region=BoxBounds(x=261, y=521, width=431, height=42),
+                        visual_region=BoxBounds(x=392, y=782, width=646, height=63),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.GPS_POINT_DD,
                             text_required=False,
@@ -496,7 +496,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Longitude',
-                        visual_region=BoxBounds(x=772, y=521, width=434, height=42),
+                        visual_region=BoxBounds(x=1158, y=782, width=651, height=63),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.GPS_POINT_DD,
                             text_required=False,
@@ -515,7 +515,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Altitude (m)',
-                        visual_region=BoxBounds(x=1367, y=521, width=213, height=42),
+                        visual_region=BoxBounds(x=2050, y=782, width=320, height=63),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
@@ -535,7 +535,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Error (m)',
-                        visual_region=BoxBounds(x=335, y=570, width=335, height=45),
+                        visual_region=BoxBounds(x=502, y=855, width=502, height=68),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
@@ -554,7 +554,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Source',
-                        visual_region=BoxBounds(x=776, y=572, width=307, height=46),
+                        visual_region=BoxBounds(x=1164, y=858, width=460, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -577,7 +577,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Locality same as FN',
-                        visual_region=BoxBounds(x=1343, y=575, width=232, height=41),
+                        visual_region=BoxBounds(x=2014, y=862, width=348, height=62),
                         text_validator=TextValidator(
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
@@ -600,12 +600,12 @@ def add_fn_form_v1(session: Session) -> None:
     attributes_region.groups = [
         FieldGroup(
             name='Measurements',
-            visual_region=BoxBounds(x=405, y=638, width=1089, height=79),
+            visual_region=BoxBounds(x=608, y=957, width=1634, height=118),
             fields=[
                 FormField(
                     text_field=TextField(
                         name='Total (mm)',
-                        visual_region=BoxBounds(x=408, y=639, width=104, height=45),
+                        visual_region=BoxBounds(x=612, y=958, width=156, height=68),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
@@ -617,7 +617,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Tail (mm)',
-                        visual_region=BoxBounds(x=516, y=638, width=103, height=46),
+                        visual_region=BoxBounds(x=774, y=957, width=154, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
@@ -629,7 +629,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Hindfoot (mm)',
-                        visual_region=BoxBounds(x=622, y=637, width=100, height=47),
+                        visual_region=BoxBounds(x=933, y=956, width=150, height=70),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
@@ -641,7 +641,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Ear (mm)',
-                        visual_region=BoxBounds(x=723, y=637, width=104, height=47),
+                        visual_region=BoxBounds(x=1084, y=956, width=156, height=70),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
@@ -653,7 +653,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Weight (g)',
-                        visual_region=BoxBounds(x=830, y=637, width=104, height=47),
+                        visual_region=BoxBounds(x=1245, y=956, width=156, height=70),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
@@ -665,7 +665,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Measured by',
-                        visual_region=BoxBounds(x=955, y=637, width=226, height=47),
+                        visual_region=BoxBounds(x=1432, y=956, width=339, height=70),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -679,7 +679,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Bats: forearm (mm)',
-                        visual_region=BoxBounds(x=1264, y=638, width=108, height=46),
+                        visual_region=BoxBounds(x=1896, y=957, width=162, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
@@ -692,7 +692,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Bats: tragus (mm)',
-                        visual_region=BoxBounds(x=1375, y=638, width=110, height=46),
+                        visual_region=BoxBounds(x=2062, y=957, width=165, height=69),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
@@ -711,14 +711,14 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Age Class',
-                        visual_region=BoxBounds(x=207, y=730, width=573, height=44),
+                        visual_region=BoxBounds(x=310, y=1095, width=860, height=66),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Adult', region=BoxBounds(x=346, y=746, width=11, height=12)),
-                            MultiCheckboxOption(name='Subadult', region=BoxBounds(x=447, y=746, width=11, height=12)),
-                            MultiCheckboxOption(name='Juvenile', region=BoxBounds(x=534, y=746, width=11, height=12)),
-                            MultiCheckboxOption(name='Embryo', region=BoxBounds(x=616, y=746, width=11, height=12)),
-                            MultiCheckboxOption(name='Unknown', region=BoxBounds(x=711, y=746, width=11, height=12)),
+                            MultiCheckboxOption(name='Adult', region=BoxBounds(x=519, y=1119, width=16, height=18)),
+                            MultiCheckboxOption(name='Subadult', region=BoxBounds(x=670, y=1119, width=16, height=18)),
+                            MultiCheckboxOption(name='Juvenile', region=BoxBounds(x=801, y=1119, width=16, height=18)),
+                            MultiCheckboxOption(name='Embryo', region=BoxBounds(x=924, y=1119, width=16, height=18)),
+                            MultiCheckboxOption(name='Unknown', region=BoxBounds(x=1066, y=1119, width=16, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_type=MultiCbExportType.SINGLE_COLUMN,
@@ -730,12 +730,12 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Relationship',
-            visual_region=BoxBounds(x=896, y=725, width=685, height=54),
+            visual_region=BoxBounds(x=1344, y=1088, width=1028, height=81),
             fields=[
                 FormField(
                     text_field=TextField(
                         name='Type',
-                        visual_region=BoxBounds(x=1062, y=731, width=256, height=34),
+                        visual_region=BoxBounds(x=1593, y=1096, width=384, height=51),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -763,7 +763,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Other ID',
-                        visual_region=BoxBounds(x=1365, y=728, width=206, height=37),
+                        visual_region=BoxBounds(x=2048, y=1092, width=309, height=56),
                         text_validator=TextValidator(
                             text_regex=r'^FN[0-9]{6}$',
                             error_tooltip='FN Numbers must be exactly 6 digits',
@@ -782,13 +782,13 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Sex',
-                        visual_region=BoxBounds(x=200, y=782, width=467, height=206),
+                        visual_region=BoxBounds(x=300, y=1173, width=700, height=309),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Male', region=BoxBounds(x=216, y=806, width=11, height=12)),
-                            MultiCheckboxOption(name='Female', region=BoxBounds(x=216, y=861, width=11, height=12)),
-                            MultiCheckboxOption(name='Sex Unknown', region=BoxBounds(x=216, y=958, width=11, height=12)),
-                            MultiCheckboxOption(name='Sex Not Examined', region=BoxBounds(x=429, y=958, width=11, height=12)),
+                            MultiCheckboxOption(name='Male', region=BoxBounds(x=324, y=1209, width=16, height=18)),
+                            MultiCheckboxOption(name='Female', region=BoxBounds(x=324, y=1292, width=16, height=18)),
+                            MultiCheckboxOption(name='Sex Unknown', region=BoxBounds(x=324, y=1437, width=16, height=18)),
+                            MultiCheckboxOption(name='Sex Not Examined', region=BoxBounds(x=644, y=1437, width=16, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_type=MultiCbExportType.SINGLE_COLUMN,
@@ -800,16 +800,16 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Male',
-            visual_region=BoxBounds(x=200, y=792, width=927, height=48),
+            visual_region=BoxBounds(x=300, y=1188, width=1390, height=72),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='External',
-                        visual_region=BoxBounds(x=353, y=793, width=421, height=36),
+                        visual_region=BoxBounds(x=530, y=1190, width=632, height=54),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Scrotal', region=BoxBounds(x=483, y=806, width=11, height=12)),
-                            MultiCheckboxOption(name='Non-scrotal', region=BoxBounds(x=617, y=806, width=11, height=12)),
+                            MultiCheckboxOption(name='Scrotal', region=BoxBounds(x=724, y=1209, width=16, height=18)),
+                            MultiCheckboxOption(name='Non-scrotal', region=BoxBounds(x=926, y=1209, width=16, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='male_external',
@@ -821,7 +821,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Testes',
-                        visual_region=BoxBounds(x=908, y=787, width=156, height=37),
+                        visual_region=BoxBounds(x=1362, y=1180, width=234, height=56),
                         text_validator=TextValidator(
                             text_regex=r'^[0-9]+[x][0-9]+$',
                             error_tooltip='Measurement must be: [Length]x[Width]',
@@ -835,16 +835,16 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Female',
-            visual_region=BoxBounds(x=199, y=841, width=1384, height=98),
+            visual_region=BoxBounds(x=298, y=1262, width=2076, height=147),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Vagina',
-                        visual_region=BoxBounds(x=350, y=846, width=348, height=42),
+                        visual_region=BoxBounds(x=525, y=1269, width=522, height=63),
                         validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Open', region=BoxBounds(x=466, y=861, width=11, height=12)),
-                            MultiCheckboxOption(name='Closed', region=BoxBounds(x=584, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Open', region=BoxBounds(x=699, y=1292, width=16, height=18)),
+                            MultiCheckboxOption(name='Closed', region=BoxBounds(x=876, y=1292, width=16, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_type=MultiCbExportType.SINGLE_COLUMN,
@@ -855,11 +855,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Mammae',
-                        visual_region=BoxBounds(x=720, y=847, width=382, height=40),
+                        visual_region=BoxBounds(x=1080, y=1270, width=573, height=60),
                         validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Enlarged', region=BoxBounds(x=858, y=861, width=11, height=12)),
-                            MultiCheckboxOption(name='Small', region=BoxBounds(x=1014, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Enlarged', region=BoxBounds(x=1287, y=1292, width=16, height=18)),
+                            MultiCheckboxOption(name='Small', region=BoxBounds(x=1521, y=1292, width=16, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_type=MultiCbExportType.SINGLE_COLUMN,
@@ -870,11 +870,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Lactation',
-                        visual_region=BoxBounds(x=1139, y=852, width=443, height=33),
+                        visual_region=BoxBounds(x=1708, y=1278, width=664, height=50),
                         validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Lactating', region=BoxBounds(x=1270, y=861, width=11, height=12)),
-                            MultiCheckboxOption(name='Not Lactating', region=BoxBounds(x=1421, y=861, width=11, height=12)),
+                            MultiCheckboxOption(name='Lactating', region=BoxBounds(x=1905, y=1292, width=16, height=18)),
+                            MultiCheckboxOption(name='Not Lactating', region=BoxBounds(x=2132, y=1292, width=16, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_type=MultiCbExportType.SINGLE_COLUMN,
@@ -885,11 +885,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     circled_field=CircledField(
                         name='Placental Scars',
-                        visual_region=BoxBounds(x=606, y=883, width=111, height=57),
+                        visual_region=BoxBounds(x=909, y=1324, width=166, height=86),
                         validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=610, y=887, width=47, height=45)),
-                            CircledOption(name='No', region=BoxBounds(x=668, y=888, width=43, height=46)),
+                            CircledOption(name='Yes', region=BoxBounds(x=915, y=1330, width=70, height=68)),
+                            CircledOption(name='No', region=BoxBounds(x=1002, y=1332, width=64, height=69)),
                         ],
                         exporter=CircledExporter(export_field_name='plsc(y/n)'),
                     )
@@ -897,10 +897,10 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Placental Scars - Measurements',
-                        visual_region=BoxBounds(x=711, y=884, width=189, height=60),
+                        visual_region=BoxBounds(x=1066, y=1326, width=284, height=90),
                         text_regions=[
-                            BoxBounds(x=726, y=896, width=82, height=35),
-                            BoxBounds(x=811, y=897, width=73, height=32),
+                            BoxBounds(x=1089, y=1344, width=123, height=52),
+                            BoxBounds(x=1216, y=1346, width=110, height=48),
                         ],
                         text_validator=TextValidator(
                             text_regex=r'^[0-9]+R,[0-9]+L$',
@@ -914,11 +914,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     circled_field=CircledField(
                         name='Embryo',
-                        visual_region=BoxBounds(x=1040, y=882, width=109, height=58),
+                        visual_region=BoxBounds(x=1560, y=1323, width=164, height=87),
                         validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=1045, y=890, width=46, height=44)),
-                            CircledOption(name='No', region=BoxBounds(x=1099, y=889, width=46, height=45)),
+                            CircledOption(name='Yes', region=BoxBounds(x=1568, y=1335, width=69, height=66)),
+                            CircledOption(name='No', region=BoxBounds(x=1648, y=1334, width=69, height=68)),
                         ],
                         exporter=CircledExporter(export_field_name='emb(y/n)'),
                     )
@@ -926,9 +926,9 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Embryo - Measurements',
-                        visual_region=BoxBounds(x=1143, y=891, width=184, height=46),
+                        visual_region=BoxBounds(x=1714, y=1336, width=276, height=69),
                         text_regions=[
-                            BoxBounds(x=1158, y=897, width=160, height=35),
+                            BoxBounds(x=1737, y=1346, width=240, height=52),
                         ],
                         text_validator=TextValidator(
                             text_regex=r'^[0-9]+R,[0-9]+L$',
@@ -942,7 +942,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Embryo - CR',
-                        visual_region=BoxBounds(x=1389, y=886, width=85, height=38),
+                        visual_region=BoxBounds(x=2084, y=1329, width=128, height=57),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                             text_required=False,
@@ -956,16 +956,16 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Ecto Parasites',
-            visual_region=BoxBounds(x=199, y=989, width=1376, height=50),
+            visual_region=BoxBounds(x=298, y=1484, width=2064, height=75),
             fields=[
                 FormField(
                     circled_field=CircledField(
                         name='Exam?',
-                        visual_region=BoxBounds(x=204, y=992, width=248, height=41),
+                        visual_region=BoxBounds(x=306, y=1488, width=372, height=62),
                         validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=354, y=994, width=39, height=38)),
-                            CircledOption(name='No', region=BoxBounds(x=404, y=992, width=41, height=40)),
+                            CircledOption(name='Yes', region=BoxBounds(x=531, y=1491, width=58, height=57)),
+                            CircledOption(name='No', region=BoxBounds(x=606, y=1488, width=62, height=60)),
                         ],
                         exporter=CircledExporter(export_field_name='ecto_exam(y/n)'),
                     )
@@ -973,11 +973,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     circled_field=CircledField(
                         name='Found?',
-                        visual_region=BoxBounds(x=446, y=991, width=262, height=41),
+                        visual_region=BoxBounds(x=669, y=1486, width=393, height=62),
                         validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=603, y=992, width=41, height=40)),
-                            CircledOption(name='No', region=BoxBounds(x=658, y=990, width=40, height=42)),
+                            CircledOption(name='Yes', region=BoxBounds(x=904, y=1488, width=62, height=60)),
+                            CircledOption(name='No', region=BoxBounds(x=987, y=1485, width=60, height=63)),
                         ],
                         exporter=CircledExporter(export_field_name='ecto_found(y/n)'),
                     )
@@ -985,7 +985,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='By',
-                        visual_region=BoxBounds(x=753, y=992, width=150, height=33),
+                        visual_region=BoxBounds(x=1130, y=1488, width=225, height=50),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -999,7 +999,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Date',
-                        visual_region=BoxBounds(x=965, y=990, width=149, height=35),
+                        visual_region=BoxBounds(x=1448, y=1485, width=224, height=52),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                         ),
@@ -1012,7 +1012,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Method',
-                        visual_region=BoxBounds(x=1208, y=986, width=368, height=39),
+                        visual_region=BoxBounds(x=1812, y=1479, width=552, height=58),
                         exporters=[
                             TextExporter(export_field_name='ecto_method'),
                         ],
@@ -1022,16 +1022,16 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Endo Parasites',
-            visual_region=BoxBounds(x=204, y=1037, width=1373, height=47),
+            visual_region=BoxBounds(x=306, y=1556, width=2060, height=70),
             fields=[
                 FormField(
                     circled_field=CircledField(
                         name='Exam?',
-                        visual_region=BoxBounds(x=206, y=1042, width=247, height=40),
+                        visual_region=BoxBounds(x=309, y=1563, width=370, height=60),
                         validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=358, y=1043, width=44, height=39)),
-                            CircledOption(name='No', region=BoxBounds(x=413, y=1040, width=40, height=44)),
+                            CircledOption(name='Yes', region=BoxBounds(x=537, y=1564, width=66, height=58)),
+                            CircledOption(name='No', region=BoxBounds(x=620, y=1560, width=60, height=66)),
                         ],
                         exporter=CircledExporter(export_field_name='endo_exam(y/n)'),
                     )
@@ -1039,11 +1039,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     circled_field=CircledField(
                         name='Found?',
-                        visual_region=BoxBounds(x=453, y=1039, width=248, height=45),
+                        visual_region=BoxBounds(x=680, y=1558, width=372, height=68),
                         validator=MultiChoiceValidation.MAXIMUM_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=608, y=1041, width=39, height=42)),
-                            CircledOption(name='No', region=BoxBounds(x=659, y=1044, width=43, height=40)),
+                            CircledOption(name='Yes', region=BoxBounds(x=912, y=1562, width=58, height=63)),
+                            CircledOption(name='No', region=BoxBounds(x=988, y=1566, width=64, height=60)),
                         ],
                         exporter=CircledExporter(export_field_name='endo_found(y/n)'),
                     )
@@ -1051,7 +1051,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='By',
-                        visual_region=BoxBounds(x=753, y=1037, width=154, height=38),
+                        visual_region=BoxBounds(x=1130, y=1556, width=231, height=57),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.LIST_CHOICE,
                             allow_closest_match_correction=True,
@@ -1065,7 +1065,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Date',
-                        visual_region=BoxBounds(x=967, y=1039, width=149, height=36),
+                        visual_region=BoxBounds(x=1450, y=1558, width=224, height=54),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.DATE,
                             text_required=False,
@@ -1079,7 +1079,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Method',
-                        visual_region=BoxBounds(x=1210, y=1039, width=362, height=36),
+                        visual_region=BoxBounds(x=1815, y=1558, width=543, height=54),
                         exporters=[
                             TextExporter(export_field_name='endo_method'),
                         ],
@@ -1102,25 +1102,25 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Prep Types',
-                        visual_region=BoxBounds(x=382, y=1101, width=1200, height=61),
+                        visual_region=BoxBounds(x=573, y=1652, width=1800, height=92),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Skin', region=BoxBounds(x=410, y=1128, width=12, height=12)),
-                            MultiCheckboxOption(name='Skull', region=BoxBounds(x=509, y=1128, width=12, height=12)),
-                            MultiCheckboxOption(name='Skull + Skel', region=BoxBounds(x=621, y=1128, width=12, height=12)),
+                            MultiCheckboxOption(name='Skin', region=BoxBounds(x=615, y=1692, width=18, height=18)),
+                            MultiCheckboxOption(name='Skull', region=BoxBounds(x=764, y=1692, width=18, height=18)),
+                            MultiCheckboxOption(name='Skull + Skel', region=BoxBounds(x=932, y=1692, width=18, height=18)),
                             MultiCheckboxOption(
                                 name='Whole Org',
-                                region=BoxBounds(x=804, y=1128, width=12, height=12),
+                                region=BoxBounds(x=1206, y=1692, width=18, height=18),
                                 circled_options=[
-                                    SubCircledOption(name='95% EtOH', region=BoxBounds(x=956, y=1100, width=71, height=58)),
-                                    SubCircledOption(name='Frozen', region=BoxBounds(x=1039, y=1106, width=54, height=57)),
+                                    SubCircledOption(name='95% EtOH', region=BoxBounds(x=1434, y=1650, width=106, height=87)),
+                                    SubCircledOption(name='Frozen', region=BoxBounds(x=1558, y=1659, width=81, height=86)),
                                 ]
                             ),
-                            MultiCheckboxOption(name='Tissue only', region=BoxBounds(x=1125, y=1128, width=12, height=12)),
+                            MultiCheckboxOption(name='Tissue only', region=BoxBounds(x=1688, y=1692, width=18, height=18)),
                             MultiCheckboxOption(
                                 name='Other',
-                                region=BoxBounds(x=1320, y=1128, width=12, height=12),
-                                text_region=BoxBounds(x=1415, y=1103, width=158, height=43),
+                                region=BoxBounds(x=1980, y=1692, width=18, height=18),
+                                text_region=BoxBounds(x=2122, y=1654, width=237, height=64),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1138,22 +1138,22 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Collection Method',
-                        visual_region=BoxBounds(x=270, y=1163, width=1150, height=52),
+                        visual_region=BoxBounds(x=405, y=1744, width=1725, height=78),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Sherman', region=BoxBounds(x=285, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Snap', region=BoxBounds(x=409, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Rat', region=BoxBounds(x=510, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Gopher', region=BoxBounds(x=592, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Pit', region=BoxBounds(x=691, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Net', region=BoxBounds(x=763, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Gun', region=BoxBounds(x=845, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Salvage', region=BoxBounds(x=935, y=1183, width=12, height=12)),
-                            MultiCheckboxOption(name='Tomahawk', region=BoxBounds(x=1068, y=1183, width=12, height=12)),
+                            MultiCheckboxOption(name='Sherman', region=BoxBounds(x=428, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Snap', region=BoxBounds(x=614, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Rat', region=BoxBounds(x=765, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Gopher', region=BoxBounds(x=888, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Pit', region=BoxBounds(x=1036, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Net', region=BoxBounds(x=1144, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Gun', region=BoxBounds(x=1268, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Salvage', region=BoxBounds(x=1402, y=1774, width=18, height=18)),
+                            MultiCheckboxOption(name='Tomahawk', region=BoxBounds(x=1602, y=1774, width=18, height=18)),
                             MultiCheckboxOption(
                                 name='Other',
-                                region=BoxBounds(x=1182, y=1183, width=12, height=12),
-                                text_region=BoxBounds(x=1265, y=1159, width=144, height=42),
+                                region=BoxBounds(x=1773, y=1774, width=18, height=18),
+                                text_region=BoxBounds(x=1898, y=1738, width=216, height=63),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1171,11 +1171,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     circled_field=CircledField(
                         name='DOA',
-                        visual_region=BoxBounds(x=1415, y=1161, width=170, height=54),
+                        visual_region=BoxBounds(x=2122, y=1742, width=255, height=81),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         options=[
-                            CircledOption(name='Yes', region=BoxBounds(x=1496, y=1173, width=33, height=33)),
-                            CircledOption(name='No', region=BoxBounds(x=1540, y=1172, width=33, height=33)),
+                            CircledOption(name='Yes', region=BoxBounds(x=2244, y=1760, width=50, height=50)),
+                            CircledOption(name='No', region=BoxBounds(x=2310, y=1758, width=50, height=50)),
                         ],
                         exporter=CircledExporter(export_field_name='dead_on_arrival(y/n)'),
                     )
@@ -1184,18 +1184,18 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Heart, Lung',
-            visual_region=BoxBounds(x=195, y=1301, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=1952, width=909, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1301, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=1952, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1314, width=12, height=12)),
-                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1347, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1314, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1347, width=12, height=12)),
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=500, y=1971, width=18, height=18)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=500, y=2020, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=636, y=1971, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2020, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Heart,Lung_pres',
@@ -1205,8 +1205,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=1951, width=165, height=100),
+                        exporters=[
+                            TextExporter(export_field_name='H/L_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1301, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=1952, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='H/L_remarks'),
                         ],
@@ -1216,18 +1225,18 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Kidney, Spleen',
-            visual_region=BoxBounds(x=195, y=1371, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=2056, width=909, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1371, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=2056, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1384, width=12, height=12)),
-                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1417, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1384, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1417, width=12, height=12)),
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=500, y=2076, width=18, height=18)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=500, y=2126, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=636, y=2076, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2126, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Kidney,Spleen_pres',
@@ -1237,8 +1246,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2056, width=165, height=103),
+                        exporters=[
+                            TextExporter(export_field_name='K/Sp_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1371, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=2056, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='K/Sp_remarks'),
                         ],
@@ -1248,18 +1266,18 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Liver',
-            visual_region=BoxBounds(x=195, y=1442, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=2163, width=909, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1442, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=2163, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1455, width=12, height=12)),
-                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1488, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1455, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1488, width=12, height=12)),
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=500, y=2182, width=18, height=18)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=500, y=2232, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=636, y=2182, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2232, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Liver_pres',
@@ -1269,8 +1287,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2162, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='L_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1442, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=2163, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='L_remarks'),
                         ],
@@ -1280,18 +1307,18 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Muscle',
-            visual_region=BoxBounds(x=195, y=1514, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=2271, width=909, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1514, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=2271, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1527, width=12, height=12)),
-                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=333, y=1560, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1527, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1560, width=12, height=12)),
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=500, y=2290, width=18, height=18)),
+                            MultiCheckboxOption(name='-80 C', region=BoxBounds(x=500, y=2340, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=636, y=2290, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2340, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Muscle_pres',
@@ -1301,8 +1328,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2270, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='M_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1514, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=2271, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='M_remarks'),
                         ],
@@ -1312,17 +1348,17 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='GI / LI / colon',
-            visual_region=BoxBounds(x=195, y=1586, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=2379, width=909, height=99),
             fields=[
                 FormField(
                     circled_field=CircledField(
                         name='Type',
-                        visual_region=BoxBounds(x=195, y=1586, width=125, height=69),
-                        validator=MultiChoiceValidation.MAXIMUM_ONE,
+                        visual_region=BoxBounds(x=292, y=2379, width=188, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         options=[
-                            CircledOption(name='GI', region=BoxBounds(x=197, y=1589, width=44, height=32)),
-                            CircledOption(name='LI', region=BoxBounds(x=253, y=1588, width=44, height=35)),
-                            CircledOption(name='colon', region=BoxBounds(x=203, y=1617, width=92, height=37)),
+                            CircledOption(name='GI', region=BoxBounds(x=296, y=2384, width=66, height=48)),
+                            CircledOption(name='LI', region=BoxBounds(x=380, y=2382, width=66, height=52)),
+                            CircledOption(name='colon', region=BoxBounds(x=304, y=2426, width=138, height=56)),
                         ],
                         exporter=CircledExporter(
                             export_field_name='GI,LI,colon_coll'
@@ -1332,13 +1368,13 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1586, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=2379, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1599, width=12, height=12)),
-                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1632, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1599, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1632, width=12, height=12)),
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=500, y=2398, width=18, height=18)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=500, y=2448, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=636, y=2398, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2448, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='GI/LI/C_pres',
@@ -1348,8 +1384,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2378, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='GI/LI/C_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1586, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=2379, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='GI/LI/C_remarks'),
                         ],
@@ -1359,18 +1404,18 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Feces',
-            visual_region=BoxBounds(x=195, y=1658, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=2487, width=909, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1658, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=2487, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=333, y=1599, width=12, height=12)),
-                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=333, y=1632, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=424, y=1599, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1632, width=12, height=12)),
+                            MultiCheckboxOption(name='-20 C', region=BoxBounds(x=500, y=2506, width=18, height=18)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=500, y=2556, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=636, y=2506, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2556, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Feces_pres',
@@ -1380,8 +1425,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2486, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='F_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1658, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=2487, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='F_remarks'),
                         ],
@@ -1391,18 +1445,18 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Blood',
-            visual_region=BoxBounds(x=195, y=1730, width=606, height=66),
+            visual_region=BoxBounds(x=292, y=2595, width=909, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=324, y=1730, width=188, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=486, y=2595, width=282, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Nobuto', region=BoxBounds(x=333, y=1743, width=12, height=12)),
-                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=331, y=1776, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=422, y=1743, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=424, y=1776, width=12, height=12)),
+                            MultiCheckboxOption(name='Nobuto', region=BoxBounds(x=500, y=2614, width=18, height=18)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=496, y=2664, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=633, y=2614, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=636, y=2664, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='Blood_pres',
@@ -1412,8 +1466,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2594, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='B_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=627, y=1730, width=175, height=66),
+                        visual_region=BoxBounds(x=940, y=2595, width=262, height=99),
                         exporters=[
                             TextExporter(export_field_name='B_remarks'),
                         ],
@@ -1423,33 +1486,33 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Ecto Parasites 1',
-            visual_region=BoxBounds(x=838, y=1301, width=749, height=66),
+            visual_region=BoxBounds(x=1257, y=1952, width=1124, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
-                        visual_region=BoxBounds(x=838, y=1301, width=231, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=1257, y=1952, width=346, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Flea',
-                                region=BoxBounds(x=863, y=1310, width=24, height=20),
-                                text_region=BoxBounds(x=853, y=1305, width=46, height=26),
+                                region=BoxBounds(x=1294, y=1965, width=36, height=30),
+                                text_region=BoxBounds(x=1280, y=1958, width=69, height=39),
                             ),
                             MultiCheckboxOption(
                                 name='Tick',
-                                region=BoxBounds(x=872, y=1342, width=15, height=17),
-                                text_region=BoxBounds(x=854, y=1334, width=46, height=26),
+                                region=BoxBounds(x=1308, y=2013, width=22, height=26),
+                                text_region=BoxBounds(x=1281, y=2001, width=69, height=39),
                             ),
                             MultiCheckboxOption(
                                 name='Mite',
-                                region=BoxBounds(x=973, y=1311, width=16, height=18),
-                                text_region=BoxBounds(x=957, y=1305, width=46, height=26),
+                                region=BoxBounds(x=1460, y=1966, width=24, height=27),
+                                text_region=BoxBounds(x=1436, y=1958, width=69, height=39),
                             ),
                             MultiCheckboxOption(
                                 name='Lice',
-                                region=BoxBounds(x=973, y=1341, width=16, height=17),
-                                text_region=BoxBounds(x=956, y=1334, width=46, height=26),
+                                region=BoxBounds(x=1460, y=2012, width=24, height=26),
+                                text_region=BoxBounds(x=1434, y=2001, width=69, height=39),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1461,13 +1524,13 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1301, width=177, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=1610, y=1952, width=266, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1314, width=12, height=12)),
-                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1161, y=1314, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1347, width=12, height=12)),
-                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1159, y=1347, width=12, height=12)),
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1623, y=1971, width=18, height=18)),
+                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1742, y=1971, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1623, y=2020, width=18, height=18)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1738, y=2020, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='ecto1_pres',
@@ -1477,8 +1540,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=1951, width=171, height=100),
+                        exporters=[
+                            TextExporter(export_field_name='ecto1_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1301, width=218, height=66),
+                        visual_region=BoxBounds(x=2054, y=1952, width=327, height=99),
                         exporters=[
                             TextExporter(export_field_name='ecto1_remarks'),
                         ],
@@ -1488,33 +1560,33 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Ecto Parasites 2',
-            visual_region=BoxBounds(x=838, y=1371, width=749, height=66),
+            visual_region=BoxBounds(x=1257, y=2056, width=1124, height=99),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
-                        visual_region=BoxBounds(x=838, y=1371, width=231, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=1257, y=2056, width=346, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Flea',
-                                region=BoxBounds(x=863, y=1380, width=24, height=20),
-                                text_region=BoxBounds(x=853, y=1375, width=46, height=26),
+                                region=BoxBounds(x=1294, y=2070, width=36, height=30),
+                                text_region=BoxBounds(x=1280, y=2062, width=69, height=39),
                             ),
                             MultiCheckboxOption(
                                 name='Tick',
-                                region=BoxBounds(x=872, y=1412, width=15, height=17),
-                                text_region=BoxBounds(x=854, y=1404, width=46, height=26),
+                                region=BoxBounds(x=1308, y=2118, width=22, height=26),
+                                text_region=BoxBounds(x=1281, y=2106, width=69, height=39),
                             ),
                             MultiCheckboxOption(
                                 name='Mite',
-                                region=BoxBounds(x=973, y=1381, width=16, height=18),
-                                text_region=BoxBounds(x=957, y=1375, width=46, height=26),
+                                region=BoxBounds(x=1460, y=2072, width=24, height=27),
+                                text_region=BoxBounds(x=1436, y=2062, width=69, height=39),
                             ),
                             MultiCheckboxOption(
                                 name='Lice',
-                                region=BoxBounds(x=973, y=1411, width=16, height=17),
-                                text_region=BoxBounds(x=956, y=1404, width=46, height=26),
+                                region=BoxBounds(x=1460, y=2116, width=24, height=26),
+                                text_region=BoxBounds(x=1434, y=2106, width=69, height=39),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1526,13 +1598,13 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1371, width=177, height=66),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=1610, y=2056, width=266, height=99),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1384, width=12, height=12)),
-                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1161, y=1384, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1417, width=12, height=12)),
-                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1159, y=1417, width=12, height=12)),
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1623, y=2076, width=18, height=18)),
+                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1742, y=2076, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1623, y=2126, width=18, height=18)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1738, y=2126, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='ecto2_pres',
@@ -1542,8 +1614,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2056, width=171, height=103),
+                        exporters=[
+                            TextExporter(export_field_name='ecto2_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1371, width=218, height=66),
+                        visual_region=BoxBounds(x=2054, y=2056, width=327, height=99),
                         exporters=[
                             TextExporter(export_field_name='ecto2_remarks'),
                         ],
@@ -1553,12 +1634,12 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Misc Parasites',
-            visual_region=BoxBounds(x=835, y=1441, width=754, height=72),
+            visual_region=BoxBounds(x=1252, y=2162, width=1131, height=108),
             fields=[
                 FormField(
                     text_field=TextField(
                         name='Type',
-                        visual_region=BoxBounds(x=838, y=1442, width=231, height=69),
+                        visual_region=BoxBounds(x=1257, y=2163, width=346, height=104),
                         exporters=[
                             TextExporter(export_field_name='misc_para_type'),
                         ],
@@ -1567,7 +1648,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Count',
-                        visual_region=BoxBounds(x=838, y=1442, width=231, height=69),
+                        visual_region=BoxBounds(x=1257, y=2163, width=346, height=104),
                         exporters=[
                             TextExporter(export_field_name='misc_para_count'),
                         ],
@@ -1576,7 +1657,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1442, width=177, height=69),
+                        visual_region=BoxBounds(x=1610, y=2163, width=266, height=104),
                         exporters=[
                             TextExporter(export_field_name='misc_para_pres'),
                         ],
@@ -1584,8 +1665,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2162, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='misc_para_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1442, width=218, height=69),
+                        visual_region=BoxBounds(x=2054, y=2163, width=327, height=104),
                         exporters=[
                             TextExporter(export_field_name='misc_para_remarks'),
                         ],
@@ -1595,33 +1685,33 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Endo Parasites 1',
-            visual_region=BoxBounds(x=838, y=1514, width=749, height=69),
+            visual_region=BoxBounds(x=1257, y=2271, width=1124, height=104),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
-                        visual_region=BoxBounds(x=838, y=1514, width=231, height=69),
-                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        visual_region=BoxBounds(x=1257, y=2271, width=346, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Nema',
-                                region=BoxBounds(x=856, y=1525, width=19, height=18),
-                                text_region=BoxBounds(x=842, y=1518, width=45, height=27),
+                                region=BoxBounds(x=1284, y=2288, width=28, height=27),
+                                text_region=BoxBounds(x=1263, y=2277, width=68, height=40),
                             ),
                             MultiCheckboxOption(
                                 name='Trem',
-                                region=BoxBounds(x=858, y=1554, width=20, height=20),
-                                text_region=BoxBounds(x=843, y=1550, width=45, height=25),
+                                region=BoxBounds(x=1287, y=2331, width=30, height=30),
+                                text_region=BoxBounds(x=1264, y=2325, width=68, height=38),
                             ),
                             MultiCheckboxOption(
                                 name='Cest',
-                                region=BoxBounds(x=980, y=1527, width=16, height=16),
-                                text_region=BoxBounds(x=964, y=1520, width=46, height=25),
+                                region=BoxBounds(x=1470, y=2290, width=24, height=24),
+                                text_region=BoxBounds(x=1446, y=2280, width=69, height=38),
                             ),
                             MultiCheckboxOption(
                                 name='Cyst',
-                                region=BoxBounds(x=982, y=1556, width=16, height=17),
-                                text_region=BoxBounds(x=964, y=1551, width=46, height=24),
+                                region=BoxBounds(x=1473, y=2334, width=24, height=26),
+                                text_region=BoxBounds(x=1446, y=2326, width=69, height=36),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1633,12 +1723,12 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1514, width=177, height=69),
-                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        visual_region=BoxBounds(x=1610, y=2271, width=266, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1527, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1560, width=12, height=12)),
-                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1527, width=12, height=12)),
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1623, y=2290, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1623, y=2340, width=18, height=18)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1752, y=2290, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='endo1_pres',
@@ -1648,8 +1738,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2270, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='misc_para_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1514, width=218, height=69),
+                        visual_region=BoxBounds(x=2054, y=2271, width=327, height=104),
                         exporters=[
                             TextExporter(export_field_name='endo1_remarks'),
                         ],
@@ -1659,33 +1758,33 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Endo Parasites 2',
-            visual_region=BoxBounds(x=838, y=1586, width=749, height=69),
+            visual_region=BoxBounds(x=1257, y=2379, width=1124, height=104),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
-                        visual_region=BoxBounds(x=838, y=1586, width=231, height=69),
-                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        visual_region=BoxBounds(x=1257, y=2379, width=346, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Nema',
-                                region=BoxBounds(x=856, y=1598, width=19, height=18),
-                                text_region=BoxBounds(x=842, y=1590, width=45, height=27),
+                                region=BoxBounds(x=1284, y=2397, width=28, height=27),
+                                text_region=BoxBounds(x=1263, y=2385, width=68, height=40),
                             ),
                             MultiCheckboxOption(
                                 name='Trem',
-                                region=BoxBounds(x=858, y=1626, width=20, height=20),
-                                text_region=BoxBounds(x=843, y=1622, width=45, height=25),
+                                region=BoxBounds(x=1287, y=2439, width=30, height=30),
+                                text_region=BoxBounds(x=1264, y=2433, width=68, height=38),
                             ),
                             MultiCheckboxOption(
                                 name='Cest',
-                                region=BoxBounds(x=980, y=1599, width=16, height=16),
-                                text_region=BoxBounds(x=964, y=1592, width=46, height=25),
+                                region=BoxBounds(x=1470, y=2398, width=24, height=24),
+                                text_region=BoxBounds(x=1446, y=2388, width=69, height=38),
                             ),
                             MultiCheckboxOption(
                                 name='Cyst',
-                                region=BoxBounds(x=982, y=1628, width=16, height=17),
-                                text_region=BoxBounds(x=964, y=1623, width=46, height=24),
+                                region=BoxBounds(x=1473, y=2442, width=24, height=26),
+                                text_region=BoxBounds(x=1446, y=2434, width=69, height=36),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1697,12 +1796,12 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1586, width=177, height=69),
-                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        visual_region=BoxBounds(x=1610, y=2379, width=266, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1599, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1632, width=12, height=12)),
-                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1599, width=12, height=12)),
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1623, y=2398, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1623, y=2448, width=18, height=18)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1752, y=2398, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='endo2_pres',
@@ -1712,8 +1811,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2378, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='endo2_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1586, width=218, height=69),
+                        visual_region=BoxBounds(x=2054, y=2379, width=327, height=104),
                         exporters=[
                             TextExporter(export_field_name='endo2_remarks'),
                         ],
@@ -1723,33 +1831,33 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Endo Parasites 3',
-            visual_region=BoxBounds(x=838, y=1658, width=749, height=69),
+            visual_region=BoxBounds(x=1257, y=2487, width=1124, height=104),
             fields=[
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Type & Count',
-                        visual_region=BoxBounds(x=838, y=1658, width=231, height=69),
-                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        visual_region=BoxBounds(x=1257, y=2487, width=346, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
                             MultiCheckboxOption(
                                 name='Nema',
-                                region=BoxBounds(x=856, y=1670, width=19, height=18),
-                                text_region=BoxBounds(x=842, y=1662, width=45, height=27),
+                                region=BoxBounds(x=1284, y=2505, width=28, height=27),
+                                text_region=BoxBounds(x=1263, y=2493, width=68, height=40),
                             ),
                             MultiCheckboxOption(
                                 name='Trem',
-                                region=BoxBounds(x=858, y=1698, width=20, height=20),
-                                text_region=BoxBounds(x=843, y=1694, width=45, height=25),
+                                region=BoxBounds(x=1287, y=2547, width=30, height=30),
+                                text_region=BoxBounds(x=1264, y=2541, width=68, height=38),
                             ),
                             MultiCheckboxOption(
                                 name='Cest',
-                                region=BoxBounds(x=980, y=1671, width=16, height=16),
-                                text_region=BoxBounds(x=964, y=1664, width=46, height=25),
+                                region=BoxBounds(x=1470, y=2506, width=24, height=24),
+                                text_region=BoxBounds(x=1446, y=2496, width=69, height=38),
                             ),
                             MultiCheckboxOption(
                                 name='Cyst',
-                                region=BoxBounds(x=982, y=1700, width=16, height=17),
-                                text_region=BoxBounds(x=964, y=1695, width=46, height=24),
+                                region=BoxBounds(x=1473, y=2550, width=24, height=26),
+                                text_region=BoxBounds(x=1446, y=2542, width=69, height=36),
                             ),
                         ],
                         exporter=MultiCheckboxExporter(
@@ -1761,12 +1869,12 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1658, width=177, height=69),
-                        validator=MultiChoiceValidation.REQUIRE_ONE,
+                        visual_region=BoxBounds(x=1610, y=2487, width=266, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1082, y=1671, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1704, width=12, height=12)),
-                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1168, y=1671, width=12, height=12)),
+                            MultiCheckboxOption(name='80%', region=BoxBounds(x=1623, y=2506, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1623, y=2556, width=18, height=18)),
+                            MultiCheckboxOption(name='Other', region=BoxBounds(x=1752, y=2506, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='endo3_pres',
@@ -1776,8 +1884,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2486, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='endo3_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1658, width=218, height=69),
+                        visual_region=BoxBounds(x=2054, y=2487, width=327, height=104),
                         exporters=[
                             TextExporter(export_field_name='endo3_remarks'),
                         ],
@@ -1787,13 +1904,12 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Embryos',
-            visual_region=BoxBounds(x=838, y=1730, width=749, height=69),
+            visual_region=BoxBounds(x=1257, y=2594, width=1124, height=104),
             fields=[
                 FormField(
                     text_field=TextField(
                         name='Count',
-                        visual_region=BoxBounds(x=872, y=1750, width=45, height=26),
-                        text_validator=TextValidator(datatype=TextValidatorDatatype.INTEGER),
+                        visual_region=BoxBounds(x=1308, y=2625, width=68, height=39),
                         exporters=[
                             TextExporter(export_field_name='emb_count'),
                         ],
@@ -1802,13 +1918,13 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1073, y=1730, width=177, height=69),
-                        validator=MultiChoiceValidation.OPTIONAL,
+                        visual_region=BoxBounds(x=1610, y=2594, width=266, height=104),
+                        validator=MultiChoiceValidation.NONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=1082, y=1743, width=12, height=12)),
-                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1082, y=1776, width=12, height=12)),
-                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1170, y=1743, width=12, height=12)),
-                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=1159, y=1176, width=12, height=12)),
+                            MultiCheckboxOption(name='10% form', region=BoxBounds(x=1623, y=2614, width=18, height=18)),
+                            MultiCheckboxOption(name='LN2', region=BoxBounds(x=1623, y=2664, width=18, height=18)),
+                            MultiCheckboxOption(name='95%', region=BoxBounds(x=1755, y=2614, width=18, height=18)),
+                            MultiCheckboxOption(name='Shield', region=BoxBounds(x=1738, y=2664, width=18, height=18)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='emb_pres',
@@ -1818,8 +1934,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2594, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='emb_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=1369, y=1730, width=218, height=69),
+                        visual_region=BoxBounds(x=2054, y=2594, width=327, height=104),
                         exporters=[
                             TextExporter(export_field_name='emb_remarks'),
                         ],
@@ -1834,14 +1959,14 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Tissue Quality',
-                        visual_region=BoxBounds(x=372, y=1803, width=462, height=39),
+                        visual_region=BoxBounds(x=558, y=2704, width=693, height=58),
                         validator=MultiChoiceValidation.REQUIRE_ONE,
                         checkboxes=[
-                            MultiCheckboxOption(name='Excellent', region=BoxBounds(x=381, y=1822, width=9, height=9)),
-                            MultiCheckboxOption(name='Very Good', region=BoxBounds(x=494, y=1822, width=9, height=9)),
-                            MultiCheckboxOption(name='Good', region=BoxBounds(x=620, y=1822, width=9, height=9)),
-                            MultiCheckboxOption(name='Fair', region=BoxBounds(x=701, y=1822, width=9, height=9)),
-                            MultiCheckboxOption(name='Poor', region=BoxBounds(x=767, y=1822, width=9, height=9)),
+                            MultiCheckboxOption(name='Excellent', region=BoxBounds(x=572, y=2733, width=14, height=14)),
+                            MultiCheckboxOption(name='Very Good', region=BoxBounds(x=741, y=2733, width=14, height=14)),
+                            MultiCheckboxOption(name='Good', region=BoxBounds(x=930, y=2733, width=14, height=14)),
+                            MultiCheckboxOption(name='Fair', region=BoxBounds(x=1052, y=2733, width=14, height=14)),
+                            MultiCheckboxOption(name='Poor', region=BoxBounds(x=1150, y=2733, width=14, height=14)),
                         ],
                         exporter=MultiCheckboxExporter(
                             export_field_name='tiss_quality',
@@ -1858,7 +1983,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Time of Death',
-                        visual_region=BoxBounds(x=383, y=1838, width=129, height=37),
+                        visual_region=BoxBounds(x=574, y=2757, width=194, height=56),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.TIME,
                         ),
@@ -1876,7 +2001,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Time of Tissue in LN2',
-                        visual_region=BoxBounds(x=773, y=1838, width=114, height=37),
+                        visual_region=BoxBounds(x=1160, y=2757, width=171, height=56),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.TIME),
                         exporters=[
                             TextExporter(export_field_name='time_tissue_pres'),
@@ -1892,7 +2017,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Elapsed Time (min)',
-                        visual_region=BoxBounds(x=383, y=1882, width=128, height=36),
+                        visual_region=BoxBounds(x=574, y=2823, width=192, height=54),
                         text_validator=TextValidator(
                             datatype=TextValidatorDatatype.INTEGER,
                         ),
@@ -1905,12 +2030,12 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Cold Chain Progression',
-            visual_region=BoxBounds(x=903, y=1834, width=681, height=90),
+            visual_region=BoxBounds(x=1354, y=2751, width=1022, height=135),
             fields=[
                 FormField(
                     text_field=TextField(
                         name='Dry Ice',
-                        visual_region=BoxBounds(x=920, y=1840, width=148, height=38),
+                        visual_region=BoxBounds(x=1380, y=2760, width=222, height=57),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
                         exporters=[
                             TextExporter(export_field_name='date_dryice', capitalization=CapitalizationType.TITLE),
@@ -1920,7 +2045,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Field LN2',
-                        visual_region=BoxBounds(x=1156, y=1836, width=143, height=42),
+                        visual_region=BoxBounds(x=1734, y=2754, width=214, height=63),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
                         exporters=[
                             TextExporter(export_field_name='date_fieldLN2', capitalization=CapitalizationType.TITLE),
@@ -1930,7 +2055,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='-20 C',
-                        visual_region=BoxBounds(x=1374, y=1835, width=147, height=43),
+                        visual_region=BoxBounds(x=2061, y=2752, width=220, height=64),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
                         exporters=[
                             TextExporter(export_field_name='date_-20C', capitalization=CapitalizationType.TITLE),
@@ -1940,7 +2065,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='-40 C',
-                        visual_region=BoxBounds(x=923, y=1881, width=142, height=41),
+                        visual_region=BoxBounds(x=1384, y=2822, width=213, height=62),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
                         exporters=[
                             TextExporter(export_field_name='date_-40C', capitalization=CapitalizationType.TITLE),
@@ -1950,7 +2075,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='-80 C',
-                        visual_region=BoxBounds(x=1159, y=1882, width=141, height=40),
+                        visual_region=BoxBounds(x=1738, y=2823, width=212, height=60),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
                         exporters=[
                             TextExporter(export_field_name='date_-80C', capitalization=CapitalizationType.TITLE),
@@ -1960,7 +2085,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Install LN2',
-                        visual_region=BoxBounds(x=1377, y=1881, width=144, height=41),
+                        visual_region=BoxBounds(x=2066, y=2822, width=216, height=62),
                         text_validator=TextValidator(datatype=TextValidatorDatatype.DATE),
                         exporters=[
                             TextExporter(export_field_name='date_installLN2', capitalization=CapitalizationType.TITLE),
@@ -1984,11 +2109,11 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=190, y=1931, width=1400, height=137),
+                        visual_region=BoxBounds(x=285, y=2896, width=2100, height=206),
                         text_regions=[
-                            BoxBounds(x=551, y=1934, width=1030, height=35),
-                            BoxBounds(x=195, y=1971, width=1383, height=41),
-                            BoxBounds(x=192, y=2017, width=1390, height=39),
+                            BoxBounds(x=826, y=2901, width=1545, height=52),
+                            BoxBounds(x=292, y=2956, width=2074, height=62),
+                            BoxBounds(x=288, y=3026, width=2085, height=58),
                         ],
                         exporters=[
                             TextExporter(export_field_name='remarks_general', capitalization=CapitalizationType.NONE),

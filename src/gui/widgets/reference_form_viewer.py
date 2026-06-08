@@ -32,6 +32,7 @@ class ReferenceFormViewer(QWidget):
     def _connect_signals(self) -> None:
         self.field_browser.treeSelectionChange.connect(self.field_canvas.handle_tree_selection_change)
         self.field_canvas.fieldSelected.connect(self.field_browser.handle_canvas_field_selected)
+        self.field_canvas.fieldPositionUpdate.connect(self.field_browser.handle_field_position_update)
 
         self.field_browser.deleteSelection.connect(self.field_canvas.handle_deletion)
 
@@ -40,7 +41,7 @@ class ReferenceFormViewer(QWidget):
 
     def set_edit_mode(self, allow_edits: bool) -> None:
         # TODO: restrict changes if we are not in edit mode
-        pass
+        self.field_canvas.set_edit_mode(allow_edits)
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self.field_canvas.load_reference_form(form)

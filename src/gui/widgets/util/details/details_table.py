@@ -1,7 +1,7 @@
 from PyQt6.QtCore import QMargins
 from PyQt6.QtWidgets import QTableWidget, QWidget, QAbstractItemView
 
-from .table_label import TableLabel
+from ..table_label import TableLabel
 
 
 class DetailsTable(QTableWidget):

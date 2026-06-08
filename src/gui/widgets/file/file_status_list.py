@@ -127,7 +127,7 @@ class FileStatusList(QTreeWidget):
             initial_status = FileStatus.PENDING
             if mode is ListMode.PRE_PROCESS:
                 if file.pre_process_result is not None:
-                    if file.pre_process_result.successful_alignment:
+                    if file.pre_process_result.alignment_possible:
                         initial_status = FileStatus.SUCCESS
                     else:
                         initial_status = FileStatus.FAILED
@@ -138,7 +138,7 @@ class FileStatusList(QTreeWidget):
                         continue
 
                     # skip files that were not aligned
-                    if not file.pre_process_result.successful_alignment:
+                    if not file.pre_process_result.alignment_possible:
                         continue
 
                 if file.process_result is not None:

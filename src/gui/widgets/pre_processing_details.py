@@ -33,6 +33,7 @@ class PreProcessingDetails(QFrame):
         self.status_label.setAutoFillBackground(True)
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
+        self.rotation_label = QLabel('Accepted Rotation Angle: ')
         self.accepted_rotation_label = QLabel()
         rotation_font = QFont()
         rotation_font.setBold(True)
@@ -55,7 +56,7 @@ class PreProcessingDetails(QFrame):
         layout.addWidget(QLabel('Status: '), 2, 0)
         layout.addWidget(self.status_label, 2, 1)
 
-        layout.addWidget(QLabel('Accepted Rotation Angle: '), 3, 0)
+        layout.addWidget(self.rotation_label, 3, 0)
         layout.addWidget(self.accepted_rotation_label, 3, 1)
 
         layout.addWidget(self.view_result_button, 4, 0)
@@ -94,8 +95,12 @@ class PreProcessingDetails(QFrame):
             self.file_path.setText(str(file.path))
 
             if file.pre_process_result is not None:
+                # hide rotation info if we don't have a valid angle
+                self.rotation_label.setVisible(file.pre_process_result.accepted_rotation_angle is not None)
+                self.accepted_rotation_label.setVisible(file.pre_process_result.accepted_rotation_angle is not None)
+
                 palette = QPalette()
-                if file.pre_process_result.successful_alignment:
+                if file.pre_process_result.alignment_possible:
                     if file.pre_process_result.fully_aligned:
                         self.status_label.setText('SUCCESS')
                         palette.setColor(QPalette.ColorRole.Window, QColor('green'))
@@ -114,5 +119,8 @@ class PreProcessingDetails(QFrame):
 
     @pyqtSlot()
     def view_results(self) -> None:
-        window = PreProcessingResult(self, self._db_id)
-        window.show()
+        if self._db_id is not None:
+            window = PreProcessingResult(self, self._db_id)
+            window.show()
+        else:
+            logger.warning('Attempted to view results but did not have a DB ID')

@@ -14,7 +14,7 @@ class PreProcessResult(MappedAsDataclass, OrmBase):
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     input_file_id: Mapped[int] = mapped_column(ForeignKey("input_file.id"), init=False)
 
-    successful_alignment: Mapped[bool]
+    alignment_possible: Mapped[bool]
     fully_aligned: Mapped[bool]
     accepted_rotation_angle: Mapped[float] = mapped_column(init=False, default=None, nullable=True)
 

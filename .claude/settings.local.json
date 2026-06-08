@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/atcos/AppData/Local/EagleEye/reference_forms/**)",
+      "Read(//c/Users/atcos/AppData/Local/EagleEye/jobs/**)"
+    ]
+  }
+}

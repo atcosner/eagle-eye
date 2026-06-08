@@ -1,6 +1,5 @@
 import cv2
 import logging
-import numpy as np
 import pymupdf
 from sqlalchemy.orm import Session
 
@@ -60,10 +59,10 @@ class PreProcessingWorker(QObject):
                     self.processingComplete.emit(self.input_file.id)
                     return
 
-                self.log.info(f'Extracting page from linked file: {linked_file.path.name}')
-
                 # TODO: could put the page number in the DB?
                 page_number = int(str(self.input_file.path.stem).split('page')[-1])
+
+                self.log.info(f'Extracting page {page_number} from linked file: {linked_file.path.name}')
 
                 # extract the page from the PDF and save it to our path
                 document = pymupdf.open(linked_file.path)
@@ -71,7 +70,7 @@ class PreProcessingWorker(QObject):
                 page_pixmap.save(self.input_file.path)
 
             self.log.info(f'Using reference: {self.job.reference_form.name}')
-            self.input_file.pre_process_result = PreProcessResult(successful_alignment=False, fully_aligned=False)
+            self.input_file.pre_process_result = PreProcessResult(alignment_possible=False, fully_aligned=False)
 
             # check that we have valid files
             if not self.input_file.path.exists():
@@ -83,6 +82,8 @@ class PreProcessingWorker(QObject):
                 self.log.error(f'Ref image did not exist: {self.job.reference_form.path}')
                 self.finish(session, FileStatus.FAILED)
                 return
+            
+            self.log.info(f'Reference form image: {self.job.reference_form.path}')
 
             # Build the paths for our output results
             pre_process_directory = LocalPaths.pre_processing_directory(self.job.uuid, self.input_file.id)

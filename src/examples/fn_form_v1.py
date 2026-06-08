@@ -1205,6 +1205,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=1951, width=165, height=100),
+                        exporters=[
+                            TextExporter(export_field_name='H/L_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=940, y=1952, width=262, height=99),
                         exporters=[
@@ -1234,6 +1243,15 @@ def add_fn_form_v1(session: Session) -> None:
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2056, width=165, height=103),
+                        exporters=[
+                            TextExporter(export_field_name='K/Sp_barcode'),
+                        ],
+                    ),
                 ),
                 FormField(
                     text_field=TextField(
@@ -1269,6 +1287,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2162, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='L_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=940, y=2163, width=262, height=99),
                         exporters=[
@@ -1298,6 +1325,15 @@ def add_fn_form_v1(session: Session) -> None:
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2270, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='M_barcode'),
+                        ],
+                    ),
                 ),
                 FormField(
                     text_field=TextField(
@@ -1348,6 +1384,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2378, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='GI/LI/C_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=940, y=2379, width=262, height=99),
                         exporters=[
@@ -1380,6 +1425,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2486, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='F_barcode'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=940, y=2487, width=262, height=99),
                         exporters=[
@@ -1409,6 +1463,15 @@ def add_fn_form_v1(session: Session) -> None:
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='Barcode',
+                        visual_region=BoxBounds(x=773, y=2594, width=165, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='B_barcode'),
+                        ],
+                    ),
                 ),
                 FormField(
                     text_field=TextField(
@@ -1477,6 +1540,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=1951, width=171, height=100),
+                        exporters=[
+                            TextExporter(export_field_name='ecto1_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=2054, y=1952, width=327, height=99),
                         exporters=[
@@ -1542,6 +1614,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2056, width=171, height=103),
+                        exporters=[
+                            TextExporter(export_field_name='ecto2_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=2054, y=2056, width=327, height=99),
                         exporters=[
@@ -1579,6 +1660,15 @@ def add_fn_form_v1(session: Session) -> None:
                         visual_region=BoxBounds(x=1610, y=2163, width=266, height=104),
                         exporters=[
                             TextExporter(export_field_name='misc_para_pres'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2162, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='misc_para_lot'),
                         ],
                     ),
                 ),
@@ -1648,6 +1738,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2270, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='misc_para_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=2054, y=2271, width=327, height=104),
                         exporters=[
@@ -1709,6 +1808,15 @@ def add_fn_form_v1(session: Session) -> None:
                             export_type=MultiCbExportType.SINGLE_COLUMN,
                         ),
                     )
+                ),
+                FormField(
+                    text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2378, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='endo2_lot'),
+                        ],
+                    ),
                 ),
                 FormField(
                     text_field=TextField(
@@ -1776,6 +1884,15 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2486, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='endo3_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
                         visual_region=BoxBounds(x=2054, y=2487, width=327, height=104),
                         exporters=[
@@ -1787,7 +1904,7 @@ def add_fn_form_v1(session: Session) -> None:
         ),
         FieldGroup(
             name='Embryos',
-            visual_region=BoxBounds(x=1257, y=2595, width=1124, height=104),
+            visual_region=BoxBounds(x=1257, y=2594, width=1124, height=104),
             fields=[
                 FormField(
                     text_field=TextField(
@@ -1802,7 +1919,7 @@ def add_fn_form_v1(session: Session) -> None:
                 FormField(
                     multi_checkbox_field=MultiCheckboxField(
                         name='Preserved',
-                        visual_region=BoxBounds(x=1610, y=2595, width=266, height=104),
+                        visual_region=BoxBounds(x=1610, y=2594, width=266, height=104),
                         validator=MultiChoiceValidation.OPTIONAL,
                         checkboxes=[
                             MultiCheckboxOption(name='10% form', region=BoxBounds(x=1623, y=2614, width=18, height=18)),
@@ -1818,8 +1935,17 @@ def add_fn_form_v1(session: Session) -> None:
                 ),
                 FormField(
                     text_field=TextField(
+                        name='LOT',
+                        visual_region=BoxBounds(x=1879, y=2594, width=171, height=105),
+                        exporters=[
+                            TextExporter(export_field_name='emb_lot'),
+                        ],
+                    ),
+                ),
+                FormField(
+                    text_field=TextField(
                         name='Remarks',
-                        visual_region=BoxBounds(x=2054, y=2595, width=327, height=104),
+                        visual_region=BoxBounds(x=2054, y=2594, width=327, height=104),
                         exporters=[
                             TextExporter(export_field_name='emb_remarks'),
                         ],

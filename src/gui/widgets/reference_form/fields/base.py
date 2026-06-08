@@ -84,6 +84,7 @@ class ResizableField(QGraphicsObject):
         self.selected: bool = False
         self.position_rect = position_rect
         self.color = color
+        self.edit_mode: bool = True
 
         self.setAcceptHoverEvents(True)
         self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable)
@@ -103,8 +104,19 @@ class ResizableField(QGraphicsObject):
         for anchor in self.resize_anchors:
             anchor.setVisible(False)
 
+    def set_edit_mode(self, allow_edits: bool) -> None:
+        self.edit_mode = allow_edits
+        self.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsMovable, allow_edits)
+        self.update_cursor()
+
+        # if we're already selected update our anchors
+        if self.selected:
+            for anchor in self.resize_anchors:
+                anchor.setSelected(self.edit_mode)
+                anchor.setVisible(self.edit_mode)
+
     def update_cursor(self) -> None:
-        if self.hovering and self.selected:
+        if self.hovering and self.selected and self.edit_mode:
             self.setCursor(Qt.CursorShape.SizeAllCursor)
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
@@ -137,7 +149,7 @@ class ResizableField(QGraphicsObject):
 
         for anchor in self.resize_anchors:
             anchor.update_position()
-
+    
     #
     # Qt overrides
     #
@@ -156,9 +168,11 @@ class ResizableField(QGraphicsObject):
         if change == QGraphicsItem.GraphicsItemChange.ItemSelectedChange:
             self.selected = value
             self.update_cursor()
+
+            # only show the anchors if we are editable
             for anchor in self.resize_anchors:
-                anchor.setSelected(True)
-                anchor.setVisible(value)
+                anchor.setSelected(self.edit_mode)
+                anchor.setVisible(value and self.edit_mode)
         return super().itemChange(change, value)
 
     def boundingRect(self) -> QRectF:

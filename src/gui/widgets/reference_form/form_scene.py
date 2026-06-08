@@ -37,6 +37,11 @@ class FormScene(QGraphicsScene):
 
         self.selectionChanged.connect(self.handle_selection_change)
 
+    def set_edit_mode(self, allow_edits: bool) -> None:
+        # update the edit mode on all of our fields
+        for field in self.fields_by_id.values():
+            field.set_edit_mode(allow_edits)
+
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self._form_db_id = None
         if form is None:

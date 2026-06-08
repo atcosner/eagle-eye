@@ -41,7 +41,7 @@ class ReferenceFormViewer(QWidget):
 
     def set_edit_mode(self, allow_edits: bool) -> None:
         # TODO: restrict changes if we are not in edit mode
-        pass
+        self.field_canvas.set_edit_mode(allow_edits)
 
     def load_reference_form(self, form: ReferenceForm | int | None) -> None:
         self.field_canvas.load_reference_form(form)

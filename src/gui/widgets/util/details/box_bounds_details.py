@@ -1,7 +1,12 @@
+import logging
+
 from PyQt6.QtCore import QRect
+from PyQt6.QtGui import QIntValidator
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QLineEdit
 
 from src.util.types import BoxBounds
+
+logger = logging.getLogger(__name__)
 
 
 class BoundsPart(QTreeWidgetItem):
@@ -12,8 +17,8 @@ class BoundsPart(QTreeWidgetItem):
 
         self.setText(0, name)
 
-        # TODO: integer validator
         self.edit = QLineEdit()
+        self.edit.setValidator(QIntValidator())
         self.edit.textEdited.connect(self.handle_text_changed)
         self.treeWidget().setItemWidget(self, 1, self.edit)
 
@@ -100,9 +105,12 @@ class BoxBoundsDetails(QTreeWidgetItem):
         self._update_title()
 
     def handle_child_data_change(self):
-        # Create the box bounds from our children
         new_bounds = BoxBounds.from_db(f'{self.top_left.get_text()},{self.width.get_text()},{self.height.get_text()}')
-        self._is_dirty = self._initial_bounds != new_bounds
+        if new_bounds is None:
+            # TODO: don't let children submit un-parseable values
+            logger.warning(f'{self.text(0)}: Could not parse child parts into a valid bounds')
+            return
 
+        self._is_dirty = self._initial_bounds != new_bounds
         self._update_title()
         self.treeWidget().resizeColumnToContents(0)

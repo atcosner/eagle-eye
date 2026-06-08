@@ -21,6 +21,9 @@ class FormFieldCanvas(QGraphicsView):
 
         self._scene.fieldSelected.connect(self.fieldSelected)
         self._scene.fieldPositionUpdate.connect(self.fieldPositionUpdate)
+    
+    def set_edit_mode(self, allow_edits: bool) -> None:
+        self._scene.set_edit_mode(allow_edits)
 
     def fit_form(self) -> None:
         self.fitInView(self._scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)

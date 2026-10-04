@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt6.QtGui import QFont, QPalette, QColor
-from PyQt6.QtWidgets import QFrame, QLabel, QLineEdit, QGridLayout, QPushButton
+from PyQt6.QtWidgets import QFrame, QLabel, QLineEdit, QGridLayout, QPushButton, QHBoxLayout
 
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class AlignmentCheckDetails(QFrame):
     alignmentConfirmed = pyqtSignal(int)
+    alignmentRefineRequested = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -22,7 +23,7 @@ class AlignmentCheckDetails(QFrame):
 
         self._db_id: int | None = None
         self._view_only: bool = False
-        self._confirmed_ids: set[int] = set()
+        self._refining_id: int | None = None
 
         self.file_name = QLineEdit()
         self.file_name.setDisabled(True)
@@ -40,6 +41,11 @@ class AlignmentCheckDetails(QFrame):
         self.confirm_button.setVisible(False)
         self.confirm_button.pressed.connect(self.confirm_alignment)
 
+        self.refine_button = QPushButton('Re-run Alignment')
+        self.refine_button.setToolTip('Run another alignment pass on the aligned image to try to improve it')
+        self.refine_button.setVisible(False)
+        self.refine_button.pressed.connect(self.refine_alignment)
+
         self._set_up_layout()
 
     def _set_up_layout(self) -> None:
@@ -53,7 +59,11 @@ class AlignmentCheckDetails(QFrame):
         layout.addWidget(self.overlaid_viewer, 2, 0, 1, 2)
         layout.setRowStretch(2, 1)
 
-        layout.addWidget(self.confirm_button, 3, 1, Qt.AlignmentFlag.AlignRight)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(self.refine_button)
+        button_layout.addWidget(self.confirm_button)
+        layout.addLayout(button_layout, 3, 0, 1, 2)
 
         self.setLayout(layout)
 
@@ -70,11 +80,16 @@ class AlignmentCheckDetails(QFrame):
         self.hide()
         self._db_id = None
 
-    def clear_confirmations(self) -> None:
-        self._confirmed_ids.clear()
-
     def set_view_only(self, view_only: bool) -> None:
         self._view_only = view_only
+        if self._db_id is not None:
+            self.load_file(self._db_id)
+
+    def set_refining(self, db_id: int | None) -> None:
+        # Only allow one re-alignment at a time
+        self._refining_id = db_id
+        self.confirm_button.setDisabled(db_id is not None)
+        self.refine_button.setDisabled(db_id is not None)
         if self._db_id is not None:
             self.load_file(self._db_id)
 
@@ -84,6 +99,7 @@ class AlignmentCheckDetails(QFrame):
     def load_file(self, db_id: int) -> None:
         self._db_id = db_id
         self.confirm_button.setVisible(False)
+        self.refine_button.setVisible(False)
 
         with Session(DB_ENGINE) as session:
             file = session.get(InputFile, db_id)
@@ -108,8 +124,16 @@ class AlignmentCheckDetails(QFrame):
 
             self.overlaid_viewer.update_preview(result.overlaid_image_path)
 
-            # Files that were OCR'd had their alignment confirmed previously
-            if db_id in self._confirmed_ids or file.process_result is not None:
+            # Files that were OCR'd can no longer be changed
+            if file.process_result is not None:
+                self._set_status('CONFIRMED', 'green')
+                return
+
+            self.refine_button.setVisible(not self._view_only)
+
+            if db_id == self._refining_id:
+                self._set_status('RE-RUNNING ALIGNMENT...', None)
+            elif result.alignment_confirmed:
                 self._set_status('CONFIRMED', 'green')
             else:
                 if result.fully_aligned:
@@ -121,7 +145,18 @@ class AlignmentCheckDetails(QFrame):
     @pyqtSlot()
     def confirm_alignment(self) -> None:
         if self._db_id is not None:
-            self._confirmed_ids.add(self._db_id)
+            with Session(DB_ENGINE) as session:
+                file = session.get(InputFile, self._db_id)
+                file.pre_process_result.alignment_confirmed = True
+                session.commit()
+
             self.alignmentConfirmed.emit(self._db_id)
         else:
             logger.warning('Attempted to confirm alignment but did not have a DB ID')
+
+    @pyqtSlot()
+    def refine_alignment(self) -> None:
+        if self._db_id is not None:
+            self.alignmentRefineRequested.emit(self._db_id)
+        else:
+            logger.warning('Attempted to refine alignment but did not have a DB ID')

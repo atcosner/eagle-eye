@@ -287,24 +287,11 @@ def _create_diff_image(ref_img: np.ndarray, aligned_img: np.ndarray) -> np.ndarr
     return diff_color
 
 
-def automatic_alignment(
+def _select_homography(
         logger: logging.Logger | NamedLoggerAdapter,
-        session: Session,
-        working_directory: Path,
         reference_image: np.ndarray,
         test_image: np.ndarray,
-        result: PreProcessResult,
-) -> FileStatus:
-    matches_path, aligned_path, overlaid_path = build_image_paths(working_directory)
-
-    # Set some defaults on the result
-    result.alignment_possible = False
-    result.fully_aligned = False
-
-    h, w = reference_image.shape[:2]
-    logger.info(f"Reference : {w}x{h}")
-    logger.info(f"Test      : {test_image.shape[1]}x{test_image.shape[0]}")
-
+) -> np.ndarray:
     # ── Try with structure mask first ──
     logger.info("[1] Computing homography with structure-masked features...")
     H_masked, inliers_masked = _compute_homography(
@@ -338,6 +325,28 @@ def automatic_alignment(
         raise AlignmentFailed()
 
     logger.info(f"    Selected: {method} ({inliers} inliers)")
+    return H
+
+
+def automatic_alignment(
+        logger: logging.Logger | NamedLoggerAdapter,
+        session: Session,
+        working_directory: Path,
+        reference_image: np.ndarray,
+        test_image: np.ndarray,
+        result: PreProcessResult,
+) -> FileStatus:
+    matches_path, aligned_path, overlaid_path = build_image_paths(working_directory)
+
+    # Set some defaults on the result
+    result.alignment_possible = False
+    result.fully_aligned = False
+
+    h, w = reference_image.shape[:2]
+    logger.info(f"Reference : {w}x{h}")
+    logger.info(f"Test      : {test_image.shape[1]}x{test_image.shape[0]}")
+
+    H = _select_homography(logger, reference_image, test_image)
     result.alignment_possible = True
 
     # ── Warp ──
@@ -383,3 +392,46 @@ def automatic_alignment(
     result.fully_aligned = True
     session.commit()
     return FileStatus.WARNING
+
+
+def refine_alignment(
+        logger: logging.Logger | NamedLoggerAdapter,
+        session: Session,
+        working_directory: Path,
+        reference_image: np.ndarray,
+        result: PreProcessResult,
+) -> None:
+    """
+    Run another feature based alignment pass on an already aligned image.
+    The first pass brings the image close to the reference, which can let a second pass find a tighter fit.
+    Nothing is written if the second pass fails, so the previous alignment is kept.
+    """
+    _, aligned_path, overlaid_path = build_image_paths(working_directory)
+
+    aligned_image = cv2.imread(str(result.aligned_image_path), cv2.IMREAD_GRAYSCALE)
+    if aligned_image is None:
+        logger.error(f'Failed to read the aligned image: {result.aligned_image_path}')
+        raise AlignmentError()
+
+    H = _select_homography(logger, reference_image, aligned_image)
+
+    h, w = reference_image.shape[:2]
+    refined_image = cv2.warpPerspective(
+        aligned_image,
+        H,
+        (w, h),
+        flags=cv2.INTER_LINEAR,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(255, 255, 255),
+    )
+
+    cv2.imwrite(str(aligned_path), refined_image)
+    logger.info(f"Aligned: {aligned_path}")
+    result.aligned_image_path = aligned_path
+
+    overlaid_image = _create_overlay(reference_image, refined_image)
+    cv2.imwrite(str(overlaid_path), overlaid_image)
+    logger.info(f"Overlaid: {overlaid_path}")
+    result.overlaid_image_path = overlaid_path
+
+    session.commit()

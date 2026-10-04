@@ -1,9 +1,10 @@
 from PyQt6.QtCore import pyqtSlot, Qt
-from PyQt6.QtWidgets import QTreeWidgetItemIterator, QVBoxLayout, QHBoxLayout, QSplitter
+from PyQt6.QtWidgets import QTreeWidgetItemIterator, QMessageBox, QVBoxLayout, QHBoxLayout, QSplitter
 from sqlalchemy.orm import Session
 
 from src.database import DB_ENGINE
 from src.database.job import Job
+from src.processing.alignment_refine_worker import AlignmentRefineWorker
 from src.util.status import FileStatus, is_finished
 
 from .processing_step import ProcessingStep
@@ -20,6 +21,7 @@ class AlignmentCheck(ProcessingStep):
 
         self.details: AlignmentCheckDetails = self.step_details
         self.details.alignmentConfirmed.connect(self.alignment_confirmed)
+        self.details.alignmentRefineRequested.connect(self.refine_alignment)
 
     def _set_up_layout(self) -> None:
         # Show the file list and the overlaid image side by side
@@ -56,7 +58,6 @@ class AlignmentCheck(ProcessingStep):
 
     def load_job(self, job: Job | int | None) -> None:
         super().load_job(job)
-        self.details.clear_confirmations()
         if job is None:
             return
 
@@ -68,6 +69,10 @@ class AlignmentCheck(ProcessingStep):
 
         # Run GUI updates based if all our items are complete
         self.update_control_state()
+
+        # Hide the details until a file is selected, which only happens here if a file needs confirming
+        self.file_list.setCurrentItem(None)
+        self.details.reset()
         self.select_next_pending()
 
     def set_view_only(self, view_only: bool) -> None:
@@ -95,6 +100,40 @@ class AlignmentCheck(ProcessingStep):
         self.worker_status_update(db_id, FileStatus.SUCCESS)
         self.update_control_state()
         self.select_next_pending()
+
+    @pyqtSlot(int)
+    def refine_alignment(self, db_id: int) -> None:
+        assert self._job_db_id is not None, 'Attempt to refine alignment without a Job ID'
+        if self.threads:
+            return
+
+        item = self.file_list.find_item(db_id)
+        if item is None:
+            return
+
+        self.worker_status_update(db_id, FileStatus.IN_PROGRESS)
+        self.details.set_refining(db_id)
+        self.update_control_state()
+
+        worker = AlignmentRefineWorker(self._job_db_id, db_id, self.thread_mutex)
+        worker.updateStatus.connect(self.worker_status_update)
+        worker.refinementFailed.connect(self.refinement_failed)
+        worker.processingComplete.connect(self.worker_complete)
+
+        self.start_thread(item, worker)
+
+    @pyqtSlot(int)
+    def refinement_failed(self, db_id: int) -> None:
+        QMessageBox.warning(
+            self,
+            'Re-run Alignment',
+            'The alignment could not be improved, the previous alignment was kept.',
+        )
+
+    @pyqtSlot(int)
+    def worker_complete(self, db_id: int) -> None:
+        self.details.set_refining(None)
+        super().worker_complete(db_id)
 
     def start_worker(self, item: FileStatusItem) -> None:
         # Nothing to process, this step only views the alignment results

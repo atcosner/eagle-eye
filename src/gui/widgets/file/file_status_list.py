@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ListMode(Enum):
     PRE_PROCESS = object()
+    ALIGNMENT_CHECK = object()
     PROCESS = object()
 
 
@@ -131,6 +132,14 @@ class FileStatusList(QTreeWidget):
                         initial_status = FileStatus.SUCCESS
                     else:
                         initial_status = FileStatus.FAILED
+            elif mode is ListMode.ALIGNMENT_CHECK:
+                if not file.container_file:
+                    # files that could not be aligned have nothing to confirm
+                    if file.pre_process_result is None or not file.pre_process_result.alignment_possible:
+                        initial_status = FileStatus.FAILED
+                    # files that were OCR'd had their alignment confirmed previously
+                    elif file.process_result is not None:
+                        initial_status = FileStatus.SUCCESS
             elif mode is ListMode.PROCESS:
                 if not file.container_file:
                     # skip files that were not pre-processed

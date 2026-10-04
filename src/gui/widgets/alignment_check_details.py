@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt6.QtGui import QFont, QPalette, QColor
-from PyQt6.QtWidgets import QFrame, QLabel, QLineEdit, QGridLayout, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QFrame, QLabel, QLineEdit, QGridLayout, QPushButton, QHBoxLayout, QMessageBox
 
 from src.database import DB_ENGINE
 from src.database.input_file import InputFile
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class AlignmentCheckDetails(QFrame):
     alignmentConfirmed = pyqtSignal(int)
     alignmentRefineRequested = pyqtSignal(int)
+    alignmentRejected = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -46,6 +47,11 @@ class AlignmentCheckDetails(QFrame):
         self.refine_button.setVisible(False)
         self.refine_button.pressed.connect(self.refine_alignment)
 
+        self.reject_button = QPushButton('Reject Alignment')
+        self.reject_button.setToolTip('Reject the alignment, this file will not be OCR\'d')
+        self.reject_button.setVisible(False)
+        self.reject_button.pressed.connect(self.reject_alignment)
+
         self._set_up_layout()
 
     def _set_up_layout(self) -> None:
@@ -61,6 +67,7 @@ class AlignmentCheckDetails(QFrame):
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
+        button_layout.addWidget(self.reject_button)
         button_layout.addWidget(self.refine_button)
         button_layout.addWidget(self.confirm_button)
         layout.addLayout(button_layout, 3, 0, 1, 2)
@@ -90,6 +97,7 @@ class AlignmentCheckDetails(QFrame):
         self._refining_id = db_id
         self.confirm_button.setDisabled(db_id is not None)
         self.refine_button.setDisabled(db_id is not None)
+        self.reject_button.setDisabled(db_id is not None)
         if self._db_id is not None:
             self.load_file(self._db_id)
 
@@ -100,6 +108,7 @@ class AlignmentCheckDetails(QFrame):
         self._db_id = db_id
         self.confirm_button.setVisible(False)
         self.refine_button.setVisible(False)
+        self.reject_button.setVisible(False)
 
         with Session(DB_ENGINE) as session:
             file = session.get(InputFile, db_id)
@@ -130,6 +139,7 @@ class AlignmentCheckDetails(QFrame):
                 return
 
             self.refine_button.setVisible(not self._view_only)
+            self.reject_button.setVisible(not self._view_only)
 
             if db_id == self._refining_id:
                 self._set_status('RE-RUNNING ALIGNMENT...', None)
@@ -153,6 +163,30 @@ class AlignmentCheckDetails(QFrame):
             self.alignmentConfirmed.emit(self._db_id)
         else:
             logger.warning('Attempted to confirm alignment but did not have a DB ID')
+
+    @pyqtSlot()
+    def reject_alignment(self) -> None:
+        if self._db_id is None:
+            logger.warning('Attempted to reject alignment but did not have a DB ID')
+            return
+
+        answer = QMessageBox.question(
+            self,
+            'Reject Alignment',
+            'Reject this alignment? The file will not be OCR\'d and this cannot be undone.',
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        # Rejected files are treated the same as files that could not be aligned
+        with Session(DB_ENGINE) as session:
+            file = session.get(InputFile, self._db_id)
+            file.pre_process_result.alignment_possible = False
+            file.pre_process_result.alignment_confirmed = False
+            session.commit()
+
+        self.alignmentRejected.emit(self._db_id)
+        self.load_file(self._db_id)
 
     @pyqtSlot()
     def refine_alignment(self) -> None:

@@ -22,6 +22,7 @@ class AlignmentCheck(ProcessingStep):
         self.details: AlignmentCheckDetails = self.step_details
         self.details.alignmentConfirmed.connect(self.alignment_confirmed)
         self.details.alignmentRefineRequested.connect(self.refine_alignment)
+        self.details.alignmentRejected.connect(self.alignment_rejected)
 
     def _set_up_layout(self) -> None:
         # Show the file list and the overlaid image side by side
@@ -98,6 +99,12 @@ class AlignmentCheck(ProcessingStep):
     @pyqtSlot(int)
     def alignment_confirmed(self, db_id: int) -> None:
         self.worker_status_update(db_id, FileStatus.SUCCESS)
+        self.update_control_state()
+        self.select_next_pending()
+
+    @pyqtSlot(int)
+    def alignment_rejected(self, db_id: int) -> None:
+        self.worker_status_update(db_id, FileStatus.FAILED)
         self.update_control_state()
         self.select_next_pending()
 

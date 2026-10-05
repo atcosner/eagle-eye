@@ -15,6 +15,16 @@
             },
         },
 
+                {
+            "name": "Full Start",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/full_start.py",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+        },
+
         {
             "name": "Dev Start",
             "type": "debugpy",

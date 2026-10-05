@@ -17,6 +17,7 @@ class PreProcessResult(MappedAsDataclass, OrmBase):
     alignment_possible: Mapped[bool]
     fully_aligned: Mapped[bool]
     accepted_rotation_angle: Mapped[float] = mapped_column(init=False, default=None, nullable=True)
+    alignment_confirmed: Mapped[bool] = mapped_column(init=False, default=False)
 
     matches_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)
     aligned_image_path: Mapped[Path] = mapped_column(DbPath, init=False, default=None, nullable=True)

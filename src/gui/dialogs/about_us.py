@@ -2,6 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QTextEdit, QDialog
 
+from src.database import DB_ENGINE, read_db_version
 from src.util.resources import RESOURCES_PATH
 
 from src.gui.widgets.util.link_label import LinkLabel
@@ -18,6 +19,7 @@ class AboutUs(QDialog):
         self.github_label = LinkLabel(
             r'<a href="https://github.com/atcosner/eagle-eye">GitHub Repo</a>'
         )
+        self.db_version_label = QLabel()
         self.description = QTextEdit()
 
         self._initial_setup()
@@ -37,8 +39,10 @@ class AboutUs(QDialog):
         title_font.setPointSize(32)
         self.title_label.setFont(title_font)
 
-        self.description.setReadOnly(True)
+        db_version = read_db_version(DB_ENGINE)
+        self.db_version_label.setText(f'DB Version: {db_version}')
 
+        self.description.setReadOnly(True)
         with (RESOURCES_PATH / 'about_us.html').open('rt', encoding='utf-8') as f:
             strings = f.readlines()
             self.description.setHtml(''.join(strings))
@@ -59,10 +63,16 @@ class AboutUs(QDialog):
         github_layout.addWidget(self.github_label)
         github_layout.addStretch()
 
+        version_layout = QHBoxLayout()
+        version_layout.addStretch()
+        version_layout.addWidget(self.db_version_label)
+        version_layout.addStretch()
+
         layout = QVBoxLayout()
         layout.addLayout(logo_layout)
         layout.addLayout(title_layout)
         layout.addLayout(github_layout)
+        layout.addLayout(version_layout)
         layout.addWidget(self.description)
 
         self.setLayout(layout)

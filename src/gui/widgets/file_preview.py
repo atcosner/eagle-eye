@@ -1,7 +1,7 @@
 import logging
 
 from PyQt6.QtCore import Qt, QMimeDatabase, QPoint, QPointF
-from PyQt6.QtGui import QPixmap, QMouseEvent, QWheelEvent, QKeyEvent, QEnterEvent, QCursor
+from PyQt6.QtGui import QPixmap, QMouseEvent, QWheelEvent, QKeyEvent, QEnterEvent, QCursor, QResizeEvent
 from PyQt6.QtPdf import QPdfDocument
 from PyQt6.QtPdfWidgets import QPdfView
 from PyQt6.QtWidgets import QWidget, QScrollArea, QLabel, QSizePolicy, QVBoxLayout, QPushButton, QHBoxLayout, QScrollBar
@@ -24,6 +24,10 @@ class ImageViewer(QScrollArea):
         self.mouse_in_widget = False
         self.control_pressed = False
 
+        # Keep the image fit to the viewport until the user changes the zoom
+        # - The viewport can be resized after the image is loaded (e.g. when being shown)
+        self.fit_to_viewport = True
+
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -39,6 +43,8 @@ class ImageViewer(QScrollArea):
         self.reset_zoom()
 
     def reset_zoom(self) -> None:
+        self.fit_to_viewport = True
+
         # Scale the image so it is fully visible at the current size
         self.image_label.resize(
             # QSize auto-scale while preserving the aspect ratio
@@ -49,6 +55,8 @@ class ImageViewer(QScrollArea):
         )
 
     def fit_to_width(self):
+        self.fit_to_viewport = False
+
         # TODO: If the image is landscape this won't be correct
         self.image_label.resize(
             # Resize to the viewport but allow us to expand outside the viewport
@@ -60,12 +68,14 @@ class ImageViewer(QScrollArea):
 
     def adjust_scale(self, factor: float) -> None:
         logger.info(f'Adjusting scale by: {factor}')
+        self.fit_to_viewport = False
         self.image_label.resize(factor * self.image_label.size())
 
         adjust_scroll_bar_scale(self.horizontalScrollBar(), factor)
         adjust_scroll_bar_scale(self.verticalScrollBar(), factor)
 
     def scale_mouse_anchor(self, factor: float, mouse_loc: QPointF) -> None:
+        self.fit_to_viewport = False
         current_scroll = QPoint(self.horizontalScrollBar().value(), self.verticalScrollBar().value())
         delta_to_mouse = mouse_loc - self.widget().pos().toPointF()
 
@@ -85,6 +95,11 @@ class ImageViewer(QScrollArea):
     #
     # Qt Event Handlers
     #
+
+    def resizeEvent(self, event: QResizeEvent) -> None:
+        super().resizeEvent(event)
+        if self.fit_to_viewport and not self.image_label.pixmap().isNull():
+            self.reset_zoom()
 
     def enterEvent(self, event: QEnterEvent) -> None:
         self.mouse_in_widget = True

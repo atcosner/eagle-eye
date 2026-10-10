@@ -21,4 +21,3 @@ EXAMPLE_FORMS = [
         build_func=fn_form_v1.add_fn_form_v1,
     ),
 ]
-    

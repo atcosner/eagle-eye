@@ -18,6 +18,7 @@ from .base import BaseWindow
 from .reference_form_editor import ReferenceFormEditor
 from ..dialogs.about_us import AboutUs
 from ..dialogs.bug_reporter import BugReporter
+from ..dialogs.example_form_adder import ExampleFormAdder
 from ..dialogs.job_selector import JobDetails, JobSelector
 from ..dialogs.reference_form_importer import ReferenceFormImporter
 from ..dialogs.reference_form_selector import ReferenceFormSelector
@@ -73,6 +74,7 @@ class MainWindow(BaseWindow):
         form_menu.addAction('Create New Reference Form').triggered.connect(self.handle_create_reference_form)
         form_menu.addSeparator()
         form_menu.addAction('Import Reference Forms').triggered.connect(self.handle_import_reference_form)
+        form_menu.addAction('Add Example Reference Forms').triggered.connect(self.handle_add_example_reference_form)
 
         settings_menu = self.menuBar().addMenu('Settings')
         settings_menu.addAction('Check Google API Config').triggered.connect(lambda: VisionApiConfig(self).exec())
@@ -121,6 +123,14 @@ class MainWindow(BaseWindow):
     def handle_import_reference_form(self) -> None:
         form_importer = ReferenceFormImporter(self)
         if not form_importer.exec():
+            return
+
+        self.job_widget.reload_reference_forms()
+
+    @pyqtSlot()
+    def handle_add_example_reference_form(self) -> None:
+        form_adder = ExampleFormAdder(self)
+        if not form_adder.exec():
             return
 
         self.job_widget.reload_reference_forms()

@@ -32,6 +32,7 @@ class FormDetailsTree(QTreeWidget):
             self.resizeColumnToContents(idx)
 
     def load_reference_forms(self, session: Session) -> None:
+        self._selected_reference_form_id = None
         self.clear()
 
         for form in session.scalars(select(ReferenceForm)):
@@ -86,6 +87,9 @@ class FormDetailsTree(QTreeWidget):
             current: QTreeWidgetItem | None,
             _: QTreeWidgetItem | None,
     ) -> None:
+        if current is None:
+            return
+
         current_id = current.data(0, Qt.ItemDataRole.UserRole)
         if current_id != self._selected_reference_form_id:
             self.referenceFormChanged.emit(current_id)

@@ -1,9 +1,9 @@
 import logging
 import subprocess
 
-from PyQt6.QtCore import QSize, pyqtSlot
+from PyQt6.QtCore import QSize, pyqtSlot, Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QPushButton, QHBoxLayout, QApplication
 
 from src.gui.widgets.util.link_label import LinkLabel
 from src.gui.widgets.util.log_viewer import LogViewer
@@ -76,6 +76,7 @@ class CliInstallPage(BasePage):
     @pyqtSlot()
     def check_gcloud_cli_install(self) -> None:
         logger.info('Checking if gcloud is installed')
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         try:
             cmd = 'gcloud version'
@@ -100,6 +101,7 @@ class CliInstallPage(BasePage):
         icon = QIcon(str(GENERIC_ICON_PATH / icon_file_name))
         self.status_icon.setPixmap(icon.pixmap(QSize(20, 20)))
 
+        QApplication.restoreOverrideCursor()
         self.completeChanged.emit()
 
     #

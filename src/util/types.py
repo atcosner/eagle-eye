@@ -49,6 +49,9 @@ class FormLinkingMethod(Enum):
     PREVIOUS_IDENTIFIER = 2
     PREVIOUS_REGION = 3
 
+    def __str__(self):
+        return self.name.replace('_', ' ').title()
+
 
 def get_link_explanation(method: FormLinkingMethod) -> str:
     match method:
@@ -79,6 +82,9 @@ def get_link_explanation(method: FormLinkingMethod) -> str:
 class FormAlignmentMethod(Enum):
     AUTOMATIC = 1
     ALIGNMENT_MARKS = 2
+
+    def __str__(self):
+        return self.name.replace('_', ' ').title()
 
 
 def get_alignment_explanation(method: FormAlignmentMethod) -> str:

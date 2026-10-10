@@ -1,16 +1,15 @@
 import logging
 import subprocess
 
-from PyQt6.QtCore import QSize, pyqtSlot
+from PyQt6.QtCore import QSize, pyqtSlot, Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QGroupBox, QPushButton, QHBoxLayout, QApplication
 
 from src.gui.widgets.util.link_label import LinkLabel
 from src.gui.widgets.util.log_viewer import LogViewer
 from src.util.resources import GENERIC_ICON_PATH
 
 from ..util.base_page import BasePage
-from ..util.dummy_field import DummyField
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +75,7 @@ class CliInitPage(BasePage):
     @pyqtSlot()
     def check_gcloud_cli_initialization(self) -> None:
         logger.info('Checking if gcloud is initialized')
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         try:
             cmd = 'gcloud config configurations list'
@@ -120,6 +120,7 @@ class CliInitPage(BasePage):
         icon = QIcon(str(GENERIC_ICON_PATH / icon_file_name))
         self.status_icon.setPixmap(icon.pixmap(QSize(20, 20)))
 
+        QApplication.restoreOverrideCursor()
         self.completeChanged.emit()
 
     #

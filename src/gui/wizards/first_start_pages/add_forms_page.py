@@ -1,12 +1,12 @@
 import logging
 from sqlalchemy.orm import Session
+from typing import Callable
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, QHeaderView
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem, QHeaderView, QApplication
 
 from src.database import DB_ENGINE
-from src.examples.fn_form_v1 import add_fn_form_v1
-from src.examples.kt_form_v8 import add_kt_form_v8
+from src.examples import EXAMPLE_FORMS
 from src.util.google_api import save_api_settings
 
 from ..util.base_page import BasePage
@@ -44,38 +44,39 @@ class AddFormsPage(BasePage):
         self.setLayout(layout)
 
     def _add_forms(self) -> None:
-        example_forms = [
-            QTreeWidgetItem(None, ['KU Ornithology - KT Form v8', 'Alignment Marks', 'Previous Region', '2']),
-            QTreeWidgetItem(None, ['KU Mammalogy - FN Form v1', 'Automatic', 'Previous Identifier', '6']),
-        ]
+        for form in EXAMPLE_FORMS:
+            item = QTreeWidgetItem(None)
+            item.setText(0, form.name)
+            item.setCheckState(0, Qt.CheckState.Unchecked)
+            item.setData(0, Qt.ItemDataRole.UserRole, form.build_func)
 
-        for form in example_forms:
-            form.setCheckState(0, Qt.CheckState.Unchecked)
-            self.form_tree.addTopLevelItem(form)
+            item.setText(1, str(form.alignment_method))
+            item.setText(2, str(form.link_method))
+            item.setText(3, str(form.regions))
+            self.form_tree.addTopLevelItem(item)
 
     #
     # Qt overrides
     #
 
     def validatePage(self) -> bool:
-        # TODO: show a dialog since the below operations can take some time to complete
-
         # add any selected reference forms
         logger.info('Adding reference forms to the DB')
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+
         with Session(DB_ENGINE) as session:
             for index in range(self.form_tree.topLevelItemCount()):
                 item = self.form_tree.topLevelItem(index)
                 if item.checkState(0) == Qt.CheckState.Checked:
-                    # add the form to the DB
-                    if index == 0:
-                        logger.info('Adding KT Form v8')
-                        add_kt_form_v8(session)
-                    elif index == 1:
-                        logger.info('Adding FN Form v1')
-                        add_fn_form_v1(session)
+                    # call the build function to add this form into the DB
+                    logger.info(f'Adding: {item.text(0)}')
+                    with Session(DB_ENGINE) as session:
+                        build_func: Callable = item.data(0, Qt.ItemDataRole.UserRole)
+                        build_func(session)
 
         # save the Google API settings
         logger.info('Updating Google API settings')
         save_api_settings()
 
+        QApplication.restoreOverrideCursor()
         return True
